@@ -114,7 +114,7 @@ public class Strip {
     }
 
     public CharSequence subSequence(int start, int end) {
-      return new FileCharSequence(this, start, end);
+      return new FileCharSequence(this, this.start + start, this.start + end);
     }
 
     public void close() throws IOException {
