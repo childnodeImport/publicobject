@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.publicobject.shush"
+      android:versionCode="2"
+      android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="3"/> 
+    <application android:icon="@drawable/shush">
+        <activity android:name=".Welcome"
+                android:label="Shush!"
+                android:noHistory="true"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+           <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver android:name=".OnRingerMuted">
+            <intent-filter>
+                <action android:name="android.media.RINGER_MODE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".TurnRingerOn"/>
+        <activity android:name=".RingerMutedDialog"
+                  android:launchMode="singleInstance"
+                  android:noHistory="true"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"/>
+    </application>
+</manifest>
