@@ -18,23 +18,23 @@ package com.publicobject.shush;
 
 import android.app.Activity;
 import android.app.AlarmManager;
-import static android.app.AlarmManager.ELAPSED_REALTIME;
 import android.app.Dialog;
 import android.app.PendingIntent;
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import android.content.*;
 import android.os.Bundle;
 import android.os.SystemClock;
-import static android.view.Gravity.BOTTOM;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.media.AudioManager;
-import static android.media.AudioManager.*;
+import android.widget.*;
+
+import java.text.DateFormat;
+
+import static android.app.AlarmManager.ELAPSED_REALTIME;
+import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import static android.media.AudioManager.EXTRA_RINGER_MODE;
+import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import static android.view.Gravity.BOTTOM;
 
 /**
  * A dialog to schedule the ringer back on after a specified duration.
@@ -116,6 +116,8 @@ public class RingerMutedDialog extends Activity implements DialogInterface.OnCan
     private void cancelRinger() {
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(createIntent());
+
+        Toast.makeText(getApplicationContext(), "Ringer shushed indefinitely!", Toast.LENGTH_LONG).show();
     }
 
     private PendingIntent createIntent() {
@@ -126,17 +128,20 @@ public class RingerMutedDialog extends Activity implements DialogInterface.OnCan
     private void scheduleRingerOn(Duration duration) {
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + duration.millis(), createIntent());
+
+        long now = System.currentTimeMillis();
+        CharSequence message = "Ringer shushed 'til " + DateUtils.formatSameDayTime(
+                now + duration.millis(), now, DateFormat.SHORT, DateFormat.SHORT);
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    protected void onStart() {
+    @Override protected void onStart() {
         super.onStart();
         dialog.show();
         registerReceiver(dismissFromVolumeUp, new IntentFilter("android.media.RINGER_MODE_CHANGED"));
     }
 
-    @Override
-    protected void onStop() {
+    @Override protected void onStop() {
         unregisterReceiver(dismissFromVolumeUp);
         super.onStop();
     }
