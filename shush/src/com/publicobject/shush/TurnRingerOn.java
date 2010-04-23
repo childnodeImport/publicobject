@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.widget.Toast;
 
 import static android.content.Context.AUDIO_SERVICE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
@@ -32,9 +33,11 @@ import static android.media.AudioManager.STREAM_RING;
 public class TurnRingerOn extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         AudioManager am = (AudioManager) context.getSystemService(AUDIO_SERVICE);
-        if (am.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
+        if (am.getRingerMode() == AudioManager.RINGER_MODE_SILENT
+                || am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             am.setRingerMode(RINGER_MODE_NORMAL);
             am.setStreamVolume(STREAM_RING, am.getStreamMaxVolume(STREAM_RING), 0);
+            Toast.makeText(context, "Ringer restored.", Toast.LENGTH_LONG).show();
         }
     }
 }

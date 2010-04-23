@@ -24,6 +24,7 @@ import android.content.*;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -56,8 +57,7 @@ public class RingerMutedDialog extends Activity implements DialogInterface.OnCan
         }
     };
 
-    @Override
-    protected void onCreate(Bundle bundle) {
+    @Override protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
         final ArrayAdapter<Duration> durationsView = new ArrayAdapter<Duration>(this, 0) {
@@ -93,12 +93,14 @@ public class RingerMutedDialog extends Activity implements DialogInterface.OnCan
             }
         });
 
+        Display display = getWindowManager().getDefaultDisplay();
         dialog = new Dialog(this, android.R.style.Theme_Dialog);
         dialog.setCanceledOnTouchOutside(true);
         dialog.setOnCancelListener(this);
         dialog.setTitle("Turn ringer back on?");
         dialog.setContentView(durationsList);
         dialog.setCancelable(true);
+        dialog.getWindow().setLayout(display.getWidth(), display.getHeight() * 3 / 5);
         dialog.getWindow().setGravity(BOTTOM);
     }
 
