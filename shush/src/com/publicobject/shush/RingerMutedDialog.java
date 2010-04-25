@@ -31,6 +31,7 @@ import android.content.IntentFilter;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.format.DateUtils;
 import static android.view.Gravity.BOTTOM;
 import android.widget.Toast;
@@ -133,9 +134,10 @@ public class RingerMutedDialog extends Activity {
 
     private void scheduleRingerOn(Date date) {
         long onTime = date.getTime();
+        long onRealtime = onTime - System.currentTimeMillis() + SystemClock.elapsedRealtime();
         Context context = getApplicationContext();
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
-                .set(ELAPSED_REALTIME, onTime, createIntent());
+                .set(ELAPSED_REALTIME, onRealtime, createIntent());
         String message = "Ringer shushed 'til "
                 + DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
