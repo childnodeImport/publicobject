@@ -19,13 +19,12 @@ package com.publicobject.shush;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import static android.content.Context.AUDIO_SERVICE;
 import android.content.Intent;
 import android.media.AudioManager;
-import android.widget.Toast;
-
-import static android.content.Context.AUDIO_SERVICE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.STREAM_RING;
+import android.widget.Toast;
 
 /**
  * Turns the ringer on full blast when received.

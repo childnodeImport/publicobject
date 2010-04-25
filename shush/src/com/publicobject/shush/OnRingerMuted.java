@@ -19,8 +19,9 @@ package com.publicobject.shush;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
-import static android.media.AudioManager.*;
+import static android.media.AudioManager.EXTRA_RINGER_MODE;
+import static android.media.AudioManager.RINGER_MODE_SILENT;
+import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
 /**
  * Upon ringer mode changing (a broadcast intent), show the ringer muted dialog (an activity intent).

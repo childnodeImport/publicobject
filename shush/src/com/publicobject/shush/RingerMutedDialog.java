@@ -18,35 +18,37 @@ package com.publicobject.shush;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import static android.app.AlarmManager.ELAPSED_REALTIME;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
-import android.content.*;
-import android.os.Bundle;
-import android.os.SystemClock;
-import android.text.format.DateUtils;
-import android.view.Display;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.*;
-
-import java.text.DateFormat;
-
-import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import android.os.Bundle;
+import android.text.format.DateUtils;
 import static android.view.Gravity.BOTTOM;
+import android.widget.Toast;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * A dialog to schedule the ringer back on after a specified duration.
  */
-public class RingerMutedDialog extends Activity implements DialogInterface.OnCancelListener {
+public class RingerMutedDialog extends Activity {
+
+    /** two hours */
+    private static final int DEFAULT_SWEEP_ANGLE = 60;
 
     private Dialog dialog;
+    private ClockSlider clockSlider;
 
-    /**
-     * If the user turns the ringer back on, dismiss the dialog and exit.
-     */
+    /** If the user turns the ringer back on, dismiss the dialog and exit. */
     private final BroadcastReceiver dismissFromVolumeUp = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             int newRingerMode = intent.getIntExtra(EXTRA_RINGER_MODE, -1);
@@ -60,81 +62,55 @@ public class RingerMutedDialog extends Activity implements DialogInterface.OnCan
     @Override protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
-        final ArrayAdapter<Duration> durationsView = new ArrayAdapter<Duration>(this, 0) {
-            @Override public View getView(int position, View convertView, ViewGroup viewGroup) {
-                TextView result;
-                if (convertView == null) {
-                    result = new TextView(getApplicationContext());
-                    result.setTextSize(20);
-                    result.setPadding(15, 5, 15, 5);
-                } else {
-                    result = (TextView) convertView;
-                }
-                result.setText(getItem(position).toString());
-                return result;
-            }
-        };
-        for (Duration duration : Duration.values()) {
-            durationsView.add(duration);
-        }
+        clockSlider = new ClockSlider(this);
+        clockSlider.setStart(new Date());
+        clockSlider.setSweepAngle(DEFAULT_SWEEP_ANGLE);
 
-        ListView durationsList = new ListView(this);
-        durationsList.setAdapter(durationsView);
-        durationsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> adapterView, View view, int index, long l) {
-                Duration duration = durationsView.getItem(index);
-                if (duration == Duration.NEVER) {
-                    cancelRinger();
-                } else {
-                    scheduleRingerOn(duration);
-                }
-                dialog.dismiss();
-                finish();
+        dialog = new AlertDialog.Builder(this)
+                .setPositiveButton("Shush!", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        scheduleRingerOn(clockSlider.getEnd());
+                        finish();
+                    }
+                })
+                .setNegativeButton("Keep it off.", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogCancelled();
+                    }
+                })
+                .setIcon(null)
+                .setView(clockSlider)
+                .setTitle("Turn ringer on in:")
+                .setCancelable(true)
+                .create();
+        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            public void onCancel(DialogInterface dialogInterface) {
+                dialogCancelled();
             }
         });
-
-        Display display = getWindowManager().getDefaultDisplay();
-        dialog = new Dialog(this, android.R.style.Theme_Dialog);
         dialog.setCanceledOnTouchOutside(true);
-        dialog.setOnCancelListener(this);
-        dialog.setTitle("Turn ringer back on?");
-        dialog.setContentView(durationsList);
-        dialog.setCancelable(true);
-        dialog.getWindow().setLayout(display.getWidth(), display.getHeight() * 3 / 5);
         dialog.getWindow().setGravity(BOTTOM);
     }
 
-    /**
-     * When the dialog is cancelled, cancel the ringer and exit.
-     */
-    public void onCancel(DialogInterface dialogInterface) {
-        cancelRinger();
+    private void dialogCancelled() {
+        cancelRingerOn();
         finish();
     }
 
-    /**
-     * Cancels the scheduled TurnRingerOn action.
-     */
-    private void cancelRinger() {
-        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(createIntent());
-
-        Toast.makeText(getApplicationContext(), "Ringer shushed indefinitely!", Toast.LENGTH_LONG).show();
+    @Override protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        long start = clockSlider.getStart().getTime();
+        int sweepAngle = clockSlider.getSweepAngle();
+        outState.putLong("start", start);
+        outState.putInt("sweep", sweepAngle);
     }
 
-    private PendingIntent createIntent() {
-        Context context = getApplicationContext();
-        return PendingIntent.getBroadcast(context, 0, new Intent(context, TurnRingerOn.class), FLAG_CANCEL_CURRENT);
-    }
-
-    private void scheduleRingerOn(Duration duration) {
-        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + duration.millis(), createIntent());
-
-        long now = System.currentTimeMillis();
-        CharSequence message = "Ringer shushed 'til " + DateUtils.formatSameDayTime(
-                now + duration.millis(), now, DateFormat.SHORT, DateFormat.SHORT);
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        int sweepAngle = savedInstanceState.getInt("sweep", DEFAULT_SWEEP_ANGLE);
+        long start = savedInstanceState.getLong("start", System.currentTimeMillis());
+        clockSlider.setStart(new Date(start));
+        clockSlider.setSweepAngle(sweepAngle);
     }
 
     @Override protected void onStart() {
@@ -145,6 +121,29 @@ public class RingerMutedDialog extends Activity implements DialogInterface.OnCan
 
     @Override protected void onStop() {
         unregisterReceiver(dismissFromVolumeUp);
+        dialog.dismiss();
         super.onStop();
+    }
+
+    private void cancelRingerOn() {
+        Context context = getApplicationContext();
+        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(createIntent());
+        Toast.makeText(context, "Ringer shushed indefinitely!", Toast.LENGTH_LONG).show();
+    }
+
+    private void scheduleRingerOn(Date date) {
+        long onTime = date.getTime();
+        Context context = getApplicationContext();
+        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
+                .set(ELAPSED_REALTIME, onTime, createIntent());
+        String message = "Ringer shushed 'til "
+                + DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT);
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private PendingIntent createIntent() {
+        Context context = getApplicationContext();
+        Intent turnRingerOn = new Intent(context, TurnRingerOn.class);
+        return PendingIntent.getBroadcast(context, 0, turnRingerOn, FLAG_CANCEL_CURRENT);
     }
 }
