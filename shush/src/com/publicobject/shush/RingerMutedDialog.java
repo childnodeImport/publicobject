@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import android.os.Bundle;
@@ -44,7 +45,7 @@ import java.util.Date;
 public class RingerMutedDialog extends Activity {
 
     /** two hours */
-    private static final int DEFAULT_SWEEP_ANGLE = 60;
+    private static final int DEFAULT_MINUTES = 120;
 
     private Dialog dialog;
     private ClockSlider clockSlider;
@@ -65,13 +66,14 @@ public class RingerMutedDialog extends Activity {
 
         clockSlider = new ClockSlider(this);
         clockSlider.setStart(new Date());
-        clockSlider.setSweepAngle(DEFAULT_SWEEP_ANGLE);
+
+        SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
+        clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
 
         dialog = new AlertDialog.Builder(this)
                 .setPositiveButton("Shush!", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        scheduleRingerOn(clockSlider.getEnd());
-                        finish();
+                        dialogCommitted();
                     }
                 })
                 .setNegativeButton("Keep it off.", new DialogInterface.OnClickListener() {
@@ -93,47 +95,8 @@ public class RingerMutedDialog extends Activity {
         dialog.getWindow().setGravity(BOTTOM);
     }
 
-    private void dialogCancelled() {
-        cancelRingerOn();
-        finish();
-    }
-
-    @Override protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        long start = clockSlider.getStart().getTime();
-        int sweepAngle = clockSlider.getSweepAngle();
-        outState.putLong("start", start);
-        outState.putInt("sweep", sweepAngle);
-    }
-
-    @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        int sweepAngle = savedInstanceState.getInt("sweep", DEFAULT_SWEEP_ANGLE);
-        long start = savedInstanceState.getLong("start", System.currentTimeMillis());
-        clockSlider.setStart(new Date(start));
-        clockSlider.setSweepAngle(sweepAngle);
-    }
-
-    @Override protected void onStart() {
-        super.onStart();
-        dialog.show();
-        registerReceiver(dismissFromVolumeUp, new IntentFilter("android.media.RINGER_MODE_CHANGED"));
-    }
-
-    @Override protected void onStop() {
-        unregisterReceiver(dismissFromVolumeUp);
-        dialog.dismiss();
-        super.onStop();
-    }
-
-    private void cancelRingerOn() {
-        Context context = getApplicationContext();
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(createIntent());
-        Toast.makeText(context, "Ringer shushed indefinitely!", Toast.LENGTH_LONG).show();
-    }
-
-    private void scheduleRingerOn(Date date) {
-        long onTime = date.getTime();
+    private void dialogCommitted() {
+        long onTime = clockSlider.getEnd().getTime();
         long onRealtime = onTime - System.currentTimeMillis() + SystemClock.elapsedRealtime();
         Context context = getApplicationContext();
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
@@ -141,6 +104,50 @@ public class RingerMutedDialog extends Activity {
         String message = "Ringer shushed 'til "
                 + DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+
+        SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("minutes", clockSlider.getMinutes());
+        editor.commit();
+
+        finish();
+    }
+
+    private void dialogCancelled() {
+        Context context = getApplicationContext();
+        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(createIntent());
+        Toast.makeText(context, "Ringer shushed indefinitely!", Toast.LENGTH_LONG).show();
+
+        finish();
+    }
+
+    @Override protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        long start = clockSlider.getStart().getTime();
+        int minutes = clockSlider.getMinutes();
+        outState.putLong("start", start);
+        outState.putInt("minutes", minutes);
+    }
+
+    @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        int minutes = savedInstanceState.getInt("minutes", DEFAULT_MINUTES);
+        long start = savedInstanceState.getLong("start", System.currentTimeMillis());
+        clockSlider.setStart(new Date(start));
+        clockSlider.setMinutes(minutes);
+    }
+
+    @Override protected void onStart() {
+        super.onStart();
+        dialog.show();
+        registerReceiver(
+                dismissFromVolumeUp, new IntentFilter("android.media.RINGER_MODE_CHANGED"));
+    }
+
+    @Override protected void onStop() {
+        unregisterReceiver(dismissFromVolumeUp);
+        dialog.dismiss();
+        super.onStop();
     }
 
     private PendingIntent createIntent() {

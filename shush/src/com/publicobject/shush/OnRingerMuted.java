@@ -34,7 +34,8 @@ public class OnRingerMuted extends BroadcastReceiver {
             Intent showRingerMutedDialog = new Intent();
             showRingerMutedDialog.setClass(context, RingerMutedDialog.class);
             showRingerMutedDialog.setAction(RingerMutedDialog.class.getName());
-            showRingerMutedDialog.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            showRingerMutedDialog.setFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             context.startActivity(showRingerMutedDialog);
         }
     }

@@ -46,6 +46,7 @@ final class ClockSlider extends View {
     private int centerY;
     private int diameter;
     private RectF outerCircle;
+    private RectF buttonCircle;
     private Path clip;
 
     private Paint lightGrey = new Paint();
@@ -54,11 +55,16 @@ final class ClockSlider extends View {
     private Paint duration = new Paint();
     private Paint durationUnits = new Paint();
     private Paint unshushTime = new Paint();
+    private Paint buttonCirclePaint = new Paint();
 
     private Calendar start = new GregorianCalendar();
     private int startAngle = 0;
     private Calendar end = new GregorianCalendar();
-    private int sweepAngle = 0;
+
+    /** minutes to shush. */
+    private int minutes = 0;
+    private boolean upPushed;
+    private boolean downPushed;
 
     public ClockSlider(Context context) {
         super(context);
@@ -78,6 +84,8 @@ final class ClockSlider extends View {
         durationUnits.setTypeface(Typeface.SANS_SERIF);
         unshushTime = new Paint(duration);
         unshushTime.setColor(lightGrey.getColor());
+        buttonCirclePaint.setColor(Color.argb(102, 115, 115, 115));
+        buttonCirclePaint.setAntiAlias(true);
     }
 
     @Override protected void onDraw(Canvas canvas) {
@@ -100,13 +108,22 @@ final class ClockSlider extends View {
             RectF innerCircle = new RectF(left + thickness, top + thickness,
                     left + thickness + innerDiameter, top + thickness + innerDiameter);
 
+            int offset = thickness * 2;
+            int buttonDiameter = diameter - offset * 2;
+            buttonCircle = new RectF(left + offset, top + offset,
+                    left + offset + buttonDiameter, top + offset + buttonDiameter);
+
             clip = new Path();
             clip.addRect(outerCircle, Path.Direction.CW);
             clip.addOval(innerCircle, Path.Direction.CCW);
+
+            duration.setTextSize(diameter * 0.32f);
+            durationUnits.setTextSize(diameter * 0.10f);
+            unshushTime.setTextSize(diameter * 0.13f);
         }
 
         drawClock(canvas);
-        drawText(canvas);
+        drawTextAndButtons(canvas);
     }
 
     public Date getStart() {
@@ -125,16 +142,16 @@ final class ClockSlider extends View {
         postInvalidate();
     }
 
-    public int getSweepAngle() {
-        return sweepAngle;
+    public int getMinutes() {
+        return minutes;
     }
 
-    public void setSweepAngle(int angle) {
-        if (angle == sweepAngle) {
+    public void setMinutes(int minutes) {
+        if (minutes == this.minutes) {
             return; // avoid unnecessary repaints
         }
-        sweepAngle = angle;
-        end.setTimeInMillis(start.getTimeInMillis() + (sweepAngle * 2 * 60 * 1000L));
+        this.minutes = minutes;
+        end.setTimeInMillis(start.getTimeInMillis() + (this.minutes * 60 * 1000L));
         postInvalidate();
     }
 
@@ -149,6 +166,7 @@ final class ClockSlider extends View {
         canvas.save();
         canvas.clipPath(clip);
         canvas.drawOval(outerCircle, lightGrey);
+        int sweepAngle = minutes / 2;
         canvas.drawArc(outerCircle, startAngle, sweepAngle, true, pink);
         canvas.drawArc(outerCircle, startAngle + sweepAngle - 1, 2, true, white);
         canvas.restore();
@@ -161,47 +179,54 @@ final class ClockSlider extends View {
      *    hours
      *  10:15 PM
      */
-    private void drawText(Canvas canvas) {
-        int halfHours = sweepAngle / 15;
+    private void drawTextAndButtons(Canvas canvas) {
+        // up/down button backgrounds
+        if (upPushed) {
+            canvas.drawArc(buttonCircle, 270, 180, true, buttonCirclePaint);
+        }
+        if (downPushed) {
+            canvas.drawArc(buttonCircle, 90, 180, true, buttonCirclePaint);
+        }
 
         String durationText;
         String durationUnitsText;
         long timeInMillis = end.getTimeInMillis();
         String onAtText = DateUtils.formatSameDayTime(timeInMillis, timeInMillis,
                 DateFormat.SHORT, DateFormat.SHORT).toString();
-
-        String half = "\u00BD"; // pretty unicode 1/2
-        if (halfHours == 1) {
-            durationText = half;
-            durationUnitsText = "hour";
-        } else if (halfHours == 2) {
+        if (minutes < 60) {
+            durationText = Integer.toString(minutes);
+            durationUnitsText = "minutes";
+        } else if (minutes == 60) {
             durationText = "1";
             durationUnitsText = "hour";
-        } else if (halfHours % 2 == 1) {
-            durationText = (halfHours / 2) + half;
+        } else if (minutes % 60 == 0) {
+            durationText = Integer.toString(minutes / 60);
+            durationUnitsText = "hours";
+        } else if (minutes % 60 == 15) {
+            durationText = minutes / 60 + "\u00BC"; // 1/4
+            durationUnitsText = "hours";
+        } else if (minutes % 60 == 30) {
+            durationText = minutes / 60 + "\u00BD"; // 1/2
+            durationUnitsText = "hours";
+        } else if (minutes % 60 == 45) {
+            durationText = minutes / 60 + "\u00BE"; // 3/4
             durationUnitsText = "hours";
         } else {
-            durationText = String.valueOf(halfHours / 2);
-            durationUnitsText = "hours";
+            throw new AssertionError();
         }
+        canvas.drawText(durationText,      centerX, centerY - (diameter * 0.08f), duration);
+        canvas.drawText(durationUnitsText, centerX, centerY + (diameter * 0.06f), durationUnits);
+        canvas.drawText(onAtText,          centerX, centerY + (diameter * 0.25f), unshushTime);
 
-        int diameterSize = diameter / 3;
-        int durationUnitsSize = diameter / 10;
-        int unshushTimeSize = diameter / 8;
-        int gap = diameter / 30;
-
-        duration.setTextSize(diameterSize);
-        durationUnits.setTextSize(durationUnitsSize);
-        unshushTime.setTextSize(unshushTimeSize);
-
-        int y = centerY - gap;
-        canvas.drawText(durationText, centerX, y, duration);
-        y += durationUnitsSize;
-        y += gap;
-        canvas.drawText(durationUnitsText, centerX, y, durationUnits);
-        y += unshushTimeSize;
-        y += gap;
-        canvas.drawText(onAtText, centerX, y, unshushTime);
+        // up/down buttons
+        Paint downPaint = downPushed ? white : lightGrey;
+        canvas.drawRect(centerX - diameter * 0.32f, centerY - diameter * 0.01f,
+                        centerX - diameter * 0.22f, centerY + diameter * 0.01f, downPaint);
+        Paint upPaint = upPushed ? white : lightGrey;
+        canvas.drawRect(centerX + diameter * 0.22f, centerY - diameter * 0.01f,
+                        centerX + diameter * 0.32f, centerY + diameter * 0.01f, upPaint);
+        canvas.drawRect(centerX + diameter * 0.26f, centerY - diameter * 0.05f,
+                        centerX + diameter * 0.28f, centerY + diameter * 0.05f, upPaint);
     }
 
     /**
@@ -209,35 +234,59 @@ final class ClockSlider extends View {
      * update the sweep angle.
      */
     @Override public boolean onTouchEvent(MotionEvent event) {
+        upPushed = false;
+        downPushed = false;
         int touchX = (int) event.getX();
         int touchY = (int) event.getY();
 
-        // ignore the touch if it's too far from the circle
         int distanceFromCenterX = centerX - touchX;
         int distanceFromCenterY = centerY - touchY;
         int distanceFromCenterSquared = distanceFromCenterX * distanceFromCenterX
                 + distanceFromCenterY * distanceFromCenterY;
-        float maxDistance = (diameter * 1.3f) / 2;
-        float minDistance = (diameter * 0.6f) / 2;
-        if (distanceFromCenterSquared < (minDistance * minDistance)
-                || distanceFromCenterSquared > (maxDistance * maxDistance)) {
+        float maxSlider = (diameter * 1.3f) / 2;
+        float maxUpDown = (diameter * 0.8f) / 2;
+
+        // handle increment/decrement
+        if (distanceFromCenterSquared < (maxUpDown * maxUpDown)) {
+            boolean up = touchX > centerX;
+
+            if (event.getAction() == MotionEvent.ACTION_DOWN
+                    || event.getAction() == MotionEvent.ACTION_MOVE) {
+                if (up) {
+                    upPushed = true;
+                } else {
+                    downPushed = true;
+                }
+                postInvalidate();
+                return true;
+            }
+
+            int angle = up ? (15 + minutes) : (705 + minutes);
+            if (angle > 720) {
+                angle -= 720;
+            }
+            setMinutes(angle);
+            return true;
+
+        // if it's on the slider, handle that
+        } else if (distanceFromCenterSquared < (maxSlider * maxSlider)) {
+            int angle = pointToAngle(touchX, touchY);
+            /*
+             * Convert the angle into a sweep angle. The sweep angle is a positive
+             * angle between the start angle and the touched angle.
+             */
+            angle = 360 + angle - startAngle;
+            int angleX2 = angle * 2;
+            angleX2 = roundToNearest15(angleX2);
+            if (angleX2 > 720) {
+                angleX2 = angleX2 - 720; // avoid mod because we prefer 720 over 0
+            }
+            setMinutes(angleX2);
+            return true;
+
+        } else {
             return false;
         }
-
-        int angle = pointToAngle(touchX, touchY);
-
-        /*
-         * Convert the angle into a sweep angle. The sweep angle is a positive
-         * angle between the start angle and the touched angle.
-         */
-        angle = 360 + angle - startAngle;
-        angle = roundToNearest15Degrees(angle);
-        if (angle > 360) {
-            angle = angle - 360; // avoid mod because we prefer 360 over 0
-        }
-        setSweepAngle(angle);
-
-        return true;
     }
 
     @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -289,11 +338,11 @@ final class ClockSlider extends View {
     }
 
     /**
-     * Rounds the angle to the nearest 15 degrees, which equals 30 minutes on
+     * Rounds the angle to the nearest 7.5 degrees, which equals 15 minutes on
      * a clock. Not strictly necessary, but it discourages fat-fingered users
      * from being frustrated when trying to select a fine-grained period.
      */
-    private int roundToNearest15Degrees(int angle) {
-        return ((angle + 8) / 15) * 15;
+    private int roundToNearest15(int angleX2) {
+        return ((angleX2 + 8) / 15) * 15;
     }
 }
