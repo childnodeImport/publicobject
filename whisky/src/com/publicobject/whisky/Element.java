@@ -17,82 +17,110 @@
 package com.publicobject.whisky;
 
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.drawable.shapes.PathShape;
-import android.graphics.drawable.shapes.Shape;
 import android.util.Log;
 
+/**
+ * A shape plus its projection onto the canvas.
+ */
 public final class Element {
 
-  private int x;
-  private int y;
-  private final Shape shape;
+  private final Matrix matrix = new Matrix();
+  private final PathShape shape;
   private final Paint paint;
+  private final float width;
+  private final float height;
 
-  public Element(int x, int y, Shape shape, Paint paint) {
-    this.x = x;
-    this.y = y;
-    this.shape = shape;
+  public Element(Path path, Paint paint) {
+    this.shape = new PathShape(path, 1.0f, 1.0f);
+    this.shape.resize(1f, 1f);
     this.paint = paint;
+
+    RectF bounds = new RectF();
+    path.computeBounds(bounds, false);
+    width = bounds.width();
+    height = bounds.height();
   }
 
-  public static Element newTriangle(int x, int y) {
+  public static Element newTriangle(int size, int color) {
     Path path = new Path();
-    path.moveTo(0, 100);
-    path.lineTo(50, 0);
-    path.lineTo(100, 100);
+    path.moveTo(0, size);
+    path.lineTo(size / 2, 0);
+    path.lineTo(size, size);
     path.close();
-    PathShape shape = new PathShape(path, 1.0f, 1.0f);
-    shape.resize(1f, 1f);
 
     Paint paint = new Paint();
-    paint.setColor(0xFF0000);
+    paint.setColor(color);
     paint.setAlpha(128);
 
-    return new Element(x, y, shape, paint);
+    return new Element(path, paint);
   }
 
-  public void setXy(float x, float y) {
-    this.x = (int) x;
-    this.y = (int) y;
-  }
+  public static Element newCircle(int radius, int color) {
+    Path path = new Path();
+    path.addCircle(radius, radius, radius, Path.Direction.CW);
 
-  public int getX() {
-    return x;
-  }
+    Paint paint = new Paint();
+    paint.setColor(color);
+    paint.setAlpha(128);
 
-  public int getY() {
-    return y;
+    return new Element(path, paint);
   }
 
   public boolean contains(float x, float y) {
-    Log.i("Element", "contains x=" + x + " y=" + y + " this=" + this);
-    return x >= this.x && x <= this.x + 100 // 100 == width
-        && y >= this.y && y <= this.y + 100; // 100 == height
+    float[] xy = canvasPointToElementPoint(x, y);
+    x = xy[0];
+    y = xy[1];
+    Log.i("Element", "point=" + x + "," + y + " width=" + width + " height=" + height);
+
+    return x >= 0 && x <= width && y >= 0 && y <= height;
   }
 
-  public static Element newCircle(int x, int y) {
-    Path path = new Path();
-    path.addCircle(50, 50, 50, Path.Direction.CW);
-    PathShape shape = new PathShape(path, 1.0f, 1.0f);
-    shape.resize(1f, 1f);
-
-    Paint paint = new Paint();
-    paint.setColor(0x0000FF);
-    paint.setAlpha(128);
-
-    return new Element(x, y, shape, paint);
+  private float[] canvasPointToElementPoint(float x, float y) {
+    Matrix inverse = new Matrix(); // TODO: cache the inverse
+    matrix.invert(inverse);
+    float[] xy = { x, y };
+    inverse.mapPoints(xy);
+    return xy;
   }
 
-  public void draw(Canvas canvas) {
+  public void move(int x, int y) {
+    matrix.postTranslate(x, y);
+  }
+
+  public Matrix getMatrix() {
+    return matrix;
+  }
+
+  public void draw(Canvas canvas, boolean selected) {
     int count = canvas.save();
-    canvas.translate(x, y);
+    canvas.concat(matrix);
+
+    if (selected) {
+      drawSelectionHint(canvas);
+    }
+
     shape.draw(canvas, paint);
     canvas.restoreToCount(count);
   }
 
+  private void drawSelectionHint(Canvas canvas) {
+    int count = canvas.save();
+    canvas.translate(8, 8);
+    shape.draw(canvas, Paints.holographOutline());
+    canvas.restoreToCount(count);
+  }
+
+  public void setMatrix(Matrix matrix) {
+    this.matrix.set(matrix);
+  }
+
   @Override public String toString() {
-    return "Element at " + x + "," + y;
+    float[] xy = canvasPointToElementPoint(0, 0);
+    return "Element at " + xy[0] + "," + xy[1];
   }
 }
