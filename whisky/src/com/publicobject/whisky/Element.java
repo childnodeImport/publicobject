@@ -97,22 +97,23 @@ public final class Element {
   }
 
   public void draw(Canvas canvas, boolean selected) {
-    int count = canvas.save();
-    canvas.concat(matrix);
 
     if (selected) {
       drawSelectionHint(canvas);
     }
 
+    int count = canvas.save();
+    canvas.concat(matrix);
     shape.draw(canvas, paint);
     canvas.restoreToCount(count);
   }
 
   private void drawSelectionHint(Canvas canvas) {
-    int count = canvas.save();
-    canvas.translate(8, 8);
-    shape.draw(canvas, Paints.holographOutline());
-    canvas.restoreToCount(count);
+//    int count = canvas.save();
+//    canvas.translate(6, 6);
+//    canvas.concat(matrix);
+//    shape.draw(canvas, Paints.holographOutline());
+//    canvas.restoreToCount(count);
   }
 
   public void setMatrix(Matrix matrix) {
