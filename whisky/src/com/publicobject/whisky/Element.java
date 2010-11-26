@@ -97,7 +97,6 @@ public final class Element {
   }
 
   public void draw(Canvas canvas, boolean selected) {
-
     if (selected) {
       drawSelectionHint(canvas);
     }

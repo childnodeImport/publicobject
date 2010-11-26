@@ -34,4 +34,18 @@ public class Paints {
     result.setStrokeWidth(4);
     return result;
   }
+
+  public static Paint anchor() {
+    Paint result = new Paint();
+    result.setStyle(Paint.Style.FILL);
+    result.setColor(0xFFFF0000);
+    return result;
+  }
+
+  public static Paint last() {
+    Paint result = new Paint();
+    result.setStyle(Paint.Style.FILL);
+    result.setColor(0xFF00FF00);
+    return result;
+  }
 }

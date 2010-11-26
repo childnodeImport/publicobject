@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * To do:
- *  - zoom
+ *  - zoom (done!)
  *  - order
  *  - fill
  *  - border
@@ -38,30 +38,41 @@ import java.util.List;
  *  - rotate (done!)
  *  - poly
  *  - select
+ *
+ * Even More:
+ *  - enable anti-aliasing when the frame rate is > 60Hz; disable it otherwise
  */
 public final class DrawView extends View {
 
   /** The canvas elements, bottom to top. */
   private final List<Element> elements = new ArrayList<Element>();
 
-  private Element selected;
+  private final Matrix zoom = new Matrix();
+  private final Matrix baseZoom = new Matrix();
 
   private Element transformed;
   private final Matrix baseTransform = new Matrix();
+
+  private Action action;
+
   private float anchorX;
   private float anchorY;
+  private float anchorX2;
+  private float anchorY2;
 
-  /*
-   * The lever point that rotation starts, or NaN for no rotation.
-   */
-  private float rotateLeverX = Float.NaN;
-  private float rotateLeverY = Float.NaN;
-  private float rotateCurrentX;
-  private float rotateCurrentY;
+  private float lastX;
+  private float lastY;
+  private float lastX2;
+  private float lastY2;
+
+  private Element selected;
 
   /* effects */
   private final Paint rotateHintPaint = Paints.holographOutline();
   private final int[] rotateHintGradient = new int[] { 0x660000FF, 0, 0 };
+  private boolean drawTouchPoints;
+  private final Paint anchorPaint = Paints.anchor();
+  private final Paint lastPaint = Paints.last();
 
   public DrawView(Context context) {
     super(context);
@@ -93,12 +104,27 @@ public final class DrawView extends View {
 
   @Override protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-    for (Element element : elements) {
-      element.draw(canvas, element == selected);
-    }
 
-    if (!Float.isNaN(rotateLeverX)) {
-      drawRotateHint(canvas);
+    int count = canvas.save();
+    canvas.concat(zoom);
+    try {
+      for (Element element : elements) {
+        element.draw(canvas, element == selected);
+      }
+
+      if (drawTouchPoints) {
+        canvas.drawCircle(anchorX, anchorY, 5, anchorPaint);
+        canvas.drawCircle(anchorX2, anchorY2, 5, anchorPaint);
+        canvas.drawCircle(lastX, lastY, 5, lastPaint);
+        canvas.drawCircle(lastX2, lastY2, 5, lastPaint);
+      }
+
+      if (action == Action.ROTATE) {
+        drawRotateHint(canvas);
+      }
+
+    } finally {
+      canvas.restoreToCount(count);
     }
   }
 
@@ -107,104 +133,149 @@ public final class DrawView extends View {
    */
   private void drawRotateHint(Canvas canvas) {
     // TODO: center the radial gradient on the circle, not the touch point?
-    float rotateRadius = radius(rotateLeverX - anchorX, rotateLeverY - anchorY);
-    RadialGradient radialGradient = new RadialGradient(rotateCurrentX, rotateCurrentY, rotateRadius * 2,
+    float rotateRadius = distance(anchorX2 - anchorX, anchorY2 - anchorY);
+    RadialGradient radialGradient = new RadialGradient(lastX2, lastY2, rotateRadius * 2,
         rotateHintGradient, null, Shader.TileMode.MIRROR);
     rotateHintPaint.setShader(radialGradient);
     canvas.drawCircle(anchorX, anchorY, rotateRadius, rotateHintPaint);
   }
 
-  private float radius(float dx, float dy) {
-    return (float) Math.sqrt(dx * dx + dy * dy);
+  private float distance(float deltaX, float deltaY) {
+    return (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
   }
 
   @Override public boolean onTouchEvent(MotionEvent event) {
-    float x = event.getX();
-    float y = event.getY();
+    int pointCount = event.getPointerCount();
+    int eventAction = event.getAction();
 
-    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+    float[] xy = {event.getX(0), event.getY(0)};
+    Matrix baseZoomInvert = new Matrix();
+    baseZoom.invert(baseZoomInvert);
+    baseZoomInvert.mapPoints(xy);
+    lastX = xy[0];
+    lastY = xy[1];
+
+    if (pointCount > 1) {
+      float[] xy2 = {event.getX(1), event.getY(1)};
+      baseZoomInvert.mapPoints(xy2);
+      lastX2 = xy2[0];
+      lastY2 = xy2[1];
+    }
+
+    if (eventAction == MotionEvent.ACTION_DOWN || eventAction == MotionEvent.ACTION_POINTER_DOWN) {
+      anchorX = lastX;
+      anchorY = lastY;
+
       for (int i = elements.size() - 1; i >= 0; i--) {
         Element element = elements.get(i);
-        if (element.contains(x, y)) {
+        if (element.contains(lastX, lastY)) {
+          action = Action.MOVE;
           selected = null;
           transformed = element;
           baseTransform.set(element.getMatrix());
-          anchorX = x;
-          anchorY = y;
           invalidate(); // TODO: precise repaint
           return true;
         }
       }
 
-      if (selected != null) {
-        selected = null;
+      if (pointCount > 1) {
+        anchorX2 = lastX2;
+        anchorY2 = lastY2;
+        action = Action.ZOOM;
         invalidate(); // TODO: precise repaint
-      }
-
-      return false;
-    }
-
-    if (transformed == null) {
-      return false;
-    }
-
-    if (event.getPointerCount() > 1) {
-      if (event.getAction() == MotionEvent.ACTION_POINTER_2_DOWN) {
-        apply(event, true); // apply move before starting rotate
-        rotateLeverX = event.getX(1);
-        rotateLeverY = event.getY(1);
-        return true;
-      } else if (event.getAction() == MotionEvent.ACTION_POINTER_2_UP) {
-        apply(event, true); // apply rotate before resuming move
-        rotateLeverX = Float.NaN;
-        rotateLeverY = Float.NaN;
         return true;
       }
+
+    } else if (pointCount > 1) {
+      if (eventAction == MotionEvent.ACTION_POINTER_2_DOWN) {
+        anchorX2 = lastX2;
+        anchorY2 = lastY2;
+
+        if (transformed != null) {
+          apply(true); // apply move before starting rotate
+          action = Action.ROTATE;
+        } else {
+          action = Action.ZOOM;
+        }
+
+        return true;
+
+      } else if (eventAction == MotionEvent.ACTION_POINTER_2_UP) {
+        apply(true); // commit
+        if (transformed != null) {
+          action = Action.MOVE;
+        } else {
+          action = null;
+        }
+        return true;
+      }
     }
 
-    apply(event, false);
-
-    if (event.getAction() == MotionEvent.ACTION_UP) {
-      selected = transformed;
+    if (eventAction == MotionEvent.ACTION_UP || eventAction == MotionEvent.ACTION_POINTER_UP) {
+      if (action == Action.ZOOM) {
+        apply(true);
+      } else {
+        selected = transformed;
+      }
       transformed = null;
-      rotateLeverX = Float.NaN;
-      rotateLeverY = Float.NaN;
+      action = null;
       invalidate(); // TODO: precise repaint
+      return true;
     }
 
+    apply(false);
     return true;
   }
 
-  private void apply(MotionEvent event, boolean updateBase) {
-    float x = event.getX();
-    float y = event.getY();
+  private void apply(boolean updateBase) {
+    if (action == Action.MOVE || action == Action.ROTATE) {
+      Matrix base = new Matrix();
+      base.set(baseTransform);
+      Matrix newTransform = new Matrix();
+      if (action == Action.ROTATE) {
+        float oldTranslateX = anchorX2 - anchorX;
+        float oldTranslateY = anchorY2 - anchorY;
+        double oldAngle = Math.atan2(oldTranslateY, oldTranslateX);
+        float newTranslateX = lastX2 - anchorX;
+        float newTranslateY = lastY2 - anchorY;
+        double newAngle = Math.atan2(newTranslateY, newTranslateX);
+        double rotate = newAngle - oldAngle;
+        newTransform.setRotate((float) Math.toDegrees(rotate), anchorX, anchorY);
+      } else if (action == Action.MOVE) {
+        newTransform.setTranslate(lastX - anchorX, lastY - anchorY);
+      }
 
-    Matrix base = new Matrix();
-    base.set(baseTransform);
-    Matrix newTransform = new Matrix();
+      base.postConcat(newTransform);
+      transformed.setMatrix(base);
 
-    if (!Float.isNaN(rotateLeverX)) {
-      rotateCurrentX = event.getX(1);
-      rotateCurrentY = event.getY(1);
-      float oldTranslateX = rotateLeverX - anchorX;
-      float oldTranslateY = rotateLeverY - anchorY;
-      double oldAngle = Math.atan2(oldTranslateY, oldTranslateX);
-      float newTranslateX = rotateCurrentX - anchorX;
-      float newTranslateY = rotateCurrentY - anchorY;
-      double newAngle = Math.atan2(newTranslateY, newTranslateX);
-      double rotate = newAngle - oldAngle;
-      newTransform.setRotate((float) Math.toDegrees(rotate), anchorX, anchorY);
-    } else {
-      newTransform.setTranslate(x - anchorX, y - anchorY);
-    }
+      if (updateBase) {
+        baseTransform.set(base);
+        anchorX = lastX;
+        anchorY = lastY;
+        anchorX2 = lastX2;
+        anchorY2 = lastY2;
+      }
 
-    base.postConcat(newTransform);
-    transformed.setMatrix(base);
+    } else if (action == Action.ZOOM) {
+      float distanceBetweenAnchorPoints = distance(anchorX - anchorX2, anchorY - anchorY2);
+      float distanceBetweenLastPoints = distance(lastX - lastX2, lastY - lastY2);
+      float scale = distanceBetweenLastPoints / distanceBetweenAnchorPoints;
 
-    if (updateBase) {
-      baseTransform.set(base);
-      anchorX = x;
-      anchorY = y;
+      Matrix base = new Matrix();
+      base.postTranslate(-0.5f * (anchorX + anchorX2), -0.5f * (anchorY + anchorY2));
+      base.postScale(scale, scale, 0, 0);
+      base.postTranslate(0.5f * (lastX + lastX2), 0.5f * (lastY + lastY2));
+      base.postConcat(baseZoom);
+
+      zoom.set(base);
+
+      if (updateBase) {
+        baseZoom.set(base);
+        anchorX = lastX;
+        anchorY = lastY;
+        anchorX2 = lastX2;
+        anchorY2 = lastY2;
+      }
     }
 
     invalidate(); // TODO: precise repaint
@@ -214,5 +285,11 @@ public final class DrawView extends View {
     // fill the maximum width and height available
     setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),
         MeasureSpec.getSize(heightMeasureSpec));
+  }
+
+  enum Action {
+    MOVE,
+    ROTATE,
+    ZOOM
   }
 }
