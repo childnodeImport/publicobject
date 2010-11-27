@@ -39,7 +39,7 @@ import java.util.List;
  *  - scale (done!)
  *  - poly
  *  - select
- *  - precise selection
+ *  - precise selection (done!)
  *
  * Even More:
  *  - enable anti-aliasing when the frame rate is > 60Hz; disable it otherwise
@@ -230,9 +230,13 @@ public final class DrawView extends View {
   }
 
   private void apply(boolean updateBase) {
+    float distanceBetweenAnchorPoints = distance(anchorX - anchorX2, anchorY - anchorY2);
+    float distanceBetweenLastPoints = distance(lastX - lastX2, lastY - lastY2);
+    float scale = distanceBetweenLastPoints / distanceBetweenAnchorPoints;
+
     if (action == Action.MOVE || action == Action.ROTATE || action == Action.SCALE) {
-      Matrix newTransform = new Matrix();
-      newTransform.set(baseTransform);
+      Matrix update = new Matrix();
+      update.set(baseTransform);
 
       if (action == Action.ROTATE) {
         float oldTranslateX = anchorX2 - anchorX;
@@ -242,22 +246,19 @@ public final class DrawView extends View {
         float newTranslateY = lastY2 - anchorY;
         double newAngle = Math.atan2(newTranslateY, newTranslateX);
         double rotate = newAngle - oldAngle;
-        newTransform.postRotate((float) Math.toDegrees(rotate), anchorX, anchorY);
+        update.postRotate((float) Math.toDegrees(rotate), anchorX, anchorY);
       } else if (action == Action.SCALE) {
-        float distanceBetweenAnchorPoints = distance(anchorX - anchorX2, anchorY - anchorY2);
-        float distanceBetweenLastPoints = distance(lastX - lastX2, lastY - lastY2);
-        float scale = distanceBetweenLastPoints / distanceBetweenAnchorPoints;
-        newTransform.postTranslate(-0.5f * (anchorX + anchorX2), -0.5f * (anchorY + anchorY2));
-        newTransform.postScale(scale, scale, 0, 0);
-        newTransform.postTranslate(0.5f * (lastX + lastX2), 0.5f * (lastY + lastY2));
+        update.postTranslate(-0.5f * (anchorX + anchorX2), -0.5f * (anchorY + anchorY2));
+        update.postScale(scale, scale, 0, 0);
+        update.postTranslate(0.5f * (lastX + lastX2), 0.5f * (lastY + lastY2));
       } else if (action == Action.MOVE) {
-        newTransform.postTranslate(lastX - anchorX, lastY - anchorY);
+        update.postTranslate(lastX - anchorX, lastY - anchorY);
       }
 
-      transformed.setMatrix(newTransform);
+      transformed.setMatrix(update);
 
       if (updateBase) {
-        baseTransform.set(newTransform);
+        baseTransform.set(update);
         anchorX = lastX;
         anchorY = lastY;
         anchorX2 = lastX2;
@@ -265,20 +266,16 @@ public final class DrawView extends View {
       }
 
     } else if (action == Action.ZOOM) {
-      float distanceBetweenAnchorPoints = distance(anchorX - anchorX2, anchorY - anchorY2);
-      float distanceBetweenLastPoints = distance(lastX - lastX2, lastY - lastY2);
-      float scale = distanceBetweenLastPoints / distanceBetweenAnchorPoints;
+      Matrix update = new Matrix();
+      update.postTranslate(-0.5f * (anchorX + anchorX2), -0.5f * (anchorY + anchorY2));
+      update.postScale(scale, scale, 0, 0);
+      update.postTranslate(0.5f * (lastX + lastX2), 0.5f * (lastY + lastY2));
+      update.postConcat(baseZoom);
 
-      Matrix base = new Matrix();
-      base.postTranslate(-0.5f * (anchorX + anchorX2), -0.5f * (anchorY + anchorY2));
-      base.postScale(scale, scale, 0, 0);
-      base.postTranslate(0.5f * (lastX + lastX2), 0.5f * (lastY + lastY2));
-      base.postConcat(baseZoom);
-
-      zoom.set(base);
+      zoom.set(update);
 
       if (updateBase) {
-        baseZoom.set(base);
+        baseZoom.set(update);
         anchorX = lastX;
         anchorY = lastY;
         anchorX2 = lastX2;

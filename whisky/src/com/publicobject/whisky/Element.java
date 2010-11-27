@@ -21,6 +21,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.Region;
 import android.graphics.drawable.shapes.PathShape;
 
 /**
@@ -29,12 +30,14 @@ import android.graphics.drawable.shapes.PathShape;
 public final class Element {
 
   private final Matrix matrix = new Matrix();
+  private final Path path;
   private final PathShape shape;
   private final Paint paint;
   private final float width;
   private final float height;
 
   public Element(Path path, Paint paint) {
+    this.path = path;
     this.shape = new PathShape(path, 1.0f, 1.0f);
     this.shape.resize(1f, 1f);
     this.paint = paint;
@@ -74,7 +77,14 @@ public final class Element {
     float[] xy = canvasPointToElementPoint(x, y);
     x = xy[0];
     y = xy[1];
-    return x >= 0 && x <= width && y >= 0 && y <= height;
+    if (x < 0 || x > width || y < 0 || y > height) {
+      return false;
+    }
+
+    Region region = new Region();
+    Region clip = new Region();
+    clip.set((int) x, (int) y, ((int) x) + 1, ((int) y) + 1);
+    return region.setPath(path, clip);
   }
 
   private float[] canvasPointToElementPoint(float x, float y) {
