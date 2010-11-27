@@ -36,8 +36,10 @@ import java.util.List;
  *  - create shapes
  *  - align
  *  - rotate (done!)
+ *  - scale (done!)
  *  - poly
  *  - select
+ *  - precise selection
  *
  * Even More:
  *  - enable anti-aliasing when the frame rate is > 60Hz; disable it otherwise
@@ -192,8 +194,12 @@ public final class DrawView extends View {
         anchorY2 = lastY2;
 
         if (transformed != null) {
-          apply(true); // apply move before starting rotate
-          action = Action.ROTATE;
+          apply(true); // apply move before starting rotate or scale
+          if (transformed.contains(lastX2, lastY2)) {
+            action = Action.SCALE;
+          } else {
+            action = Action.ROTATE;
+          }
         } else {
           action = Action.ZOOM;
         }
@@ -212,11 +218,7 @@ public final class DrawView extends View {
     }
 
     if (eventAction == MotionEvent.ACTION_UP || eventAction == MotionEvent.ACTION_POINTER_UP) {
-      if (action == Action.ZOOM) {
-        apply(true);
-      } else {
-        selected = transformed;
-      }
+      apply(true);
       transformed = null;
       action = null;
       invalidate(); // TODO: precise repaint
@@ -228,10 +230,10 @@ public final class DrawView extends View {
   }
 
   private void apply(boolean updateBase) {
-    if (action == Action.MOVE || action == Action.ROTATE) {
-      Matrix base = new Matrix();
-      base.set(baseTransform);
+    if (action == Action.MOVE || action == Action.ROTATE || action == Action.SCALE) {
       Matrix newTransform = new Matrix();
+      newTransform.set(baseTransform);
+
       if (action == Action.ROTATE) {
         float oldTranslateX = anchorX2 - anchorX;
         float oldTranslateY = anchorY2 - anchorY;
@@ -240,16 +242,22 @@ public final class DrawView extends View {
         float newTranslateY = lastY2 - anchorY;
         double newAngle = Math.atan2(newTranslateY, newTranslateX);
         double rotate = newAngle - oldAngle;
-        newTransform.setRotate((float) Math.toDegrees(rotate), anchorX, anchorY);
+        newTransform.postRotate((float) Math.toDegrees(rotate), anchorX, anchorY);
+      } else if (action == Action.SCALE) {
+        float distanceBetweenAnchorPoints = distance(anchorX - anchorX2, anchorY - anchorY2);
+        float distanceBetweenLastPoints = distance(lastX - lastX2, lastY - lastY2);
+        float scale = distanceBetweenLastPoints / distanceBetweenAnchorPoints;
+        newTransform.postTranslate(-0.5f * (anchorX + anchorX2), -0.5f * (anchorY + anchorY2));
+        newTransform.postScale(scale, scale, 0, 0);
+        newTransform.postTranslate(0.5f * (lastX + lastX2), 0.5f * (lastY + lastY2));
       } else if (action == Action.MOVE) {
-        newTransform.setTranslate(lastX - anchorX, lastY - anchorY);
+        newTransform.postTranslate(lastX - anchorX, lastY - anchorY);
       }
 
-      base.postConcat(newTransform);
-      transformed.setMatrix(base);
+      transformed.setMatrix(newTransform);
 
       if (updateBase) {
-        baseTransform.set(base);
+        baseTransform.set(newTransform);
         anchorX = lastX;
         anchorY = lastY;
         anchorX2 = lastX2;
@@ -290,6 +298,7 @@ public final class DrawView extends View {
   enum Action {
     MOVE,
     ROTATE,
+    SCALE,
     ZOOM
   }
 }

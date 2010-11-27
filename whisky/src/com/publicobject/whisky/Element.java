@@ -22,7 +22,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.drawable.shapes.PathShape;
-import android.util.Log;
 
 /**
  * A shape plus its projection onto the canvas.
@@ -75,8 +74,6 @@ public final class Element {
     float[] xy = canvasPointToElementPoint(x, y);
     x = xy[0];
     y = xy[1];
-    Log.i("Element", "point=" + x + "," + y + " width=" + width + " height=" + height);
-
     return x >= 0 && x <= width && y >= 0 && y <= height;
   }
 
