@@ -25,15 +25,18 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import java.util.Arrays;
 
-public class PlayPauseWidgetProvider extends AppWidgetProvider {
+public final class PlayPauseWidgetProvider extends AppWidgetProvider {
 
-    @Override public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    @Override public void onUpdate(
+            Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
-
             Intent intent = new Intent(context, OnPlayPause.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.playpause_appwidget);
+
+            views.setImageViewResource(R.id.img_playpause, R.drawable.playpause);
+
             views.setOnClickPendingIntent(R.id.button, pendingIntent);
 
             // Tell the AppWidgetManager to perform an update on the current App Widget
@@ -41,8 +44,6 @@ public class PlayPauseWidgetProvider extends AppWidgetProvider {
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
 
-
-        Log.i("PlayPause", "onUpdate: " + Arrays.toString(appWidgetIds));
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 

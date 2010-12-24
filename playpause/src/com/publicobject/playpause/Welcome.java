@@ -26,7 +26,7 @@ import android.os.Bundle;
 /**
  * A dialog that explains how Play/Pause works.
  */
-public class Welcome extends Activity implements OnClickListener, OnCancelListener {
+public final class Welcome extends Activity implements OnClickListener, OnCancelListener {
 
     @Override
     protected void onCreate(Bundle bundle) {

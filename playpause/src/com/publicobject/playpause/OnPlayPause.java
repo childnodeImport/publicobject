@@ -24,21 +24,23 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 /**
+ * Responds to the user touching the widget by broadcasting an event to the
+ * current media app.
  */
-public class OnPlayPause extends BroadcastReceiver {
+public final class OnPlayPause extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         Log.i("PlayPause", "onReceive : " + intent);
         long now = SystemClock.uptimeMillis();
 
-        Intent downIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-        KeyEvent downEvent = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 0);
-        downIntent.putExtra(Intent.EXTRA_KEY_EVENT, downEvent);
-        context.sendOrderedBroadcast(downIntent, null);
+        Intent down = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+        down.putExtra(Intent.EXTRA_KEY_EVENT,
+                new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 0));
+        context.sendOrderedBroadcast(down, null);
 
-        Intent upIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-        KeyEvent upEvent = new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 0);
-        upIntent.putExtra(Intent.EXTRA_KEY_EVENT, upEvent);
-        context.sendOrderedBroadcast(upIntent, null);
+        Intent up = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+        up.putExtra(Intent.EXTRA_KEY_EVENT,
+                new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 0));
+        context.sendOrderedBroadcast(up, null);
     }
 }

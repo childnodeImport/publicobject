@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
-    <Button android:id="@+id/button"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:text="Play/Pause"/>
+              android:layout_height="fill_parent"
+              android:background="@drawable/background">
+
+    <LinearLayout android:id="@+id/button"
+                  android:layout_width="fill_parent"
+                  android:layout_height="fill_parent"
+                  android:background="@drawable/button"
+                  android:clickable="true"
+                  android:focusable="true">
+
+        <ImageView android:id="@+id/img_playpause"
+                   android:layout_width="fill_parent"
+                   android:layout_height="fill_parent"
+                   android:scaleType="center"/>
+
+    </LinearLayout>
 </LinearLayout>
