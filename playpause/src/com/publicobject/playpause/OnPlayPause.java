@@ -19,6 +19,7 @@ package com.publicobject.playpause;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -30,6 +31,10 @@ import android.view.KeyEvent;
 public final class OnPlayPause extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
+
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        Log.i("PlayPause", "Music was active: " + audioManager.isMusicActive());
+
         Log.i("PlayPause", "onReceive : " + intent);
         long now = SystemClock.uptimeMillis();
 
@@ -42,5 +47,7 @@ public final class OnPlayPause extends BroadcastReceiver {
         up.putExtra(Intent.EXTRA_KEY_EVENT,
                 new KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 0));
         context.sendOrderedBroadcast(up, null);
+
+        Log.i("PlayPause", "Music now active: " + audioManager.isMusicActive());
     }
 }

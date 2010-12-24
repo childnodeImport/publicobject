@@ -34,7 +34,7 @@ public final class Welcome extends Activity implements OnClickListener, OnCancel
 
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setIcon(R.drawable.shush)
+                .setIcon(R.drawable.icon)
                 .setTitle("Play/Pause Widget")
                 .setMessage("Add the widget to your home screen. Touching it toggles "
                         + "between play and pause in your current media player.")

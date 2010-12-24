@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import java.util.Arrays;
@@ -29,7 +30,12 @@ public final class PlayPauseWidgetProvider extends AppWidgetProvider {
 
     @Override public void onUpdate(
             Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
         for (int appWidgetId : appWidgetIds) {
+            Log.i("PlayPause", "Music is active: " + audioManager.isMusicActive());
+
             Intent intent = new Intent(context, OnPlayPause.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
