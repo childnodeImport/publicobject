@@ -42,7 +42,9 @@ public final class LocalizationToStringsTest extends TestCase {
 
   public void testApostrophes() {
     LocalizationToStrings localizationToStrings = new LocalizationToStrings();
+    assertEquals("\\\\", localizationToStrings.resourceEscape("\\"));
     assertEquals("\\\"", localizationToStrings.resourceEscape("\""));
     assertEquals("\\'", localizationToStrings.resourceEscape("'"));
+    assertEquals("foo\\\\\\\'bar\\\\", localizationToStrings.resourceEscape("foo\\'bar\\"));
   }
 }

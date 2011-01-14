@@ -53,6 +53,17 @@ public final class LocalizationToStrings {
   }
 
   public String resourceEscape(String s) {
-    return s.replaceAll("'", "\\\\'").replaceAll("\"", "\\\\\"");
+    StringBuilder result = new StringBuilder();
+    for (char c : s.toCharArray()) {
+      switch (c) {
+      case '"':
+      case '\\':
+      case '\'':
+        result.append('\\');
+        break;
+      }
+      result.append(c);
+    }
+    return result.toString();
   }
 }
