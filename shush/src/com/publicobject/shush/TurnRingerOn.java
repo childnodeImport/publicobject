@@ -36,7 +36,7 @@ public class TurnRingerOn extends BroadcastReceiver {
                 || am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             am.setRingerMode(RINGER_MODE_NORMAL);
             am.setStreamVolume(STREAM_RING, am.getStreamMaxVolume(STREAM_RING), 0);
-            Toast.makeText(context, "Ringer restored.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.ringerRestored, Toast.LENGTH_LONG).show();
         }
     }
 }

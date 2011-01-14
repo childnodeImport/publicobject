@@ -189,31 +189,32 @@ final class ClockSlider extends View {
         }
 
         String durationText;
-        String durationUnitsText;
+        int durationUnitsId;
         long timeInMillis = end.getTimeInMillis();
         String onAtText = DateUtils.formatSameDayTime(timeInMillis, timeInMillis,
                 DateFormat.SHORT, DateFormat.SHORT).toString();
         if (minutes < 60) {
             durationText = Integer.toString(minutes);
-            durationUnitsText = "minutes";
+            durationUnitsId = R.string.minutes;
         } else if (minutes == 60) {
             durationText = "1";
-            durationUnitsText = "hour";
+            durationUnitsId = R.string.hour;
         } else if (minutes % 60 == 0) {
             durationText = Integer.toString(minutes / 60);
-            durationUnitsText = "hours";
+            durationUnitsId = R.string.hours;
         } else if (minutes % 60 == 15) {
             durationText = minutes / 60 + "\u00BC"; // 1/4
-            durationUnitsText = "hours";
+            durationUnitsId = R.string.hours;
         } else if (minutes % 60 == 30) {
             durationText = minutes / 60 + "\u00BD"; // 1/2
-            durationUnitsText = "hours";
+            durationUnitsId = R.string.hours;
         } else if (minutes % 60 == 45) {
             durationText = minutes / 60 + "\u00BE"; // 3/4
-            durationUnitsText = "hours";
+            durationUnitsId = R.string.hours;
         } else {
             throw new AssertionError();
         }
+        String durationUnitsText = getResources().getString(durationUnitsId);
         canvas.drawText(durationText,      centerX, centerY - (diameter * 0.08f), duration);
         canvas.drawText(durationUnitsText, centerX, centerY + (diameter * 0.06f), durationUnits);
         canvas.drawText(onAtText,          centerX, centerY + (diameter * 0.25f), unshushTime);

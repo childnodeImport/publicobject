@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.publicobject.shush"
-      android:versionCode="9"
-      android:versionName="3.0">
+      android:versionCode="10"
+      android:versionName="4.0">
     <uses-sdk android:minSdkVersion="3"/> 
     <application android:icon="@drawable/shush">
         <activity android:name=".Welcome"
                 android:label="Shush!"
                 android:noHistory="true"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+                android:theme="@android:style/Theme.Translucent.NoTitleBar">
            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -24,6 +24,6 @@
                   android:launchMode="singleInstance"
                   android:noHistory="true"
                   android:label="Shush!"
-                  android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"/>
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
     </application>
 </manifest>

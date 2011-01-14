@@ -71,19 +71,19 @@ public class RingerMutedDialog extends Activity {
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
 
         dialog = new AlertDialog.Builder(this)
-                .setPositiveButton("Shush!", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.shush, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogCommitted();
                     }
                 })
-                .setNegativeButton("Keep it off.", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.keepItOff, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogCancelled();
                     }
                 })
                 .setIcon(null)
                 .setView(clockSlider)
-                .setTitle("Turn ringer on in:")
+                .setTitle(R.string.turnRingerOnIn)
                 .setCancelable(true)
                 .create();
         dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -101,8 +101,8 @@ public class RingerMutedDialog extends Activity {
         Context context = getApplicationContext();
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
                 .set(ELAPSED_REALTIME, onRealtime, createIntent());
-        String message = "Ringer shushed 'til "
-                + DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT);
+        String message = String.format(getResources().getString(R.string.ringerShushedUntil),
+            DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT));
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
@@ -116,7 +116,7 @@ public class RingerMutedDialog extends Activity {
     private void dialogCancelled() {
         Context context = getApplicationContext();
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(createIntent());
-        Toast.makeText(context, "Ringer shushed indefinitely!", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, R.string.ringerShushedIndefinitely, Toast.LENGTH_LONG).show();
 
         finish();
     }

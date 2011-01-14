@@ -28,18 +28,16 @@ import android.os.Bundle;
  */
 public class Welcome extends Activity implements OnClickListener, OnCancelListener {
 
-    @Override
-    protected void onCreate(Bundle bundle) {
+    @Override protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
         new AlertDialog.Builder(this)
                 .setCancelable(true)
                 .setIcon(R.drawable.shush)
-                .setTitle("Shush! Ringer Restorer")
-                .setMessage("Activate Shush by turning your ringer off. You can "
-                        + "use the volume down button just like you're used to.")
+                .setTitle(R.string.title)
+                .setMessage(R.string.welcomeMessage)
                 .setOnCancelListener(this)
-                .setPositiveButton("Sweet!", this)
+                .setPositiveButton(R.string.okay, this)
                 .create()
                 .show();
     }

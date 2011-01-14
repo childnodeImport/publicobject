@@ -1,0 +1,15 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush! Ringer Restorer</string>
+  <string name="welcomeMessage ">Activate Shush \' \" \\ \\\" by turning your ringer off. You can use the volume down button just like you\'re used to.</string>
+  <string name="okay">Sweet!</string>
+  <string name="ringerRestored">Ringer restored.</string>
+  <string name="ringerShushedUntil">Ringer shushed \'til %1$s</string>
+  <string name="ringerShushedIndefinitely">Ringer shushed indefinitely!</string>
+  <string name="turnRingerOnIn">Turn ringer on in:</string>
+  <string name="minutes">minutes</string>
+  <string name="hour">hour</string>
+  <string name="hours">hours</string>
+  <string name="shush">Shush!</string>
+  <string name="keepItOff">Keep it off.</string>
+</resources>
