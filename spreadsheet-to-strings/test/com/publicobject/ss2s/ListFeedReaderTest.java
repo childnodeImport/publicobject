@@ -16,6 +16,7 @@
 
 package com.publicobject.ss2s;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -68,7 +69,8 @@ public final class ListFeedReaderTest extends TestCase {
         "</feed>";
 
     ListFeedReader listFeedReader = new ListFeedReader();
-    List<Localization> localizations = listFeedReader.readLocalizations(new StringReader(xml));
+    List<Localization> localizations = listFeedReader.readLocalizations(
+        new ByteArrayInputStream(xml.getBytes("UTF-8")));
     assertEquals(2, localizations.size());
 
     Localization en = localizations.get(0);

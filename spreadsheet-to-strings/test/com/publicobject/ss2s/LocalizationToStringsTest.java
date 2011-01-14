@@ -39,4 +39,10 @@ public final class LocalizationToStringsTest extends TestCase {
         + "  <string name=\"okay\">Sweet!</string>\r\n"
         + "</resources>", xml);
   }
+
+  public void testApostrophes() {
+    LocalizationToStrings localizationToStrings = new LocalizationToStrings();
+    assertEquals("\\\"", localizationToStrings.resourceEscape("\""));
+    assertEquals("\\'", localizationToStrings.resourceEscape("'"));
+  }
 }

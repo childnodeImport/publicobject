@@ -52,7 +52,7 @@ public final class LocalizationToStrings {
     out.endDocument();
   }
 
-  private String resourceEscape(String x) {
-    return x;
+  public String resourceEscape(String s) {
+    return s.replaceAll("'", "\\\\'").replaceAll("\"", "\\\\\"");
   }
 }

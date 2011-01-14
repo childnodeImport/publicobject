@@ -61,7 +61,7 @@ public final class WorksheetFeedReaderTest extends TestCase {
 
     String listFeedUrl = "https://spreadsheets.google.com/feeds/list/0AqH4uBT50p0tdFJZNHNuTWxuc2NtTjRrZWlQelZWRXc/od6/private/full";
     List<String> listFeedUrls = new WorksheetFeedReader().readListFeedUrls(
-        new ByteArrayInputStream(xml.getBytes()));
+        new ByteArrayInputStream(xml.getBytes("UTF-8")));
     assertEquals(Arrays.asList(listFeedUrl), listFeedUrls);
   }
 }

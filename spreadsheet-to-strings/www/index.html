@@ -1,15 +1,32 @@
 <html>
   <head>
-    <title>Spreadsheet to XML</title>
+    <title>Spreadsheet to strings: a localization tool for Android</title>
   </head>
 
   <body>
-    <h1>Spreadsheet to XML</h1>
+    <h1>Spreadsheet to strings: a localization tool for Android</h1>
+
+    <img src="spreadsheet.png" width="643" height="560">
+
+    <h3>How it works</h3>
+    <ol>
+        <li>Create a new <a href="http://docs.google.com/spreadsheets">Google spreadsheet</a>
+            to manage your translation text. Each row in the spreadsheet is a string to be
+            translated. Each column is a language that you support.</li>
+        <li>Get your worldly friends to help out by using the collaboration features
+            in Google Docs.</li>
+        <li>This app will generate strings.xml resource files for your Android project
+            from the spreadsheet.</li>
+    </ol>
 
     <form action="/ShowXml" method="GET">
-        spreadsheet URL: <input type="text" name="spreadsheetUrl" size="50">
+        Your spreadsheet URL: <input type="text" name="spreadsheetUrl" size="50">
         <input type="submit" value="To XML">
+        <br>Example spreadsheet: <code>https://spreadsheets1.google.com/ccc?key=tRY4snMlnscmN4keiPzVVEw</code>
     </form>
+
+   <hr>
+   <a href="http://publicobject.com">publicobject.com</a>
 
   </body>
 </html>

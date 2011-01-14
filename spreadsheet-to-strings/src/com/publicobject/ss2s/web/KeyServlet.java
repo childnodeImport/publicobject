@@ -47,25 +47,12 @@ public final class KeyServlet extends HttpServlet {
     try {
       String token = checkAccessGranted(request);
       if (token == null) {
-        System.out.println("Redirecting!");
         requestAccess(request, response);
         return;
       }
-
       String key = request.getPathInfo().substring(1);
-      System.out.println("Using key=" + key);
       List<Localization> localizations = keyToLocalizations(key, token);
-
-      response.setContentType("text/plain");
-      Writer writer = new OutputStreamWriter(response.getOutputStream(), "UTF-8");
-      writer.write("" + localizations.size() + " localizations\n");
-      for (Localization localization : localizations) {
-        writer.write("--------------------------------------------------------------------------------\n");
-        writer.write("values-" + localization.getLanguageAndRegion() + ".xml\n\n");
-        new LocalizationToStrings().localizationToStrings(localization, writer);
-        writer.write("\n\n");
-      }
-      System.out.println("Success!");
+      showLocalizations(response, localizations);
     } catch (XmlPullParserException e) {
       throw new RuntimeException(e);
     } catch (URISyntaxException e) {
@@ -73,9 +60,23 @@ public final class KeyServlet extends HttpServlet {
     }
   }
 
-  private List<Localization> keyToLocalizations(String key, String token) throws IOException, XmlPullParserException {
+  private void showLocalizations(HttpServletResponse response,
+      List<Localization> localizations) throws IOException, XmlPullParserException {
+    response.setContentType("text/plain");
+    Writer writer = new OutputStreamWriter(response.getOutputStream(), "UTF-8");
+    writer.write("" + localizations.size() + " localizations\n");
+    for (Localization localization : localizations) {
+      writer.write(
+          "--------------------------------------------------------------------------------\n");
+      writer.write("values-" + localization.getLanguageAndRegion() + ".xml\n\n");
+      new LocalizationToStrings().localizationToStrings(localization, writer);
+      writer.write("\n\n");
+    }
+  }
+
+  private List<Localization> keyToLocalizations(String key, String token)
+      throws IOException, XmlPullParserException {
     String urlString = "https://spreadsheets.google.com/feeds/worksheets/" + key + "/private/full";
-    System.out.println("worksheet url: " + urlString);
     URL url = new URL(urlString);
     HttpURLConnection worksheetConnection = (HttpURLConnection) url.openConnection();
     authorizeConnection(token, worksheetConnection);
@@ -89,7 +90,6 @@ public final class KeyServlet extends HttpServlet {
     }
 
     String feedUrl = feedUrls.get(0);
-    System.out.println("feed url: " + feedUrl);
     HttpURLConnection listFeedConnection = (HttpURLConnection) new URL(feedUrl).openConnection();
     authorizeConnection(token, listFeedConnection);
     List<Localization> localizations = new ListFeedReader()
@@ -117,9 +117,7 @@ public final class KeyServlet extends HttpServlet {
       if (oneUseToken == null) {
         return null;
       }
-      System.out.println("Received one use token: " + oneUseToken);
       sessionToken = upgradeToken(oneUseToken);
-      System.out.println("Received session token: " + sessionToken);
       request.getSession().setAttribute(ACCESS_TOKEN_SESSION_KEY, sessionToken);
     }
     return sessionToken;
