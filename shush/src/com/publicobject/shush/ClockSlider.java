@@ -16,7 +16,6 @@
 
 package com.publicobject.shush;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -40,6 +39,8 @@ final class ClockSlider extends View {
     private static final int INSETS = 6;
     private static final int MINUTES_PER_HALF_DAY = 720;
 
+    private final RingerMutedDialog ringerMutedDialog;
+
     private int width;
     private int height;
     private int centerX;
@@ -48,6 +49,13 @@ final class ClockSlider extends View {
     private RectF outerCircle;
     private RectF buttonCircle;
     private Path clip;
+
+    private RectF smallVolume;
+    private RectF largeVolume;
+    private Path volumeClip;
+    private boolean volumeSliding;
+    /** Volume to restore to; between 0.0 and 1.0 */
+    private float volume = 0.8f;
 
     private Paint lightGrey = new Paint();
     private Paint pink = new Paint();
@@ -66,8 +74,9 @@ final class ClockSlider extends View {
     private boolean upPushed;
     private boolean downPushed;
 
-    public ClockSlider(Context context) {
+    public ClockSlider(RingerMutedDialog context) {
         super(context);
+        this.ringerMutedDialog = context;
 
         lightGrey.setColor(Color.rgb(115, 115, 115));
         lightGrey.setAntiAlias(true);
@@ -102,7 +111,9 @@ final class ClockSlider extends View {
 
             int left = (width - diameter) / 2;
             int top = (height - diameter) / 2;
-            outerCircle = new RectF(left, top, left + diameter, top + diameter);
+            int bottom = top + diameter;
+            int right = left + diameter;
+            outerCircle = new RectF(left, top, right, bottom);
 
             int innerDiameter = diameter - thickness * 2;
             RectF innerCircle = new RectF(left + thickness, top + thickness,
@@ -117,13 +128,32 @@ final class ClockSlider extends View {
             clip.addRect(outerCircle, Path.Direction.CW);
             clip.addOval(innerCircle, Path.Direction.CCW);
 
+            // volume triangles
+            int volumeLeft = Math.max(INSETS * 2, centerX - diameter);
+            int volumeRight = Math.min(width - INSETS * 2, centerX + diameter);
+            int volumeHeight = (volumeRight - volumeLeft) / 2;
+            int volumeButtonSize = (int) (diameter * 0.25f);
+            largeVolume = new RectF(volumeLeft, bottom - volumeHeight, volumeRight, bottom);
+            smallVolume = new RectF(volumeLeft, bottom - volumeButtonSize,
+                    volumeLeft + volumeButtonSize, bottom);
+            volumeClip = new Path();
+            volumeClip.moveTo(largeVolume.left, largeVolume.bottom);
+            volumeClip.lineTo(largeVolume.right, largeVolume.bottom);
+            volumeClip.lineTo(largeVolume.right, largeVolume.top);
+            volumeClip.close();
+
             duration.setTextSize(diameter * 0.32f);
             durationUnits.setTextSize(diameter * 0.10f);
             unshushTime.setTextSize(diameter * 0.13f);
         }
 
-        drawClock(canvas);
-        drawTextAndButtons(canvas);
+        if (volumeSliding) {
+            drawVolumeSlider(canvas, largeVolume);
+        } else {
+            drawClock(canvas);
+            drawClockTextAndButtons(canvas);
+            drawVolumeSlider(canvas, smallVolume);
+        }
     }
 
     public Date getStart() {
@@ -155,6 +185,26 @@ final class ClockSlider extends View {
         postInvalidate();
     }
 
+    public float getVolume() {
+        return volume;
+    }
+
+    public void setVolume(float volume) {
+        setVolume(volumeSliding, volume);
+    }
+
+    private void setVolume(boolean volumeSliding, float volume) {
+        if (volumeSliding == this.volumeSliding && volume == this.volume) {
+            return; // avoid unnecessary repaints
+        }
+        if (volumeSliding != this.volumeSliding) {
+            this.ringerMutedDialog.volumeSliding(volumeSliding);
+        }
+        this.volumeSliding = volumeSliding;
+        this.volume = volume;
+        postInvalidate();
+    }
+
     public Date getEnd() {
         return end.getTime();
     }
@@ -173,13 +223,30 @@ final class ClockSlider extends View {
     }
 
     /**
+     * This draws a triangle showing the current volume level. The triangle may
+     * be small for an icon button or large for an active slider. At min volume
+     * the triangle is mostly grey; at max volume it is all pink.
+     */
+    private void drawVolumeSlider(Canvas canvas, RectF bound) {
+        float right = bound.left + (volume * bound.width());
+        float whiteLineWidth = diameter * 0.015f;
+
+        canvas.save();
+        canvas.clipPath(volumeClip);
+        canvas.drawRect(bound.left, bound.top, bound.right, bound.bottom, lightGrey);
+        canvas.drawRect(bound.left, bound.top, right, bound.bottom, pink);
+        canvas.drawRect(right - whiteLineWidth, bound.top, right, bound.bottom, white);
+        canvas.restore();
+    }
+
+    /**
      * Write labels in the middle of the circle like so:
      *
      *    2 1/2
      *    hours
      *  10:15 PM
      */
-    private void drawTextAndButtons(Canvas canvas) {
+    private void drawClockTextAndButtons(Canvas canvas) {
         // up/down button backgrounds
         if (upPushed) {
             canvas.drawArc(buttonCircle, 270, 180, true, buttonCirclePaint);
@@ -235,11 +302,25 @@ final class ClockSlider extends View {
      * update the sweep angle.
      */
     @Override public boolean onTouchEvent(MotionEvent event) {
-        upPushed = false;
-        downPushed = false;
         int touchX = (int) event.getX();
         int touchY = (int) event.getY();
 
+        // handle volume slider
+        boolean newVolumeSliding = volumeSliding;
+        if (smallVolume.contains(touchX, touchY) && event.getAction() == MotionEvent.ACTION_DOWN) {
+            newVolumeSliding = true;
+        }
+        if (newVolumeSliding) {
+            float newVolume = toVolume((touchX - largeVolume.left) / largeVolume.width());
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                newVolumeSliding = false;
+            }
+            setVolume(newVolumeSliding, newVolume);
+            return true;
+        }
+
+        upPushed = false;
+        downPushed = false;
         int distanceFromCenterX = centerX - touchX;
         int distanceFromCenterY = centerY - touchY;
         int distanceFromCenterSquared = distanceFromCenterX * distanceFromCenterX
@@ -288,6 +369,20 @@ final class ClockSlider extends View {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns a volume fraction that's in permitted bounds. We don't let the
+     * volume go too low (what would be the point!) or above 100%.
+     */
+    private float toVolume(float rawFraction) {
+        if (rawFraction < 0.2) {
+            return 0.2f;
+        }
+        if (rawFraction > 1.0) {
+            return 1.0f;
+        }
+        return rawFraction;
     }
 
     @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {

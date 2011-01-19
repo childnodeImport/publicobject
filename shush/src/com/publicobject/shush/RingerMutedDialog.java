@@ -45,7 +45,9 @@ import java.util.Date;
 public class RingerMutedDialog extends Activity {
 
     /** two hours */
-    private static final int DEFAULT_MINUTES = 120;
+    public static final int DEFAULT_MINUTES = 120;
+    /** 80% of max volume */
+    public static final float DEFAULT_VOLUME = 0.8f;
 
     private Dialog dialog;
     private ClockSlider clockSlider;
@@ -69,6 +71,7 @@ public class RingerMutedDialog extends Activity {
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
+        clockSlider.setVolume(preferences.getFloat("volume", DEFAULT_VOLUME));
 
         dialog = new AlertDialog.Builder(this)
                 .setPositiveButton(R.string.shush, new DialogInterface.OnClickListener() {
@@ -95,6 +98,10 @@ public class RingerMutedDialog extends Activity {
         dialog.getWindow().setGravity(BOTTOM);
     }
 
+    public void volumeSliding(boolean sliding) {
+        dialog.setTitle(sliding ? R.string.restoreVolumeLevel : R.string.turnRingerOnIn);
+    }
+
     private void dialogCommitted() {
         long onTime = clockSlider.getEnd().getTime();
         long onRealtime = onTime - System.currentTimeMillis() + SystemClock.elapsedRealtime();
@@ -108,6 +115,7 @@ public class RingerMutedDialog extends Activity {
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("minutes", clockSlider.getMinutes());
+        editor.putFloat("volume", clockSlider.getVolume());
         editor.commit();
 
         finish();
@@ -125,16 +133,20 @@ public class RingerMutedDialog extends Activity {
         super.onSaveInstanceState(outState);
         long start = clockSlider.getStart().getTime();
         int minutes = clockSlider.getMinutes();
+        float volume = clockSlider.getVolume();
         outState.putLong("start", start);
         outState.putInt("minutes", minutes);
+        outState.putFloat("volume", volume);
     }
 
     @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         int minutes = savedInstanceState.getInt("minutes", DEFAULT_MINUTES);
         long start = savedInstanceState.getLong("start", System.currentTimeMillis());
+        float volume = savedInstanceState.getFloat("volume", DEFAULT_VOLUME);
         clockSlider.setStart(new Date(start));
         clockSlider.setMinutes(minutes);
+        clockSlider.setVolume(volume);
     }
 
     @Override protected void onStart() {
@@ -153,6 +165,7 @@ public class RingerMutedDialog extends Activity {
     private PendingIntent createIntent() {
         Context context = getApplicationContext();
         Intent turnRingerOn = new Intent(context, TurnRingerOn.class);
+        turnRingerOn.putExtra("volume", clockSlider.getVolume());
         return PendingIntent.getBroadcast(context, 0, turnRingerOn, FLAG_CANCEL_CURRENT);
     }
 }

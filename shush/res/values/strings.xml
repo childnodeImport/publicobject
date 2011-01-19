@@ -7,6 +7,7 @@
   <string name="ringerShushedUntil">Ringer shushed \'til %1$s</string>
   <string name="ringerShushedIndefinitely">Ringer shushed indefinitely!</string>
   <string name="turnRingerOnIn">Turn ringer on in:</string>
+  <string name="restoreVolumeLevel">Restore volume level:</string>
   <string name="minutes">minutes</string>
   <string name="hour">hour</string>
   <string name="hours">hours</string>

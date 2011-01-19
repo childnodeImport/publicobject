@@ -27,16 +27,20 @@ import static android.media.AudioManager.STREAM_RING;
 import android.widget.Toast;
 
 /**
- * Turns the ringer on full blast when received.
+ * Turns the ringer on when received.
  */
 public class TurnRingerOn extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         AudioManager am = (AudioManager) context.getSystemService(AUDIO_SERVICE);
-        if (am.getRingerMode() == AudioManager.RINGER_MODE_SILENT
-                || am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
-            am.setRingerMode(RINGER_MODE_NORMAL);
-            am.setStreamVolume(STREAM_RING, am.getStreamMaxVolume(STREAM_RING), 0);
-            Toast.makeText(context, R.string.ringerRestored, Toast.LENGTH_LONG).show();
+        if (am.getRingerMode() != AudioManager.RINGER_MODE_SILENT
+                && am.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
+            return;
         }
+
+        am.setRingerMode(RINGER_MODE_NORMAL);
+        int volume = (int) (am.getStreamMaxVolume(STREAM_RING)
+                * intent.getExtras().getFloat("volume", RingerMutedDialog.DEFAULT_VOLUME));
+        am.setStreamVolume(STREAM_RING, volume, 0);
+        Toast.makeText(context, R.string.ringerRestored, Toast.LENGTH_LONG).show();
     }
 }
