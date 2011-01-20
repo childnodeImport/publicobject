@@ -386,8 +386,8 @@ final class ClockSlider extends View {
      * volume go too low (what would be the point!) or above 100%.
      */
     private float toVolume(float rawFraction) {
-        if (rawFraction < 0.2) {
-            return 0.2f;
+        if (rawFraction < 0.1) {
+            return 0.1f;
         }
         if (rawFraction > 1.0) {
             return 1.0f;
