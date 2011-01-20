@@ -63,6 +63,7 @@ final class ClockSlider extends View {
     private Paint duration = new Paint();
     private Paint durationUnits = new Paint();
     private Paint unshushTime = new Paint();
+    private Paint percentPaint = new Paint();
     private Paint buttonCirclePaint = new Paint();
 
     private Calendar start = new GregorianCalendar();
@@ -93,6 +94,9 @@ final class ClockSlider extends View {
         durationUnits.setTypeface(Typeface.SANS_SERIF);
         unshushTime = new Paint(duration);
         unshushTime.setColor(lightGrey.getColor());
+        percentPaint = new Paint(duration);
+        percentPaint.setTextAlign(Paint.Align.LEFT);
+        percentPaint.setColor(lightGrey.getColor());
         buttonCirclePaint.setColor(Color.argb(102, 115, 115, 115));
         buttonCirclePaint.setAntiAlias(true);
     }
@@ -145,6 +149,7 @@ final class ClockSlider extends View {
             duration.setTextSize(diameter * 0.32f);
             durationUnits.setTextSize(diameter * 0.10f);
             unshushTime.setTextSize(diameter * 0.13f);
+            percentPaint.setTextSize(volumeButtonSize * 0.32f);
         }
 
         if (volumeSliding) {
@@ -230,6 +235,11 @@ final class ClockSlider extends View {
     private void drawVolumeSlider(Canvas canvas, RectF bound) {
         float right = bound.left + (volume * bound.width());
         float whiteLineWidth = diameter * 0.015f;
+
+        int percent = (int) (volume * 100);
+        float textX = largeVolume.left;
+        float textY = largeVolume.bottom - smallVolume.height() / 2;
+        canvas.drawText(percent + "%", textX, textY, percentPaint);
 
         canvas.save();
         canvas.clipPath(volumeClip);

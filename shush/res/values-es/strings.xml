@@ -1,0 +1,15 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush!  Restaurador de Tonos</string>
+  <string name="welcomeMessage">Activa Shush apagando el timbre.  Puedes usar el bot&#243;n para bajar el volumen como normalmente haces.</string>
+  <string name="okay">Bien!</string>
+  <string name="ringerRestored">Timbre restaurado.</string>
+  <string name="ringerShushedUntil">Timbre callado hasta las %1$s</string>
+  <string name="ringerShushedIndefinitely">Timbre callado indefinidamente!</string>
+  <string name="turnRingerOnIn">Prende el timbre en: </string>
+  <string name="minutes">minutos</string>
+  <string name="hour">hora</string>
+  <string name="hours">horas</string>
+  <string name="shush">Shush!</string>
+  <string name="keepItOff">D&#233;jalo apagado.</string>
+</resources>
