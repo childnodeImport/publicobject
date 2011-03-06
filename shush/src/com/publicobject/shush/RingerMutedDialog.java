@@ -32,11 +32,13 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioManager;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.format.DateUtils;
 import static android.view.Gravity.BOTTOM;
 import android.view.View;
@@ -51,24 +53,42 @@ import java.util.Date;
 /**
  * A dialog to schedule the ringer back on after a specified duration.
  */
-public class RingerMutedDialog extends Activity {
+public final class RingerMutedDialog extends Activity {
 
     /** two hours */
     public static final int DEFAULT_MINUTES = 120;
     /** 80% of max volume */
     public static final float DEFAULT_VOLUME = 0.8f;
-    /** two seconds */
-    private static final long TOAST_LENGTH_MILLIS = 2000;
+    /** show full-screen toast messages for two seconds */
+    private static final long TOAST_LENGTH_MILLIS = 2 * 1000;
+    /** cancel shush after 60 seconds of inactivity */
+    private static final long TIMEOUT_MILLIS = 60 * 1000;
+    /** observe broadcast ringer mode changes */
+    private final IntentFilter RINGER_MODE_CHANGED
+            = new IntentFilter("android.media.RINGER_MODE_CHANGED");
+
     /** either a dialog (regular) or full screen window (for lock screen) */
     private ShushWindow shushWindow;
     /** the main UI control */
     private ClockSlider clockSlider;
+
+    /** Read/write access to this activity's event queue */
+    private final Handler handler = new Handler();
 
     /** If the user turns the ringer back on, dismiss the dialog and exit. */
     private final BroadcastReceiver dismissFromVolumeUp = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             int newRingerMode = intent.getIntExtra(EXTRA_RINGER_MODE, -1);
             if (RINGER_MODE_NORMAL == newRingerMode) {
+                cancel(false);
+            }
+        }
+    };
+
+    /** If the user doesn't take action, quietly dismiss Shush. */
+    private final Runnable dismissFromTimeout = new Runnable() {
+        public void run() {
+            if (shushWindow != null) {
                 cancel(false);
             }
         }
@@ -87,27 +107,27 @@ public class RingerMutedDialog extends Activity {
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
-        clockSlider.setVolume(preferences.getFloat("volume", DEFAULT_VOLUME));
+        clockSlider.setVolume(getRestoreVolume());
 
-        registerReceiver(
-                dismissFromVolumeUp, new IntentFilter("android.media.RINGER_MODE_CHANGED"));
+        registerReceiver(dismissFromVolumeUp, RINGER_MODE_CHANGED);
+        registerTimeoutCallback();
     }
 
     @Override protected void onStop() {
         unregisterReceiver(dismissFromVolumeUp);
+        unregisterTimeoutCallback();
         shushWindow.close();
         shushWindow = null;
         clockSlider = null;
         super.onStop();
     }
 
-    /**
-     * Shush is transient. If something else comes in front of it, just nuke
-     * shush. This prevents Shush from showing up when the screen is unlocked.
-     */
-    @Override protected void onPause() {
-        super.onPause();
-        cancel(false);
+    private void registerTimeoutCallback() {
+        handler.postDelayed(dismissFromTimeout, TIMEOUT_MILLIS);
+    }
+
+    private void unregisterTimeoutCallback() {
+        handler.removeCallbacks(dismissFromTimeout);
     }
 
     public void volumeSliding(boolean sliding) {
@@ -115,6 +135,7 @@ public class RingerMutedDialog extends Activity {
     }
 
     private void commit() {
+        unregisterTimeoutCallback();
         long onTime = clockSlider.getEnd().getTime();
         long onRealtime = onTime - System.currentTimeMillis() + SystemClock.elapsedRealtime();
         Context context = getApplicationContext();
@@ -126,13 +147,13 @@ public class RingerMutedDialog extends Activity {
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("minutes", clockSlider.getMinutes());
-        editor.putFloat("volume", clockSlider.getVolume());
         editor.commit();
 
         shushWindow.finish(message);
     }
 
     private void cancel(boolean showMessage) {
+        unregisterTimeoutCallback();
         Context context = getApplicationContext();
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(createIntent());
 
@@ -167,6 +188,18 @@ public class RingerMutedDialog extends Activity {
         Intent turnRingerOn = new Intent(context, TurnRingerOn.class);
         turnRingerOn.putExtra("volume", clockSlider.getVolume());
         return PendingIntent.getBroadcast(context, 0, turnRingerOn, FLAG_CANCEL_CURRENT);
+    }
+
+    private float getRestoreVolume() {
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        try {
+            int lastRing = Settings.System.getInt(getContentResolver(),
+                    Settings.System.VOLUME_RING + Settings.System.APPEND_FOR_LAST_AUDIBLE);
+            int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_RING);
+            return (float) lastRing / max;
+        } catch (Settings.SettingNotFoundException e) {
+            return DEFAULT_VOLUME;
+        }
     }
 
     interface ShushWindow {
@@ -278,7 +311,7 @@ public class RingerMutedDialog extends Activity {
             TextView toast = (TextView) fullScreenWindow.findViewById(R.id.toast);
             toast.setText(message);
 
-            new Handler().postDelayed(new Runnable() {
+            handler.postDelayed(new Runnable() {
                 public void run() {
                     RingerMutedDialog.this.finish();
                 }
