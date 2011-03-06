@@ -37,7 +37,7 @@ import java.util.GregorianCalendar;
  */
 final class ClockSlider extends View {
 
-    private static final int MAX_SIZE = 200;
+    private static final int MAX_SIZE = 300;
     private static final int INSETS = 6;
     private static final int MINUTES_PER_HALF_DAY = 720;
 

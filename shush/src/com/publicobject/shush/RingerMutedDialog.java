@@ -30,6 +30,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import android.os.Bundle;
@@ -55,6 +57,8 @@ public class RingerMutedDialog extends Activity {
     public static final int DEFAULT_MINUTES = 120;
     /** 80% of max volume */
     public static final float DEFAULT_VOLUME = 0.8f;
+    /** two seconds */
+    private static final long TOAST_LENGTH_MILLIS = 2000;
     /** either a dialog (regular) or full screen window (for lock screen) */
     private ShushWindow shushWindow;
     /** the main UI control */
@@ -95,6 +99,15 @@ public class RingerMutedDialog extends Activity {
         shushWindow = null;
         clockSlider = null;
         super.onStop();
+    }
+
+    /**
+     * Shush is transient. If something else comes in front of it, just nuke
+     * shush. This prevents Shush from showing up when the screen is unlocked.
+     */
+    @Override protected void onPause() {
+        super.onPause();
+        cancel(false);
     }
 
     public void volumeSliding(boolean sliding) {
@@ -163,6 +176,9 @@ public class RingerMutedDialog extends Activity {
         void close();
     }
 
+    /**
+     * Show Shush! in a dialog by default.
+     */
     class ShushDialog implements ShushWindow {
         private final ClockSlider clockSlider;
         private final Dialog dialog;
@@ -215,12 +231,16 @@ public class RingerMutedDialog extends Activity {
         }
     }
 
+    /**
+     * Show Shush! as a full-screen app when triggered by the lock screen.
+     */
     class ShushFullscreen implements ShushWindow {
         private final Window fullScreenWindow;
 
         ShushFullscreen() {
             fullScreenWindow = getWindow();
             fullScreenWindow.setContentView(R.layout.fullscreen);
+            fullScreenWindow.setBackgroundDrawable(new ColorDrawable(Color.BLACK));
             fullScreenWindow.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -262,7 +282,7 @@ public class RingerMutedDialog extends Activity {
                 public void run() {
                     RingerMutedDialog.this.finish();
                 }
-            }, 3000);
+            }, TOAST_LENGTH_MILLIS);
         }
 
         public void close() {}
