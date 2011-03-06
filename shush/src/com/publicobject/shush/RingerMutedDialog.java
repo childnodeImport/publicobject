@@ -21,6 +21,7 @@ import android.app.AlarmManager;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import android.content.BroadcastReceiver;
@@ -32,9 +33,15 @@ import android.content.SharedPreferences;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import static android.view.Gravity.BOTTOM;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.text.DateFormat;
 import java.util.Date;
@@ -48,8 +55,9 @@ public class RingerMutedDialog extends Activity {
     public static final int DEFAULT_MINUTES = 120;
     /** 80% of max volume */
     public static final float DEFAULT_VOLUME = 0.8f;
-
-    private Dialog dialog;
+    /** either a dialog (regular) or full screen window (for lock screen) */
+    private ShushWindow shushWindow;
+    /** the main UI control */
     private ClockSlider clockSlider;
 
     /** If the user turns the ringer back on, dismiss the dialog and exit. */
@@ -57,60 +65,50 @@ public class RingerMutedDialog extends Activity {
         public void onReceive(Context context, Intent intent) {
             int newRingerMode = intent.getIntExtra(EXTRA_RINGER_MODE, -1);
             if (RINGER_MODE_NORMAL == newRingerMode) {
-                dialog.dismiss();
-                finish();
+                cancel(false);
             }
         }
     };
 
-    @Override protected void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
+    @Override protected void onStart() {
+        super.onStart();
 
-        clockSlider = new ClockSlider(this);
+        KeyguardManager keyguard = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        shushWindow = keyguard.inKeyguardRestrictedInputMode()
+                ? new ShushFullscreen()
+                : new ShushDialog();
+        clockSlider = shushWindow.getClockSlider();
+        clockSlider.setRingerMutedDialog(this);
         clockSlider.setStart(new Date());
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
         clockSlider.setVolume(preferences.getFloat("volume", DEFAULT_VOLUME));
 
-        dialog = new AlertDialog.Builder(this)
-                .setPositiveButton(R.string.shush, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogCommitted();
-                    }
-                })
-                .setNegativeButton(R.string.keepItOff, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogCancelled();
-                    }
-                })
-                .setIcon(null)
-                .setView(clockSlider)
-                .setTitle(R.string.turnRingerOnIn)
-                .setCancelable(true)
-                .create();
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            public void onCancel(DialogInterface dialogInterface) {
-                dialogCancelled();
-            }
-        });
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.getWindow().setGravity(BOTTOM);
+        registerReceiver(
+                dismissFromVolumeUp, new IntentFilter("android.media.RINGER_MODE_CHANGED"));
+    }
+
+    @Override protected void onStop() {
+        unregisterReceiver(dismissFromVolumeUp);
+        shushWindow.close();
+        shushWindow = null;
+        clockSlider = null;
+        super.onStop();
     }
 
     public void volumeSliding(boolean sliding) {
-        dialog.setTitle(sliding ? R.string.restoreVolumeLevel : R.string.turnRingerOnIn);
+        shushWindow.setTitle(sliding ? R.string.restoreVolumeLevel : R.string.turnRingerOnIn);
     }
 
-    private void dialogCommitted() {
+    private void commit() {
         long onTime = clockSlider.getEnd().getTime();
         long onRealtime = onTime - System.currentTimeMillis() + SystemClock.elapsedRealtime();
         Context context = getApplicationContext();
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
                 .set(ELAPSED_REALTIME, onRealtime, createIntent());
         String message = String.format(getResources().getString(R.string.ringerShushedUntil),
-            DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT));
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT));
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -118,15 +116,17 @@ public class RingerMutedDialog extends Activity {
         editor.putFloat("volume", clockSlider.getVolume());
         editor.commit();
 
-        finish();
+        shushWindow.finish(message);
     }
 
-    private void dialogCancelled() {
+    private void cancel(boolean showMessage) {
         Context context = getApplicationContext();
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(createIntent());
-        Toast.makeText(context, R.string.ringerShushedIndefinitely, Toast.LENGTH_LONG).show();
 
-        finish();
+        String message = showMessage
+                ? context.getString(R.string.ringerShushedIndefinitely)
+                : null;
+        shushWindow.finish(message);
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {
@@ -149,23 +149,122 @@ public class RingerMutedDialog extends Activity {
         clockSlider.setVolume(volume);
     }
 
-    @Override protected void onStart() {
-        super.onStart();
-        dialog.show();
-        registerReceiver(
-                dismissFromVolumeUp, new IntentFilter("android.media.RINGER_MODE_CHANGED"));
-    }
-
-    @Override protected void onStop() {
-        unregisterReceiver(dismissFromVolumeUp);
-        dialog.dismiss();
-        super.onStop();
-    }
-
     private PendingIntent createIntent() {
         Context context = getApplicationContext();
         Intent turnRingerOn = new Intent(context, TurnRingerOn.class);
         turnRingerOn.putExtra("volume", clockSlider.getVolume());
         return PendingIntent.getBroadcast(context, 0, turnRingerOn, FLAG_CANCEL_CURRENT);
+    }
+
+    interface ShushWindow {
+        ClockSlider getClockSlider();
+        void setTitle(int titleId);
+        void finish(String message);
+        void close();
+    }
+
+    class ShushDialog implements ShushWindow {
+        private final ClockSlider clockSlider;
+        private final Dialog dialog;
+
+        ShushDialog() {
+            clockSlider = new ClockSlider(RingerMutedDialog.this, null);
+            dialog = new AlertDialog.Builder(RingerMutedDialog.this)
+                    .setPositiveButton(R.string.shush, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            commit();
+                        }
+                    })
+                    .setNegativeButton(R.string.keepItOff, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            cancel(true);
+                        }
+                    })
+                    .setIcon(null)
+                    .setView(clockSlider)
+                    .setTitle(R.string.turnRingerOnIn)
+                    .setCancelable(true)
+                    .create();
+            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                public void onCancel(DialogInterface dialogInterface) {
+                    cancel(true);
+                }
+            });
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.getWindow().setGravity(BOTTOM);
+            dialog.show();
+        }
+
+        public ClockSlider getClockSlider() {
+            return clockSlider;
+        }
+
+        public void setTitle(int titleId) {
+            dialog.setTitle(titleId);
+        }
+
+        public void finish(String message) {
+            if (message != null) {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            }
+            RingerMutedDialog.this.finish();
+        }
+
+        public void close() {
+            dialog.dismiss();
+        }
+    }
+
+    class ShushFullscreen implements ShushWindow {
+        private final Window fullScreenWindow;
+
+        ShushFullscreen() {
+            fullScreenWindow = getWindow();
+            fullScreenWindow.setContentView(R.layout.fullscreen);
+            fullScreenWindow.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    | WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+            Button shush = (Button) fullScreenWindow.findViewById(R.id.shush);
+            shush.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    commit();
+                }
+            });
+
+            Button keepItOff = (Button) fullScreenWindow.findViewById(R.id.keepItOff);
+            keepItOff.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    cancel(true);
+                }
+            });
+        }
+
+        public ClockSlider getClockSlider() {
+            return (ClockSlider) fullScreenWindow.findViewById(R.id.clockSlider);
+        }
+
+        public void setTitle(int titleId) {
+            TextView title = (TextView) fullScreenWindow.findViewById(R.id.title);
+            title.setText(titleId);
+        }
+
+        public void finish(String message) {
+            if (message == null) {
+                RingerMutedDialog.this.finish();
+                return;
+            }
+
+            fullScreenWindow.setContentView(R.layout.toast);
+            TextView toast = (TextView) fullScreenWindow.findViewById(R.id.toast);
+            toast.setText(message);
+
+            new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    RingerMutedDialog.this.finish();
+                }
+            }, 3000);
+        }
+
+        public void close() {}
     }
 }

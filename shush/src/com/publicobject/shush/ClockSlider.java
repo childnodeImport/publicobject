@@ -16,6 +16,7 @@
 
 package com.publicobject.shush;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -23,6 +24,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.text.format.DateUtils;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import java.text.DateFormat;
@@ -39,7 +41,7 @@ final class ClockSlider extends View {
     private static final int INSETS = 6;
     private static final int MINUTES_PER_HALF_DAY = 720;
 
-    private final RingerMutedDialog ringerMutedDialog;
+    private RingerMutedDialog ringerMutedDialog;
 
     private int width;
     private int height;
@@ -75,9 +77,8 @@ final class ClockSlider extends View {
     private boolean upPushed;
     private boolean downPushed;
 
-    public ClockSlider(RingerMutedDialog context) {
-        super(context);
-        this.ringerMutedDialog = context;
+    public ClockSlider(Context context, AttributeSet attrs) {
+        super(context, attrs);
 
         lightGrey.setColor(Color.rgb(115, 115, 115));
         lightGrey.setAntiAlias(true);
@@ -99,6 +100,10 @@ final class ClockSlider extends View {
         percentPaint.setColor(lightGrey.getColor());
         buttonCirclePaint.setColor(Color.argb(102, 115, 115, 115));
         buttonCirclePaint.setAntiAlias(true);
+    }
+
+    public void setRingerMutedDialog(RingerMutedDialog ringerMutedDialog) {
+        this.ringerMutedDialog = ringerMutedDialog;
     }
 
     @Override protected void onDraw(Canvas canvas) {
