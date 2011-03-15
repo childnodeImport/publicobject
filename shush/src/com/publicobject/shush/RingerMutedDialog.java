@@ -78,6 +78,9 @@ public final class RingerMutedDialog extends Activity {
     /** If the user turns the ringer back on, dismiss the dialog and exit. */
     private final BroadcastReceiver dismissFromVolumeUp = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
+            if (clockSlider == null) {
+                return; // race between volume up and onStop
+            }
             int newRingerMode = intent.getIntExtra(EXTRA_RINGER_MODE, -1);
             if (RINGER_MODE_NORMAL == newRingerMode) {
                 cancel(false);

@@ -317,6 +317,10 @@ final class ClockSlider extends View {
      * update the sweep angle.
      */
     @Override public boolean onTouchEvent(MotionEvent event) {
+        if (outerCircle == null) {
+            return true; // ignore all events until the canvas is drawn
+        }
+
         int touchX = (int) event.getX();
         int touchY = (int) event.getY();
 
