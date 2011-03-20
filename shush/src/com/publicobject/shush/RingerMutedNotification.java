@@ -34,7 +34,7 @@ final class RingerMutedNotification {
                 DateFormat.getTimeFormat(context).format(onTime));
 
         Notification notification = new Notification();
-        notification.icon = R.drawable.shush;
+        notification.icon = R.drawable.notification;
         notification.tickerText = message;
         notification.flags |= Notification.FLAG_AUTO_CANCEL
                 | Notification.FLAG_ONGOING_EVENT
