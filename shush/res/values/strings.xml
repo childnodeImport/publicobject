@@ -13,4 +13,5 @@
   <string name="hours">hours</string>
   <string name="shush">Shush!</string>
   <string name="keepItOff">Keep it off.</string>
+  <string name="turnItOnNow">Select to turn it on now.</string>
 </resources>

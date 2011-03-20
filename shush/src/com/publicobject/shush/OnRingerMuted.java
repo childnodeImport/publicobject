@@ -30,13 +30,11 @@ public class OnRingerMuted extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         int newRingerMode = intent.getIntExtra(EXTRA_RINGER_MODE, -1);
-        if (RINGER_MODE_SILENT == newRingerMode || RINGER_MODE_VIBRATE == newRingerMode) {
-            Intent showRingerMutedDialog = new Intent();
-            showRingerMutedDialog.setClass(context, RingerMutedDialog.class);
-            showRingerMutedDialog.setAction(RingerMutedDialog.class.getName());
-            showRingerMutedDialog.setFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            context.startActivity(showRingerMutedDialog);
+        if (newRingerMode == RINGER_MODE_SILENT || newRingerMode == RINGER_MODE_VIBRATE) {
+            context.startActivity(RingerMutedDialog.getIntent(context));
+        } else {
+            RingerMutedNotification.dismiss(context);
+            TurnRingerOn.cancelScheduled(context);
         }
     }
 }

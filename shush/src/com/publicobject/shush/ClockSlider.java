@@ -23,11 +23,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.text.format.DateUtils;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -53,6 +52,7 @@ final class ClockSlider extends View {
     private Path clip;
 
     private RectF smallVolume;
+    private RectF smallVolumeTouchRegion;
     private RectF largeVolume;
     private Path volumeClip;
     private boolean volumeSliding;
@@ -145,6 +145,11 @@ final class ClockSlider extends View {
             largeVolume = new RectF(volumeLeft, bottom - volumeHeight, volumeRight, bottom);
             smallVolume = new RectF(volumeLeft, bottom - volumeButtonSize,
                     volumeLeft + volumeButtonSize, bottom);
+            // the initial touch region is 25% bigger on the left and on the bottom
+            smallVolumeTouchRegion = new RectF(smallVolume.left - smallVolume.width() / 4,
+                    smallVolume.top, smallVolume.right,
+                    smallVolume.bottom + smallVolume.height() / 4);
+
             volumeClip = new Path();
             volumeClip.moveTo(largeVolume.left, largeVolume.bottom);
             volumeClip.lineTo(largeVolume.right, largeVolume.bottom);
@@ -273,8 +278,7 @@ final class ClockSlider extends View {
         String durationText;
         int durationUnitsId;
         long timeInMillis = end.getTimeInMillis();
-        String onAtText = DateUtils.formatSameDayTime(timeInMillis, timeInMillis,
-                DateFormat.SHORT, DateFormat.SHORT).toString();
+        String onAtText = DateFormat.getTimeFormat(getContext()).format(timeInMillis);
         if (minutes < 60) {
             durationText = Integer.toString(minutes);
             durationUnitsId = R.string.minutes;
@@ -326,7 +330,8 @@ final class ClockSlider extends View {
 
         // handle volume slider
         boolean newVolumeSliding = volumeSliding;
-        if (smallVolume.contains(touchX, touchY) && event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (smallVolumeTouchRegion.contains(touchX, touchY)
+                && event.getAction() == MotionEvent.ACTION_DOWN) {
             newVolumeSliding = true;
         }
         if (newVolumeSliding) {

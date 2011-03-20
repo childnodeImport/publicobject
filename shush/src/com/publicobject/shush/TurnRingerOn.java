@@ -17,6 +17,10 @@
 
 package com.publicobject.shush;
 
+import android.app.AlarmManager;
+import static android.app.AlarmManager.ELAPSED_REALTIME;
+import android.app.PendingIntent;
+import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import static android.content.Context.AUDIO_SERVICE;
@@ -29,18 +33,40 @@ import android.widget.Toast;
 /**
  * Turns the ringer on when received.
  */
-public class TurnRingerOn extends BroadcastReceiver {
+public final class TurnRingerOn extends BroadcastReceiver {
+    public static PendingIntent createPendingIntent(Context context, float volume) {
+        Intent intent = new Intent(context, TurnRingerOn.class);
+        intent.putExtra("volume", volume);
+        return PendingIntent.getBroadcast(context, 0, intent, FLAG_CANCEL_CURRENT);
+    }
+
     public void onReceive(Context context, Intent intent) {
-        AudioManager am = (AudioManager) context.getSystemService(AUDIO_SERVICE);
-        if (am.getRingerMode() != AudioManager.RINGER_MODE_SILENT
-                && am.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
+        AudioManager audioManager = getAudioManager(context);
+        if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT
+                && audioManager.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
             return;
         }
 
-        am.setRingerMode(RINGER_MODE_NORMAL);
-        int volume = (int) (am.getStreamMaxVolume(STREAM_RING)
+        audioManager.setRingerMode(RINGER_MODE_NORMAL);
+        int volume = (int) (audioManager.getStreamMaxVolume(STREAM_RING)
                 * intent.getExtras().getFloat("volume", RingerMutedDialog.DEFAULT_VOLUME));
-        am.setStreamVolume(STREAM_RING, volume, 0);
+        audioManager.setStreamVolume(STREAM_RING, volume, 0);
         Toast.makeText(context, R.string.ringerRestored, Toast.LENGTH_LONG).show();
+    }
+
+    public static void schedule(Context context, PendingIntent ringerOnIntent, long onRealtime) {
+        getAlarmService(context).set(ELAPSED_REALTIME, onRealtime, ringerOnIntent);
+    }
+
+    public static void cancelScheduled(Context context) {
+        getAlarmService(context).cancel(createPendingIntent(context, 0.0f));
+    }
+
+    private AudioManager getAudioManager(Context context) {
+        return (AudioManager) context.getSystemService(AUDIO_SERVICE);
+    }
+
+    private static AlarmManager getAlarmService(Context context) {
+        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 }

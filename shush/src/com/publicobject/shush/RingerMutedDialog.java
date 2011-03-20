@@ -17,13 +17,10 @@
 package com.publicobject.shush;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import static android.app.AlarmManager.ELAPSED_REALTIME;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,7 +36,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.format.DateUtils;
 import static android.view.Gravity.BOTTOM;
 import android.view.View;
 import android.view.Window;
@@ -47,14 +43,12 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.text.DateFormat;
 import java.util.Date;
 
 /**
  * A dialog to schedule the ringer back on after a specified duration.
  */
 public final class RingerMutedDialog extends Activity {
-
     /** two hours */
     public static final int DEFAULT_MINUTES = 120;
     /** 80% of max volume */
@@ -97,8 +91,22 @@ public final class RingerMutedDialog extends Activity {
         }
     };
 
+    /**
+     * Returns an intent that triggers this dialog as an activity.
+     */
+    public static Intent getIntent(Context context) {
+        Intent result = new Intent();
+        result.setClass(context, RingerMutedDialog.class);
+        result.setAction(RingerMutedDialog.class.getName());
+        result.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        return result;
+    }
+
     @Override protected void onStart() {
         super.onStart();
+
+        TurnRingerOn.cancelScheduled(this);
+        RingerMutedNotification.dismiss(this);
 
         KeyguardManager keyguard = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         shushWindow = keyguard.inKeyguardRestrictedInputMode()
@@ -139,29 +147,26 @@ public final class RingerMutedDialog extends Activity {
 
     private void commit() {
         unregisterTimeoutCallback();
+        PendingIntent ringerOn = TurnRingerOn.createPendingIntent(this, clockSlider.getVolume());
+
         long onTime = clockSlider.getEnd().getTime();
         long onRealtime = onTime - System.currentTimeMillis() + SystemClock.elapsedRealtime();
-        Context context = getApplicationContext();
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
-                .set(ELAPSED_REALTIME, onRealtime, createIntent());
-        String message = String.format(getResources().getString(R.string.ringerShushedUntil),
-                DateUtils.formatSameDayTime(onTime, onTime, DateFormat.SHORT, DateFormat.SHORT));
+        TurnRingerOn.schedule(this, ringerOn, onRealtime);
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("minutes", clockSlider.getMinutes());
         editor.commit();
 
-        shushWindow.finish(message);
+        RingerMutedNotification.show(this, onTime, ringerOn);
+        shushWindow.finish(null);
     }
 
     private void cancel(boolean showMessage) {
         unregisterTimeoutCallback();
-        Context context = getApplicationContext();
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(createIntent());
 
         String message = showMessage
-                ? context.getString(R.string.ringerShushedIndefinitely)
+                ? getString(R.string.ringerShushedIndefinitely)
                 : null;
         shushWindow.finish(message);
     }
@@ -184,13 +189,6 @@ public final class RingerMutedDialog extends Activity {
         clockSlider.setStart(new Date(start));
         clockSlider.setMinutes(minutes);
         clockSlider.setVolume(volume);
-    }
-
-    private PendingIntent createIntent() {
-        Context context = getApplicationContext();
-        Intent turnRingerOn = new Intent(context, TurnRingerOn.class);
-        turnRingerOn.putExtra("volume", clockSlider.getVolume());
-        return PendingIntent.getBroadcast(context, 0, turnRingerOn, FLAG_CANCEL_CURRENT);
     }
 
     private float getRestoreVolume() {
