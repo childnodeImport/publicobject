@@ -36,7 +36,7 @@ import java.util.GregorianCalendar;
  */
 final class ClockSlider extends View {
 
-    private static final int MAX_SIZE = 300;
+    private static final int MAX_SIZE = 230;
     private static final int INSETS = 6;
     private static final int MINUTES_PER_HALF_DAY = 720;
 
@@ -412,7 +412,8 @@ final class ClockSlider extends View {
     @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-        setMeasuredDimension(width, Math.min(height, MAX_SIZE));
+        int maxHeight = (int) Math.min(height, width * 0.7);
+        setMeasuredDimension(width, maxHeight);
     }
 
     /**
