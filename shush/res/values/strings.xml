@@ -14,4 +14,12 @@
   <string name="shush">Shush!</string>
   <string name="keepItOff">Keep it off.</string>
   <string name="turnItOnNow">Select to turn it on now.</string>
+  <string name="notificationsOn">Notifications on</string>
+  <string name="notificationsOff">Notifications off</string>
+  <string name="pink">Pink</string>
+  <string name="red">Red</string>
+  <string name="yellow">Yellow</string>
+  <string name="green">Green</string>
+  <string name="cyan">Cyan</string>
+  <string name="blue">Blue</string>
 </resources>

@@ -20,26 +20,54 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnClickListener;
-import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 /**
  * A dialog that explains how Shush works.
  */
-public class Welcome extends Activity implements OnClickListener, OnCancelListener {
+public final class Welcome extends Activity
+        implements View.OnClickListener, DialogInterface.OnClickListener, OnCancelListener {
+    private boolean notifications = true;
+    private int color = 0;
 
-    @Override protected void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
+    private ImageView colorsImage;
+    private TextView colorsLabel;
+    private ImageView notificationsImage;
+    private TextView notificationsLabel;
 
-        new AlertDialog.Builder(this)
+    @Override protected void onResume() {
+        super.onResume();
+
+        View view = LayoutInflater.from(this).inflate(R.layout.welcome, null);
+        colorsImage = (ImageView) view.findViewById(R.id.colorsImage);
+        colorsLabel = (TextView) view.findViewById(R.id.colorsLabel);
+        notificationsImage = (ImageView) view.findViewById(R.id.notificationsImage);
+        notificationsLabel = (TextView) view.findViewById(R.id.notificationsLabel);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setCancelable(true)
                 .setIcon(R.drawable.shush)
+                .setView(view)
                 .setTitle(R.string.title)
-                .setMessage(R.string.welcomeMessage)
                 .setOnCancelListener(this)
                 .setPositiveButton(R.string.okay, this)
-                .create()
-                .show();
+                .create();
+        dialog.show();
+
+        colorsImage.setOnClickListener(this);
+        colorsLabel.setOnClickListener(this);
+        notificationsImage.setOnClickListener(this);
+        notificationsLabel.setOnClickListener(this);
+    }
+
+    @Override protected void onPause() {
+        colorsImage = null;
+        colorsLabel = null;
+        notificationsImage = null;
+        notificationsLabel = null;
     }
 
     public void onClick(DialogInterface dialogInterface, int i) {
@@ -48,5 +76,42 @@ public class Welcome extends Activity implements OnClickListener, OnCancelListen
 
     public void onCancel(DialogInterface dialogInterface) {
         finish();
+    }
+
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.notificationsImage || id == R.id.notificationsLabel) {
+            notifications = !notifications;
+
+            if (notifications) {
+                notificationsImage.setImageResource(R.drawable.notifications_on);
+                notificationsLabel.setText(R.string.notificationsOn);
+            } else {
+                notificationsImage.setImageResource(R.drawable.notifications_off);
+                notificationsLabel.setText(R.string.notificationsOff);
+            }
+        } else if (id == R.id.colorsImage|| id == R.id.colorsLabel) {
+            color = (color + 1) % 6;
+
+            if (color == 0) {
+                colorsImage.setImageResource(R.drawable.colorpink);
+                colorsLabel.setText(R.string.pink);
+            } else if (color == 1) {
+                colorsImage.setImageResource(R.drawable.colorred);
+                colorsLabel.setText(R.string.red);
+            } else if (color == 2) {
+                colorsImage.setImageResource(R.drawable.coloryellow);
+                colorsLabel.setText(R.string.yellow);
+            } else if (color == 3) {
+                colorsImage.setImageResource(R.drawable.colorgreen);
+                colorsLabel.setText(R.string.green);
+            } else if (color == 4) {
+                colorsImage.setImageResource(R.drawable.colorcyan);
+                colorsLabel.setText(R.string.cyan);
+            } else if (color == 5) {
+                colorsImage.setImageResource(R.drawable.colorblue);
+                colorsLabel.setText(R.string.blue);
+            }
+        }
     }
 }
