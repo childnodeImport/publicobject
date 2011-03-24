@@ -29,10 +29,12 @@ import android.text.format.DateFormat;
 final class RingerMutedNotification {
     private static final int NOTIFICATION_ID = 1;
 
-    public static void show(Context context, long onTime, PendingIntent ringerOnIntent) {
-        String message = String.format(context.getString(R.string.ringerShushedUntil),
+    public static String getMessage(Context context, long onTime) {
+        return String.format(context.getString(R.string.ringerShushedUntil),
                 DateFormat.getTimeFormat(context).format(onTime));
+    }
 
+    public static void show(Context context, String message, PendingIntent ringerOnIntent) {
         Notification notification = new Notification();
         notification.icon = R.drawable.notification;
         notification.tickerText = message;

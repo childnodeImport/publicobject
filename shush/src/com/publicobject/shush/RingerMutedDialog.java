@@ -36,10 +36,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Log;
 import static android.view.Gravity.BOTTOM;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -71,6 +68,9 @@ public final class RingerMutedDialog extends Activity {
 
     /** Read/write access to this activity's event queue */
     private final Handler handler = new Handler();
+
+    /** True for notifications; false for toasts. */
+    private boolean notifications;
 
     /** If the user turns the ringer back on, dismiss the dialog and exit. */
     private final BroadcastReceiver dismissFromVolumeUp = new BroadcastReceiver() {
@@ -122,6 +122,8 @@ public final class RingerMutedDialog extends Activity {
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
         clockSlider.setVolume(getRestoreVolume());
+        clockSlider.setColor(preferences.getInt("color", Welcome.COLORS[3]));
+        notifications = preferences.getBoolean("notifications", true);
 
         registerReceiver(dismissFromVolumeUp, RINGER_MODE_CHANGED);
         registerTimeoutCallback();
@@ -161,8 +163,13 @@ public final class RingerMutedDialog extends Activity {
         editor.putInt("minutes", clockSlider.getMinutes());
         editor.commit();
 
-        RingerMutedNotification.show(this, onTime, ringerOn);
-        shushWindow.finish(null);
+        String message = RingerMutedNotification.getMessage(this, onTime);
+        if (notifications) {
+            RingerMutedNotification.show(this, message, ringerOn);
+            shushWindow.finish(null);
+        } else {
+            shushWindow.finish(message);
+        }
     }
 
     private void cancel(boolean showMessage) {

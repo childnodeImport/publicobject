@@ -18,56 +18,67 @@ package com.publicobject.shush;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * A dialog that explains how Shush works.
+ * A dialog that explains how Shush works and lets users pick limited options.
+ *
+ * TODO: read and write preferences in the background?
  */
 public final class Welcome extends Activity
-        implements View.OnClickListener, DialogInterface.OnClickListener, OnCancelListener {
-    private boolean notifications = true;
-    private int color = 0;
+        implements DialogInterface.OnClickListener, OnCancelListener {
+    public static final int[] COLORS = {
+            Color.rgb(0xff, 0x00, 0xff), // pink
+            Color.rgb(0xff, 0x00, 0x00), // red
+            Color.rgb(0xff, 0xff, 0x00), // yellow
+            Color.rgb(0x00, 0xff, 0x00), // green
+            Color.rgb(0x00, 0xff, 0xff), // cyan
+            Color.rgb(0x00, 0x00, 0xff), // blue
+    };
 
-    private ImageView colorsImage;
-    private TextView colorsLabel;
-    private ImageView notificationsImage;
-    private TextView notificationsLabel;
+    private boolean notifications = true;
+    private int colorIndex = 0;
 
     @Override protected void onResume() {
         super.onResume();
 
-        View view = LayoutInflater.from(this).inflate(R.layout.welcome, null);
-        colorsImage = (ImageView) view.findViewById(R.id.colorsImage);
-        colorsLabel = (TextView) view.findViewById(R.id.colorsLabel);
-        notificationsImage = (ImageView) view.findViewById(R.id.notificationsImage);
-        notificationsLabel = (TextView) view.findViewById(R.id.notificationsLabel);
+        SharedPreferences preferences = getSharedPreferences(
+                RingerMutedDialog.class.getSimpleName(), Context.MODE_PRIVATE);
+        int savedColor = preferences.getInt("color", COLORS[0]);
+        for (int i = 0; i < COLORS.length; i++) {
+            if (COLORS[i] == savedColor) {
+                colorIndex = i;
+                break;
+            }
+        }
+        notifications = preferences.getBoolean("notifications", true);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        View view = LayoutInflater.from(this).inflate(R.layout.welcome, null);
+        Picker colorPicker = new ColorPicker(view);
+        colorPicker.selectionChanged();
+
+        Picker notificationsPicker = new NotificationsPicker(view);
+        notificationsPicker.selectionChanged();
+
+        new AlertDialog.Builder(this)
                 .setCancelable(true)
                 .setIcon(R.drawable.shush)
                 .setView(view)
                 .setTitle(R.string.title)
                 .setOnCancelListener(this)
                 .setPositiveButton(R.string.okay, this)
-                .create();
-        dialog.show();
-
-        colorsImage.setOnClickListener(this);
-        colorsLabel.setOnClickListener(this);
-        notificationsImage.setOnClickListener(this);
-        notificationsLabel.setOnClickListener(this);
-    }
-
-    @Override protected void onPause() {
-        colorsImage = null;
-        colorsLabel = null;
-        notificationsImage = null;
-        notificationsLabel = null;
+                .create()
+                .show();
     }
 
     public void onClick(DialogInterface dialogInterface, int i) {
@@ -78,39 +89,95 @@ public final class Welcome extends Activity
         finish();
     }
 
-    public void onClick(View view) {
-        int id = view.getId();
-        if (id == R.id.notificationsImage || id == R.id.notificationsLabel) {
+    private abstract class Picker implements View.OnTouchListener {
+        private final LinearLayout layout;
+        protected final ImageView image;
+        protected final TextView label;
+
+        public Picker(View view, int layoutId, int labelId, int imageId) {
+            layout = (LinearLayout) view.findViewById(layoutId);
+            image = (ImageView) view.findViewById(imageId);
+            label = (TextView) view.findViewById(labelId);
+            layout.setOnTouchListener(this);
+        }
+
+        public final boolean onTouch(View view, MotionEvent motionEvent) {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN
+                    || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                layout.setBackgroundColor(Color.argb(102, 115, 115, 115));
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                layout.setBackgroundColor(Color.TRANSPARENT);
+                toggle();
+                selectionChanged();
+            }
+            return true;
+        }
+
+        abstract void selectionChanged();
+
+        abstract void toggle();
+    }
+
+    private class ColorPicker extends Picker {
+        public ColorPicker(View view) {
+            super(view, R.id.colorsLayout, R.id.colorsLabel, R.id.colorsImage);
+        }
+
+        @Override void toggle() {
+            colorIndex = (colorIndex + 1) % 6;
+
+            SharedPreferences preferences = getSharedPreferences(
+                    RingerMutedDialog.class.getSimpleName(), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt("color", COLORS[colorIndex]);
+            editor.commit();
+        }
+
+        @Override void selectionChanged() {
+            if (colorIndex == 0) {
+                image.setImageResource(R.drawable.colorpink);
+                label.setText(R.string.pink);
+            } else if (colorIndex == 1) {
+                image.setImageResource(R.drawable.colorred);
+                label.setText(R.string.red);
+            } else if (colorIndex == 2) {
+                image.setImageResource(R.drawable.coloryellow);
+                label.setText(R.string.yellow);
+            } else if (colorIndex == 3) {
+                image.setImageResource(R.drawable.colorgreen);
+                label.setText(R.string.green);
+            } else if (colorIndex == 4) {
+                image.setImageResource(R.drawable.colorcyan);
+                label.setText(R.string.cyan);
+            } else if (colorIndex == 5) {
+                image.setImageResource(R.drawable.colorblue);
+                label.setText(R.string.blue);
+            }
+        }
+    }
+
+    private class NotificationsPicker extends Picker {
+        public NotificationsPicker(View view) {
+            super(view, R.id.notificationsLayout, R.id.notificationsLabel, R.id.notificationsImage);
+        }
+
+        @Override void toggle() {
             notifications = !notifications;
 
-            if (notifications) {
-                notificationsImage.setImageResource(R.drawable.notifications_on);
-                notificationsLabel.setText(R.string.notificationsOn);
-            } else {
-                notificationsImage.setImageResource(R.drawable.notifications_off);
-                notificationsLabel.setText(R.string.notificationsOff);
-            }
-        } else if (id == R.id.colorsImage|| id == R.id.colorsLabel) {
-            color = (color + 1) % 6;
+            SharedPreferences preferences = getSharedPreferences(
+                    RingerMutedDialog.class.getSimpleName(), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("notifications", notifications);
+            editor.commit();
+        }
 
-            if (color == 0) {
-                colorsImage.setImageResource(R.drawable.colorpink);
-                colorsLabel.setText(R.string.pink);
-            } else if (color == 1) {
-                colorsImage.setImageResource(R.drawable.colorred);
-                colorsLabel.setText(R.string.red);
-            } else if (color == 2) {
-                colorsImage.setImageResource(R.drawable.coloryellow);
-                colorsLabel.setText(R.string.yellow);
-            } else if (color == 3) {
-                colorsImage.setImageResource(R.drawable.colorgreen);
-                colorsLabel.setText(R.string.green);
-            } else if (color == 4) {
-                colorsImage.setImageResource(R.drawable.colorcyan);
-                colorsLabel.setText(R.string.cyan);
-            } else if (color == 5) {
-                colorsImage.setImageResource(R.drawable.colorblue);
-                colorsLabel.setText(R.string.blue);
+        @Override void selectionChanged() {
+            if (notifications) {
+                image.setImageResource(R.drawable.notifications_on);
+                label.setText(R.string.notificationsOn);
+            } else {
+                image.setImageResource(R.drawable.notifications_off);
+                label.setText(R.string.notificationsOff);
             }
         }
     }

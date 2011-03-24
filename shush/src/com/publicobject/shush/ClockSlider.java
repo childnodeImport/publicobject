@@ -102,6 +102,10 @@ final class ClockSlider extends View {
         buttonCirclePaint.setAntiAlias(true);
     }
 
+    public void setColor(int color) {
+        pink.setColor(color);
+    }
+
     public void setRingerMutedDialog(RingerMutedDialog ringerMutedDialog) {
         this.ringerMutedDialog = ringerMutedDialog;
     }

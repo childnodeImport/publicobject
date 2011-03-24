@@ -1,51 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-  <TextView android:id="@+id/welcomeMessage"
-          android:text="@string/welcomeMessage"
-          android:layout_marginLeft="6dip"
-          android:layout_marginRight="6dip"
-          android:textSize="22dip"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"/>
-
-  <LinearLayout android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dip">
-    <ImageView android:id="@+id/notificationsImage"
-          android:src="@drawable/notifications_on"
-          android:layout_gravity="center"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"/>
-    <TextView android:id="@+id/notificationsLabel"
-          android:gravity="center_vertical"
-          android:text="@string/notificationsOn"
-          android:textSize="22dip"
-          android:layout_gravity="center"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"/>
-  </LinearLayout>
-
-  <LinearLayout android:orientation="horizontal"
+              android:orientation="vertical"
+              android:gravity="center"
               android:layout_width="fill_parent"
-              android:layout_height="wrap_content">
-      <ImageView android:id="@+id/colorsImage"
-            android:src="@drawable/colorpink"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-      <TextView android:id="@+id/colorsLabel"
-            android:gravity="center_vertical"
-            android:text="@string/pink"
-            android:textSize="22dip"
-            android:layout_gravity="center"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
-  </LinearLayout>
+              android:layout_height="fill_parent">
+
+    <TextView android:id="@+id/welcomeMessage"
+              android:text="@string/welcomeMessage"
+              android:layout_marginLeft="6dip"
+              android:layout_marginRight="6dip"
+              android:textSize="22dip"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"/>
+
+    <LinearLayout android:id="@+id/notificationsLayout"
+                  android:orientation="horizontal"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="16dip"
+                  android:focusable="true">
+        <ImageView android:id="@+id/notificationsImage"
+                   android:src="@drawable/notifications_on"
+                   android:layout_gravity="center"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/notificationsLabel"
+                  android:gravity="center_vertical"
+                  android:text="@string/notificationsOn"
+                  android:textSize="22dip"
+                  android:layout_gravity="center"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/colorsLayout"
+                  android:orientation="horizontal"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="16dip"
+                  android:focusable="true">
+        <ImageView android:id="@+id/colorsImage"
+                   android:src="@drawable/colorpink"
+                   android:layout_gravity="center"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/colorsLabel"
+                  android:gravity="center_vertical"
+                  android:text="@string/pink"
+                  android:textSize="22dip"
+                  android:layout_gravity="center"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"/>
+    </LinearLayout>
 
 </LinearLayout>
