@@ -122,7 +122,7 @@ public final class RingerMutedDialog extends Activity {
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
         clockSlider.setVolume(getRestoreVolume());
-        clockSlider.setColor(preferences.getInt("color", Welcome.COLORS[3]));
+        clockSlider.setColor(preferences.getInt("color", Welcome.COLORS[0]));
         notifications = preferences.getBoolean("notifications", true);
 
         registerReceiver(dismissFromVolumeUp, RINGER_MODE_CHANGED);
