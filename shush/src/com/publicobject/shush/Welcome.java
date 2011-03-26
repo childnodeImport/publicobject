@@ -39,11 +39,11 @@ public final class Welcome extends Activity
         implements DialogInterface.OnClickListener, OnCancelListener {
     public static final int[] COLORS = {
             Color.rgb(0xff, 0x00, 0xff), // pink
-            Color.rgb(0xff, 0x00, 0x00), // red
-            Color.rgb(0xff, 0xff, 0x00), // yellow
-            Color.rgb(0x00, 0xff, 0x00), // green
-            Color.rgb(0x00, 0xff, 0xff), // cyan
-            Color.rgb(0x00, 0x00, 0xff), // blue
+            Color.rgb(0x66, 0x99, 0xff), // blue
+            Color.rgb(0x99, 0xcc, 0x33), // green
+            Color.rgb(0xff, 0xcc, 0x00), // yellow
+            Color.rgb(0xff, 0x66, 0x00), // orange
+            Color.rgb(0xcc, 0x00, 0x00), // red
     };
 
     private boolean notifications = true;
@@ -104,13 +104,18 @@ public final class Welcome extends Activity
         public final boolean onTouch(View view, MotionEvent motionEvent) {
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN
                     || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                layout.setBackgroundColor(Color.argb(102, 115, 115, 115));
+                buttonStateChanged(true);
             } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                layout.setBackgroundColor(Color.TRANSPARENT);
+                buttonStateChanged(false);
                 toggle();
                 selectionChanged();
             }
             return true;
+        }
+
+        protected void buttonStateChanged(boolean down) {
+            int background = down ? Color.rgb(0x40, 0x40, 0x40) : Color.rgb(0x18, 0x18, 0x18);
+            layout.setBackgroundColor(background);
         }
 
         abstract void selectionChanged();
@@ -133,25 +138,25 @@ public final class Welcome extends Activity
             editor.commit();
         }
 
+        @Override protected void buttonStateChanged(boolean down) {
+            super.buttonStateChanged(down);
+            image.setImageResource(down ? R.drawable.colors_down : R.drawable.colors_up);
+        }
+
         @Override void selectionChanged() {
+            image.setBackgroundColor(COLORS[colorIndex]);
             if (colorIndex == 0) {
-                image.setImageResource(R.drawable.colorpink);
                 label.setText(R.string.pink);
             } else if (colorIndex == 1) {
-                image.setImageResource(R.drawable.colorred);
-                label.setText(R.string.red);
-            } else if (colorIndex == 2) {
-                image.setImageResource(R.drawable.coloryellow);
-                label.setText(R.string.yellow);
-            } else if (colorIndex == 3) {
-                image.setImageResource(R.drawable.colorgreen);
-                label.setText(R.string.green);
-            } else if (colorIndex == 4) {
-                image.setImageResource(R.drawable.colorcyan);
-                label.setText(R.string.cyan);
-            } else if (colorIndex == 5) {
-                image.setImageResource(R.drawable.colorblue);
                 label.setText(R.string.blue);
+            } else if (colorIndex == 2) {
+                label.setText(R.string.green);
+            } else if (colorIndex == 3) {
+                label.setText(R.string.yellow);
+            } else if (colorIndex == 4) {
+                label.setText(R.string.orange);
+            } else if (colorIndex == 5) {
+                label.setText(R.string.red);
             }
         }
     }
