@@ -39,11 +39,21 @@ public final class Welcome extends Activity
         implements DialogInterface.OnClickListener, OnCancelListener {
     public static final int[] COLORS = {
             Color.rgb(0xff, 0x00, 0xff), // pink
+            Color.rgb(0x88, 0x33, 0xbb), // purple
             Color.rgb(0x66, 0x99, 0xff), // blue
             Color.rgb(0x99, 0xcc, 0x33), // green
             Color.rgb(0xff, 0xcc, 0x00), // yellow
             Color.rgb(0xff, 0x66, 0x00), // orange
             Color.rgb(0xcc, 0x00, 0x00), // red
+    };
+    public static final int[] COLOR_NAMES = {
+            R.string.pink,
+            R.string.purple,
+            R.string.blue,
+            R.string.green,
+            R.string.yellow,
+            R.string.orange,
+            R.string.red,
     };
 
     private boolean notifications = true;
@@ -145,19 +155,7 @@ public final class Welcome extends Activity
 
         @Override void selectionChanged() {
             image.setBackgroundColor(COLORS[colorIndex]);
-            if (colorIndex == 0) {
-                label.setText(R.string.pink);
-            } else if (colorIndex == 1) {
-                label.setText(R.string.blue);
-            } else if (colorIndex == 2) {
-                label.setText(R.string.green);
-            } else if (colorIndex == 3) {
-                label.setText(R.string.yellow);
-            } else if (colorIndex == 4) {
-                label.setText(R.string.orange);
-            } else if (colorIndex == 5) {
-                label.setText(R.string.red);
-            }
+            label.setText(COLOR_NAMES[colorIndex]);
         }
     }
 

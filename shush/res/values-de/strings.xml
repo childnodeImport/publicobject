@@ -1,16 +1,26 @@
 <?xml version='1.0' ?>
 <resources>
   <string name="title">Pst! Klingelton Reaktivierer</string>
-  <string name="welcomeMessage">Pst! müssen Sie nicht starten. Es aktiviert sich automatisch, wenn sie Ihr Soundprofil auf Vibrieren oder Lautlos stellen. Benutzten Sie hierfür z.B. die Lautstärketasten an Ihrem Mobiltelefon.</string>
-  <string name="okay">Okay!</string>
-  <string name="ringerRestored">Ihr Soundprofil wurde zurückgesetzt.</string>
-  <string name="ringerShushedUntil">Ihr Klingelton bleibt deaktiviert bis %1$s Uhr.</string>
+  <string name="welcomeMessage">Pst! m&#252;ssen Sie nicht starten. Es aktiviert sich automatisch, wenn sie Ihr Soundprofil auf Vibrieren oder Lautlos stellen. Benutzten Sie hierf&#252;r z.B. die Lautst&#228;rketasten an Ihrem Mobiltelefon.</string>
+  <string name="okay">Verstanden!</string>
+  <string name="ringerRestored">Ihr Soundprofil wurde zur&#252;ckgesetzt.</string>
+  <string name="ringerShushedUntil">Klingelton deaktiviert bis %1$s Uhr.</string>
   <string name="ringerShushedIndefinitely">Klingelton dauerhaft ausgeschaltet.</string>
   <string name="turnRingerOnIn">Klingelton reaktivieren in:</string>
-  <string name="restoreVolumeLevel">Lautstärke wiederherstellen:</string>
+  <string name="restoreVolumeLevel">Lautst&#228;rke wiederherstellen:</string>
   <string name="minutes">Minuten</string>
   <string name="hour">Stunde</string>
   <string name="hours">Stunden</string>
   <string name="shush">Pst!</string>
   <string name="keepItOff">Ausgeschaltet lassen.</string>
+  <string name="turnItOnNow">Klingelton jetzt reaktivieren!</string>
+  <string name="notificationsOn">Benachrichtigung an</string>
+  <string name="notificationsOff">Benachrichtigung aus</string>
+  <string name="pink">Pink</string>
+  <string name="blue">Blau</string>
+  <string name="green">Gr&#252;n</string>
+  <string name="yellow">Gelb</string>
+  <string name="orange">Orange</string>
+  <string name="red">Rot</string>
+  <string name="purple">Violett</string>
 </resources>
