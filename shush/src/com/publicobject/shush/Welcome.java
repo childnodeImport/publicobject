@@ -139,7 +139,7 @@ public final class Welcome extends Activity
         }
 
         @Override void toggle() {
-            colorIndex = (colorIndex + 1) % 6;
+            colorIndex = (colorIndex + 1) % COLORS.length;
 
             SharedPreferences preferences = getSharedPreferences(
                     RingerMutedDialog.class.getSimpleName(), Context.MODE_PRIVATE);
