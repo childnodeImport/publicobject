@@ -35,8 +35,6 @@ import java.util.GregorianCalendar;
  * A slider around a circle, to select a time between now and 12 hours from now.
  */
 final class ClockSlider extends View {
-
-    private static final int MAX_SIZE = 230;
     private static final int INSETS = 6;
     private static final int MINUTES_PER_HALF_DAY = 720;
 
@@ -48,8 +46,9 @@ final class ClockSlider extends View {
     private int centerY;
     private int diameter;
     private RectF outerCircle;
+    private RectF innerCircle;
     private RectF buttonCircle;
-    private Path clip;
+    private final Path path = new Path();
 
     private RectF smallVolume;
     private RectF smallVolumeTouchRegion;
@@ -129,17 +128,13 @@ final class ClockSlider extends View {
             outerCircle = new RectF(left, top, right, bottom);
 
             int innerDiameter = diameter - thickness * 2;
-            RectF innerCircle = new RectF(left + thickness, top + thickness,
+            innerCircle = new RectF(left + thickness, top + thickness,
                     left + thickness + innerDiameter, top + thickness + innerDiameter);
 
             int offset = thickness * 2;
             int buttonDiameter = diameter - offset * 2;
             buttonCircle = new RectF(left + offset, top + offset,
                     left + offset + buttonDiameter, top + offset + buttonDiameter);
-
-            clip = new Path();
-            clip.addRect(outerCircle, Path.Direction.CW);
-            clip.addOval(innerCircle, Path.Direction.CCW);
 
             // volume triangles
             int volumeLeft = Math.max(INSETS * 2, centerX - diameter);
@@ -232,13 +227,28 @@ final class ClockSlider extends View {
      * Draw a circle and an arc of the selected duration from start thru end.
      */
     private void drawClock(Canvas canvas) {
-        canvas.save();
-        canvas.clipPath(clip);
-        canvas.drawOval(outerCircle, lightGrey);
+        // the colored "filled" part of the circle
+        path.reset();
         int sweepAngle = minutes / 2;
-        canvas.drawArc(outerCircle, startAngle, sweepAngle, true, pink);
-        canvas.drawArc(outerCircle, startAngle + sweepAngle - 1, 2, true, white);
-        canvas.restore();
+        path.arcTo(outerCircle, startAngle, sweepAngle);
+        path.arcTo(innerCircle, startAngle + sweepAngle, -sweepAngle);
+        path.close();
+        canvas.drawPath(path, this.pink);
+
+        // the grey empty part of the circle
+        int inverseSweep = 360 - sweepAngle;
+        path.reset();
+        path.arcTo(outerCircle, startAngle, -inverseSweep);
+        path.arcTo(innerCircle, startAngle - inverseSweep, inverseSweep);
+        path.close();
+        canvas.drawPath(path, lightGrey);
+
+        // the white selected part of the circle
+        path.reset();
+        path.arcTo(outerCircle, startAngle + sweepAngle - 1, 2);
+        path.arcTo(innerCircle, startAngle + sweepAngle + 1, -2);
+        path.close();
+        canvas.drawPath(path, white);
     }
 
     /**
