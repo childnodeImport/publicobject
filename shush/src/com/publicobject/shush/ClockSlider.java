@@ -53,7 +53,6 @@ final class ClockSlider extends View {
     private RectF smallVolume;
     private RectF smallVolumeTouchRegion;
     private RectF largeVolume;
-    private Path volumeClip;
     private boolean volumeSliding;
     /** Volume to restore to; between 0.0 and 1.0 */
     private float volume = 0.8f;
@@ -136,34 +135,37 @@ final class ClockSlider extends View {
             buttonCircle = new RectF(left + offset, top + offset,
                     left + offset + buttonDiameter, top + offset + buttonDiameter);
 
-            // volume triangles
+            // the large volume triangle
             int volumeLeft = Math.max(INSETS * 2, centerX - diameter);
             int volumeRight = Math.min(width - INSETS * 2, centerX + diameter);
             int volumeHeight = (volumeRight - volumeLeft) / 2;
-            int volumeButtonSize = (int) (diameter * 0.25f);
             largeVolume = new RectF(volumeLeft, bottom - volumeHeight, volumeRight, bottom);
-            smallVolume = new RectF(volumeLeft, bottom - volumeButtonSize,
-                    volumeLeft + volumeButtonSize, bottom);
-            // the initial touch region is 25% bigger on the left and on the bottom
-            smallVolumeTouchRegion = new RectF(smallVolume.left - smallVolume.width() / 4,
-                    smallVolume.top, smallVolume.right,
-                    smallVolume.bottom + smallVolume.height() / 4);
 
-            volumeClip = new Path();
-            volumeClip.moveTo(largeVolume.left, largeVolume.bottom);
-            volumeClip.lineTo(largeVolume.right, largeVolume.bottom);
-            volumeClip.lineTo(largeVolume.right, largeVolume.top);
-            volumeClip.close();
+            // the small volume triangle fits into the large triangle's bottom left corner
+            float smallVolumeWidth = diameter * 0.25f;
+            float smallVolumeHeight = smallVolumeWidth / largeVolume.width() * largeVolume.height();
+            smallVolume = new RectF(volumeLeft,
+                    bottom - smallVolumeHeight,
+                    volumeLeft + smallVolumeWidth,
+                    bottom);
+
+            // the small volume touch region is slightly bigger than the triangle
+            smallVolumeTouchRegion = new RectF(
+                    smallVolume.left - smallVolume.width() * 0.25f,
+                    smallVolume.top - smallVolume.height() * 0.50f,
+                    smallVolume.right + smallVolume.width() * 0.10f,
+                    smallVolume.bottom + smallVolume.height() * 0.25f);
 
             duration.setTextSize(diameter * 0.32f);
             durationUnits.setTextSize(diameter * 0.10f);
             unshushTime.setTextSize(diameter * 0.13f);
-            percentPaint.setTextSize(volumeButtonSize * 0.32f);
+            percentPaint.setTextSize(diameter * 0.08f);
         }
 
         if (volumeSliding) {
             drawVolumeSlider(canvas, largeVolume);
         } else {
+            canvas.drawRect(smallVolumeTouchRegion, lightGrey);
             drawClock(canvas);
             drawClockTextAndButtons(canvas);
             drawVolumeSlider(canvas, smallVolume);
@@ -257,20 +259,50 @@ final class ClockSlider extends View {
      * the triangle is mostly grey; at max volume it is all pink.
      */
     private void drawVolumeSlider(Canvas canvas, RectF bound) {
-        float right = bound.left + (volume * bound.width());
-        float whiteLineWidth = diameter * 0.015f;
-
         int percent = (int) (volume * 100);
         float textX = largeVolume.left;
-        float textY = largeVolume.bottom - smallVolume.height() / 2;
+        float textY = largeVolume.bottom - smallVolume.height();
         canvas.drawText(percent + "%", textX, textY, percentPaint);
 
-        canvas.save();
-        canvas.clipPath(volumeClip);
-        canvas.drawRect(bound.left, bound.top, bound.right, bound.bottom, lightGrey);
-        canvas.drawRect(bound.left, bound.top, right, bound.bottom, pink);
-        canvas.drawRect(right - whiteLineWidth, bound.top, right, bound.bottom, white);
-        canvas.restore();
+        drawTriangleSlice(canvas, bound, 0.0f, volume, pink);
+        drawTriangleSlice(canvas, bound, volume, 1.0f, lightGrey);
+
+        float linePercent = 3.0f / bound.width(); // percent of bound that's 3 dips wide
+        float top = Math.min(volume + (linePercent / 2), 1.0f);
+        float bottom = top - linePercent;
+        drawTriangleSlice(canvas, bound, bottom, top, white);
+    }
+
+    /**
+     * Draws a vertical slice of a right triangle whose slope goes from left to
+     * right in bound. Left and right are lower and upper fractions of the
+     * drawn area of bound.
+     */
+    private void drawTriangleSlice(Canvas canvas, RectF bound, float from, float to, Paint paint) {
+
+        /*
+         * Fill the middle slice of the triangle bounded by 'bound':
+         *
+         *        /|
+         *       / |
+         *      /| |
+         *     / | |
+         *    /| | |
+         *   /_|_|_|
+         */
+
+        float left = bound.left + (from * bound.width());
+        float right = bound.left + (to * bound.width());
+        float levelTwo = bound.bottom - (from * bound.height());
+        float levelThree = bound.bottom - (to * bound.height());
+
+        path.reset();
+        path.moveTo(left, bound.bottom);
+        path.lineTo(left, levelTwo);
+        path.lineTo(right, levelThree);
+        path.lineTo(right, bound.bottom);
+        path.close();
+        canvas.drawPath(path, paint);
     }
 
     /**
