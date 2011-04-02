@@ -165,7 +165,6 @@ final class ClockSlider extends View {
         if (volumeSliding) {
             drawVolumeSlider(canvas, largeVolume);
         } else {
-            canvas.drawRect(smallVolumeTouchRegion, lightGrey);
             drawClock(canvas);
             drawClockTextAndButtons(canvas);
             drawVolumeSlider(canvas, smallVolume);
