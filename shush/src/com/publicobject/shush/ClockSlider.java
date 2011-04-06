@@ -228,19 +228,23 @@ final class ClockSlider extends View {
      * Draw a circle and an arc of the selected duration from start thru end.
      */
     private void drawClock(Canvas canvas) {
-        int sweepDegrees = minutes / 2;
+        int sweepDegrees = (minutes / 2) - 1;
 
         // the colored "filled" part of the circle
         drawArc(canvas, startAngle, sweepDegrees, pink);
 
-        // the grey empty part of the circle
-        drawArc(canvas, startAngle + sweepDegrees, 360 - sweepDegrees, lightGrey);
-
         // the white selected part of the circle
-        drawArc(canvas, startAngle + sweepDegrees - 1, 2, white);
+        drawArc(canvas, startAngle + sweepDegrees, 2, white);
+
+        // the grey empty part of the circle
+        drawArc(canvas, startAngle + sweepDegrees + 2, 360 - sweepDegrees - 2, lightGrey);
     }
 
     private void drawArc(Canvas canvas, int startAngle, int sweepDegrees, Paint paint) {
+        if (sweepDegrees <= 0) {
+            return;
+        }
+
         path.reset();
         path.arcTo(outerCircle, startAngle, sweepDegrees);
         path.arcTo(innerCircle, startAngle + sweepDegrees, -sweepDegrees);
