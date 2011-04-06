@@ -229,27 +229,22 @@ final class ClockSlider extends View {
      */
     private void drawClock(Canvas canvas) {
         // the colored "filled" part of the circle
-        path.reset();
-        int sweepAngle = minutes / 2;
-        path.arcTo(outerCircle, startAngle, sweepAngle);
-        path.arcTo(innerCircle, startAngle + sweepAngle, -sweepAngle);
-        path.close();
-        canvas.drawPath(path, this.pink);
+        int sweepDegrees = minutes / 2;
+        drawArc(canvas, startAngle, sweepDegrees, pink);
 
         // the grey empty part of the circle
-        int inverseSweep = 360 - sweepAngle;
-        path.reset();
-        path.arcTo(outerCircle, startAngle, -inverseSweep);
-        path.arcTo(innerCircle, startAngle - inverseSweep, inverseSweep);
-        path.close();
-        canvas.drawPath(path, lightGrey);
+        drawArc(canvas, startAngle + sweepDegrees, 360 - sweepDegrees, lightGrey);
 
         // the white selected part of the circle
+        drawArc(canvas, startAngle + sweepDegrees - 1, 2, white);
+    }
+
+    private void drawArc(Canvas canvas, int startAngle, int sweepDegrees, Paint paint) {
         path.reset();
-        path.arcTo(outerCircle, startAngle + sweepAngle - 1, 2);
-        path.arcTo(innerCircle, startAngle + sweepAngle + 1, -2);
+        path.arcTo(outerCircle, startAngle, sweepDegrees);
+        path.arcTo(innerCircle, startAngle + sweepDegrees, -sweepDegrees);
         path.close();
-        canvas.drawPath(path, white);
+        canvas.drawPath(path, paint);
     }
 
     /**
