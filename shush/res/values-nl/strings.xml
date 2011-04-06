@@ -1,0 +1,26 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Sssst! Ringer Hersteller</string>
+  <string name="welcomeMessage">Activeer Shush door je ring volume uit te zetten. Je kunt gewoon de volume lager knop gebruiken zoals je gewend bent.</string>
+  <string name="okay">Ok!</string>
+  <string name="ringerRestored">Ringer hersteld!</string>
+  <string name="ringerShushedUntil">Ringer uit tot %1$s</string>
+  <string name="ringerShushedIndefinitely">Ringer altijd uit!</string>
+  <string name="turnRingerOnIn">Zet ringer aan over:</string>
+  <string name="restoreVolumeLevel">Herstel volume niveau:</string>
+  <string name="minutes">minuten</string>
+  <string name="hour">uur</string>
+  <string name="hours">uren</string>
+  <string name="shush">Tijdelijk uit</string>
+  <string name="keepItOff">Altijd uit</string>
+  <string name="turnItOnNow">Selecteer om hem nu aan te zetten.</string>
+  <string name="notificationsOn">Notificaties aan</string>
+  <string name="notificationsOff">Notificaties uit</string>
+  <string name="pink">Roze</string>
+  <string name="blue">Blauw</string>
+  <string name="green">Groen</string>
+  <string name="yellow">Geel</string>
+  <string name="orange">Oranje</string>
+  <string name="red">Rood</string>
+  <string name="purple">Paars</string>
+</resources>
