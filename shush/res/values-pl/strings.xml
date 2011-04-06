@@ -1,7 +1,7 @@
 <?xml version='1.0' ?>
 <resources>
   <string name="title">Cicho sza! A potem przywr&#243;&#263; dzwonek</string>
-  <string name="welcomeMessage">Aby uruchomi&#263; "Cicho sza", wystarczy wy&#322;&#261;czy&#263; dzwonek. Mo&#380;esz u&#380;y&#263; przycisku wyciszania g&#322;osu.</string>
+  <string name="welcomeMessage">Aby uruchomi&#263; \"Cicho sza\", wystarczy wy&#322;&#261;czy&#263; dzwonek. Mo&#380;esz u&#380;y&#263; przycisku wyciszania g&#322;osu.</string>
   <string name="okay">&#346;wietnie!</string>
   <string name="ringerRestored">Dzwonek w&#322;&#261;czony.</string>
   <string name="ringerShushedUntil">Dzwonek wy&#322;&#261;czony do %1$s</string>
@@ -13,4 +13,13 @@
   <string name="hours">godz.</string>
   <string name="shush">Cicho sza!</string>
   <string name="keepItOff">Wy&#322;&#261;cz na sta&#322;e.</string>
+  <string name="notificationsOn">Powiadomienia w&#322;&#261;czone</string>
+  <string name="notificationsOff">Powiadomienia wy&#322;&#261;czone</string>
+  <string name="pink">R&#243;&#380;owy</string>
+  <string name="blue">Niebieski</string>
+  <string name="green">Zielony</string>
+  <string name="yellow">&#379;&#243;&#322;ty</string>
+  <string name="orange">Pomara&#324;czowy</string>
+  <string name="red">Czerwony</string>
+  <string name="purple">Fioletowy</string>
 </resources>
