@@ -26,7 +26,8 @@ import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
 /**
- * Upon ringer mode changing (a broadcast intent), show the ringer muted dialog (an activity intent).
+ * Upon ringer mode changing (a broadcast intent), show the ringer muted dialog
+ * (an activity intent).
  */
 public class OnRingerMuted extends BroadcastReceiver {
 
@@ -38,6 +39,7 @@ public class OnRingerMuted extends BroadcastReceiver {
         "com.noimjosh.profile",
         "com.urbandroid.sleep",
         "vStudio.Android.Camera360",
+        "vStudio.Android.GPhotoPaid",
     };
 
     public void onReceive(Context context, Intent intent) {
