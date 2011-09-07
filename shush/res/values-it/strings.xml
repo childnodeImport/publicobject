@@ -1,0 +1,26 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush! Ripristino Suoneria</string>
+  <string name="welcomeMessage">Fai partire Shush disattivando la suoneria. Puoi farlo con il taso gi&#249; del volume come fai normalmente. </string>
+  <string name="okay">Ottimo!</string>
+  <string name="ringerRestored">Suoneria ripristinata.</string>
+  <string name="ringerShushedUntil">Suoneria disattivata fino alle % 1$s</string>
+  <string name="ringerShushedIndefinitely">Suoneria disattivata indefinitamente!</string>
+  <string name="turnRingerOnIn">Ripristina la suoneria tra:</string>
+  <string name="restoreVolumeLevel">Livello volume di ripristino:</string>
+  <string name="minutes">minuti</string>
+  <string name="hour">ora</string>
+  <string name="hours">ore</string>
+  <string name="shush">Shush!</string>
+  <string name="keepItOff">Lascia spenta.</string>
+  <string name="turnItOnNow">Seleziona per ripristinare adesso.</string>
+  <string name="notificationsOn">Notifica attiva</string>
+  <string name="notificationsOff">Notifica disattivata</string>
+  <string name="pink">Rosa</string>
+  <string name="blue">Blu</string>
+  <string name="green">Verde</string>
+  <string name="yellow">Giallo</string>
+  <string name="orange">Arancione</string>
+  <string name="red">Rosso</string>
+  <string name="purple">Viola</string>
+</resources>

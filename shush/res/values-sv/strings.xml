@@ -1,0 +1,26 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush! &#197;terst&#228;ll din Ringsignal</string>
+  <string name="welcomeMessage">Aktivera Shush genom att st&#228;nga av din ringsignal. Du kan anv&#228;nda volymknapparna som vanligt.</string>
+  <string name="okay">Snyggt!</string>
+  <string name="ringerRestored">Ringsignal &#229;terst&#228;lld.</string>
+  <string name="ringerShushedUntil">Ringsignal avst&#228;ngd tills %1$s</string>
+  <string name="ringerShushedIndefinitely">Ringsignal avst&#228;ngd till obest&#228;md tid!</string>
+  <string name="turnRingerOnIn">S&#228;tt p&#229; ringsignalen om:</string>
+  <string name="restoreVolumeLevel">&#197;terst&#228;ll volymniv&#229; till:</string>
+  <string name="minutes">minuter</string>
+  <string name="hour">timme</string>
+  <string name="hours">timmar</string>
+  <string name="shush">Shush!</string>
+  <string name="keepItOff">H&#229;ll den avst&#228;ngd.</string>
+  <string name="turnItOnNow">V&#228;lj f&#246;r att s&#228;tta p&#229; den nu.</string>
+  <string name="notificationsOn">Aviseringar p&#229;</string>
+  <string name="notificationsOff">Aviseringar av</string>
+  <string name="pink">Rosa</string>
+  <string name="blue">Bl&#229;</string>
+  <string name="green">Gr&#246;n</string>
+  <string name="yellow">Gul</string>
+  <string name="orange">Orange</string>
+  <string name="red">R&#246;d</string>
+  <string name="purple">Lila</string>
+</resources>
