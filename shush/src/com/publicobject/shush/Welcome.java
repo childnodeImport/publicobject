@@ -149,8 +149,8 @@ public final class Welcome extends Activity
         }
 
         @Override protected void buttonStateChanged(boolean down) {
-            super.buttonStateChanged(down);
             image.setImageResource(down ? R.drawable.colors_down : R.drawable.colors_up);
+            super.buttonStateChanged(down);
         }
 
         @Override void selectionChanged() {
