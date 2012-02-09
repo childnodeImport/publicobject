@@ -151,6 +151,10 @@ public final class RingerMutedDialog extends Activity {
     }
 
     private void commit() {
+        if (clockSlider == null) {
+            return; // race between volume up and shush button
+        }
+        
         unregisterTimeoutCallback();
         PendingIntent ringerOn = TurnRingerOn.createPendingIntent(this, clockSlider.getVolume());
 
@@ -173,8 +177,11 @@ public final class RingerMutedDialog extends Activity {
     }
 
     private void cancel(boolean showMessage) {
-        unregisterTimeoutCallback();
+        if (clockSlider == null) {
+            return; // race between volume up and cancel button
+        }
 
+        unregisterTimeoutCallback();
         String message = showMessage
                 ? getString(R.string.ringerShushedIndefinitely)
                 : null;
