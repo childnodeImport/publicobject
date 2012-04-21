@@ -4,6 +4,7 @@
       android:versionCode="91"
       android:versionName="9.1">
     <uses-sdk android:minSdkVersion="5"/>
+    <uses-sdk android:targetSdkVersion="15"/>
     <uses-feature android:name="android.hardware.telephony"/>
     <application android:label="@string/title"  android:icon="@drawable/shush">
         <activity android:name=".Welcome"

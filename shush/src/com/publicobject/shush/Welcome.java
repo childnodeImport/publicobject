@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -80,11 +81,12 @@ public final class Welcome extends Activity
         Picker notificationsPicker = new NotificationsPicker(view);
         notificationsPicker.selectionChanged();
 
+        Picker sharePicker = new SharePicker(view);
+        sharePicker.selectionChanged();
+
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setIcon(R.drawable.shush)
                 .setView(view)
-                .setTitle(R.string.title)
                 .setOnCancelListener(this)
                 .setPositiveButton(R.string.okay, this)
                 .create()
@@ -112,13 +114,14 @@ public final class Welcome extends Activity
         }
 
         public final boolean onTouch(View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN
-                    || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                 buttonStateChanged(true);
             } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                 buttonStateChanged(false);
                 toggle();
                 selectionChanged();
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                buttonStateChanged(false);
             }
             return true;
         }
@@ -182,6 +185,26 @@ public final class Welcome extends Activity
                 image.setImageResource(R.drawable.notifications_off);
                 label.setText(R.string.notificationsOff);
             }
+        }
+    }
+
+    private class SharePicker extends Picker {
+        public SharePicker(View view) {
+            super(view, R.id.shareLayout, R.id.shareLabel, R.id.shareImage);
+        }
+
+        @Override void toggle() {
+            Intent intent=new Intent(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            Context context = getApplicationContext();
+            intent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.shareSubject));
+            intent.putExtra(Intent.EXTRA_TEXT, context.getString(R.string.shareMessage));
+            startActivity(Intent.createChooser(intent,
+                    context.getString(R.string.shareChooserTitle)));
+        }
+
+        @Override void selectionChanged() {
         }
     }
 }

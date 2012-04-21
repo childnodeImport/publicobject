@@ -23,4 +23,11 @@
   <string name="orange">Orange</string>
   <string name="red">Red</string>
   <string name="purple">Purple</string>
+  <string name="settingsTitle">CUSTOMIZE</string>
+  <string name="shareTitle">SHARE THE LOVE</string>
+  <string name="shareOverview">Like this app? Your friends will too!</string>
+  <string name="shareButton">Share</string>
+  <string name="shareChooserTitle">Share the Love</string>
+  <string name="shareMessage">I heart Shush for Android. http://shushapp.com</string>
+  <string name="shareSubject">Shush!</string>
 </resources>
