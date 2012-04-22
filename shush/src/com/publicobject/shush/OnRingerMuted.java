@@ -24,6 +24,7 @@ import android.content.Intent;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
+import java.util.Arrays;
 
 /**
  * Upon ringer mode changing (a broadcast intent), show the ringer muted dialog
@@ -31,8 +32,10 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
  */
 public class OnRingerMuted extends BroadcastReceiver {
 
+    /** Sorted list of foreground apps that shush won't trigger on top of */
     private static final String[] CONFLICTING_APPS = {
         // "bt.android.elixir", // widget; always in the foreground
+        "com.baseapp.eyeem",
         "com.idelata.MuteButtonFree",
         "com.littlephoto",
         "com.motorola.Camera",
@@ -69,10 +72,8 @@ public class OnRingerMuted extends BroadcastReceiver {
                 continue;
             }
             String processName = p.processName;
-            for (String app : CONFLICTING_APPS) {
-                if (processName.equals(app)) {
-                    return true;
-                }
+            if (Arrays.binarySearch(CONFLICTING_APPS, processName) >= 0) {
+                return true;
             }
         }
         return false;

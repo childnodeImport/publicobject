@@ -54,8 +54,8 @@ public final class TurnRingerOn extends BroadcastReceiver {
         Toast.makeText(context, R.string.ringerRestored, Toast.LENGTH_LONG).show();
     }
 
-    public static void schedule(Context context, PendingIntent ringerOnIntent, long onRealtime) {
-        getAlarmService(context).set(ELAPSED_REALTIME, onRealtime, ringerOnIntent);
+    public static void schedule(Context context, PendingIntent ringerOnIntent, long onTime) {
+        getAlarmService(context).set(AlarmManager.RTC_WAKEUP, onTime, ringerOnIntent);
     }
 
     public static void cancelScheduled(Context context) {

@@ -29,18 +29,18 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.media.AudioManager;
 import static android.media.AudioManager.EXTRA_RINGER_MODE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.provider.Settings;
 import static android.view.Gravity.BOTTOM;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.Date;
@@ -121,7 +121,7 @@ public final class RingerMutedDialog extends Activity {
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
-        clockSlider.setVolume(getRestoreVolume());
+        clockSlider.setVolume(preferences.getFloat("volume", DEFAULT_VOLUME));
         clockSlider.setColor(preferences.getInt("color", Welcome.COLORS[0]));
         notifications = preferences.getBoolean("notifications", true);
 
@@ -154,17 +154,17 @@ public final class RingerMutedDialog extends Activity {
         if (clockSlider == null) {
             return; // race between volume up and shush button
         }
-        
+
         unregisterTimeoutCallback();
         PendingIntent ringerOn = TurnRingerOn.createPendingIntent(this, clockSlider.getVolume());
 
         long onTime = clockSlider.getEnd().getTime();
-        long onRealtime = onTime - System.currentTimeMillis() + SystemClock.elapsedRealtime();
-        TurnRingerOn.schedule(this, ringerOn, onRealtime);
+        TurnRingerOn.schedule(this, ringerOn, onTime);
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("minutes", clockSlider.getMinutes());
+        editor.putFloat("volume", clockSlider.getVolume());
         editor.commit();
 
         String message = RingerMutedNotification.getMessage(this, onTime);
@@ -208,18 +208,6 @@ public final class RingerMutedDialog extends Activity {
         clockSlider.setVolume(volume);
     }
 
-    private float getRestoreVolume() {
-        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        try {
-            int lastRing = Settings.System.getInt(getContentResolver(),
-                    Settings.System.VOLUME_RING + Settings.System.APPEND_FOR_LAST_AUDIBLE);
-            int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_RING);
-            return (float) lastRing / max;
-        } catch (Settings.SettingNotFoundException e) {
-            return DEFAULT_VOLUME;
-        }
-    }
-
     interface ShushWindow {
         ClockSlider getClockSlider();
         void setTitle(int titleId);
@@ -235,7 +223,21 @@ public final class RingerMutedDialog extends Activity {
         private final Dialog dialog;
 
         ShushDialog() {
-            clockSlider = new ClockSlider(RingerMutedDialog.this, null);
+            clockSlider = new ClockSlider(getApplicationContext(), null);
+
+            // Wrap the clock slider in some padding for Holo
+            View dialogView;
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD) {
+                LinearLayout linearLayout = new LinearLayout(getApplicationContext());
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                linearLayout.addView(clockSlider, params);
+                params.setMargins(4, 20, 4, 20);
+                dialogView = linearLayout;
+            } else {
+                dialogView = clockSlider;
+            }
+
             dialog = new AlertDialog.Builder(RingerMutedDialog.this)
                     .setPositiveButton(R.string.shush, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -248,7 +250,7 @@ public final class RingerMutedDialog extends Activity {
                         }
                     })
                     .setIcon(null)
-                    .setView(clockSlider)
+                    .setView(dialogView)
                     .setTitle(R.string.turnRingerOnIn)
                     .setCancelable(true)
                     .create();

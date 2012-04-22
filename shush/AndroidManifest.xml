@@ -10,7 +10,7 @@
         <activity android:name=".Welcome"
                 android:label="Shush!"
                 android:noHistory="true"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar">
+                android:theme="@style/ShushTheme">
            <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -26,6 +26,6 @@
                   android:launchMode="singleInstance"
                   android:noHistory="true"
                   android:label="Shush!"
-                  android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+                  android:theme="@style/ShushTheme"/>
     </application>
 </manifest>
