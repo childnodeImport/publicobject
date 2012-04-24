@@ -18,7 +18,6 @@
 package com.publicobject.shush;
 
 import android.app.AlarmManager;
-import static android.app.AlarmManager.ELAPSED_REALTIME;
 import android.app.PendingIntent;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import android.content.BroadcastReceiver;
