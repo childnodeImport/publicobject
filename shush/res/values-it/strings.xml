@@ -1,10 +1,10 @@
 <?xml version='1.0' ?>
 <resources>
   <string name="title">Shush! Ripristino Suoneria</string>
-  <string name="welcomeMessage">Fai partire Shush disattivando la suoneria. Puoi farlo con il taso gi&#249; del volume come fai normalmente. </string>
+  <string name="welcomeMessage">Fai partire Shush disattivando la suoneria. Puoi farlo con il tasto gi&#249; del volume come fai normalmente. </string>
   <string name="okay">Ottimo!</string>
   <string name="ringerRestored">Suoneria ripristinata.</string>
-  <string name="ringerShushedUntil">Suoneria disattivata fino alle % 1$s</string>
+  <string name="ringerShushedUntil">Suoneria disattivata fino alle %1$s</string>
   <string name="ringerShushedIndefinitely">Suoneria disattivata indefinitamente!</string>
   <string name="turnRingerOnIn">Ripristina la suoneria tra:</string>
   <string name="restoreVolumeLevel">Livello volume di ripristino:</string>
@@ -23,4 +23,11 @@
   <string name="orange">Arancione</string>
   <string name="red">Rosso</string>
   <string name="purple">Viola</string>
+  <string name="settingsTitle">PERSONALIZZA</string>
+  <string name="shareTitle">CONDIVIDI</string>
+  <string name="shareOverview">Ti &#232; piaciuta quest\' applicazione? Piacer&#224; anche ai tuoi amici!</string>
+  <string name="shareButton">Condividi</string>
+  <string name="shareChooserTitle">Condividi l\'applicazione</string>
+  <string name="shareMessage">Mi &#232; piaciuto Shush per Android. http://shushapp.com</string>
+  <string name="shareSubject">Shush!</string>
 </resources>
