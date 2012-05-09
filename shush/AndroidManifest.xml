@@ -26,6 +26,6 @@
                   android:launchMode="singleInstance"
                   android:noHistory="true"
                   android:label="Shush!"
-                  android:theme="@style/ShushTheme"/>
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
     </application>
 </manifest>
