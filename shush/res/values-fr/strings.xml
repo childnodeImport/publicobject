@@ -1,0 +1,33 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush! Sonneur Restaurateur</string>
+  <string name="welcomeMessage">Activez Shush par en &#233;teignant votre sonneur.  Vous pouvez utiliser le touche de volume-bas tout comme vous &#234;tes habitu&#233; &#224;.</string>
+  <string name="okay">Excellent!</string>
+  <string name="ringerRestored">Sonneur r&#233;tabli</string>
+  <string name="ringerShushedUntil">Sonneur silence jusqu\'a %1$s</string>
+  <string name="ringerShushedIndefinitely">Sonneur taire ind&#233;finiment!</string>
+  <string name="turnRingerOnIn">Activez la sonnerie dans:</string>
+  <string name="restoreVolumeLevel">Restaurer le niveau de volume:</string>
+  <string name="minutes">minutes</string>
+  <string name="hour">Heure</string>
+  <string name="hours">Heures</string>
+  <string name="shush">Chut!</string>
+  <string name="keepItOff">Gardez la sonneur hors.</string>
+  <string name="turnItOnNow">S&#233;lectionnez pour l\'activer maintenant.</string>
+  <string name="notificationsOn">Notifications sur</string>
+  <string name="notificationsOff">Notifications au large</string>
+  <string name="pink">Rose</string>
+  <string name="blue">Bleu</string>
+  <string name="green">Vert</string>
+  <string name="yellow">Jaune</string>
+  <string name="orange">Orange</string>
+  <string name="red">Rouge</string>
+  <string name="purple">Violet</string>
+  <string name="settingsTitle">PERSONNALISER</string>
+  <string name="shareTitle">PARTAGEZ L\'AMOUR</string>
+  <string name="shareOverview">Aimez-vous cette app?  Vos amis l\'aimeront aussi!</string>
+  <string name="shareButton">Partagez</string>
+  <string name="shareChooserTitle">Partagez l\'amour</string>
+  <string name="shareMessage">J\'adore Shush pour Android.  http://shushapp.com</string>
+  <string name="shareSubject">Chut!</string>
+</resources>

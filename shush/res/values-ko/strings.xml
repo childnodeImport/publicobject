@@ -23,5 +23,11 @@
   <string name="orange">&#51452;&#54889;&#49353;</string>
   <string name="red">&#48744;&#44036;&#49353;</string>
   <string name="purple">&#48372;&#46972;&#49353;</string>
+  <string name="settingsTitle">&#52964;&#49828;&#53552;&#47560;&#51060;&#51669;</string>
+  <string name="shareTitle">&#44277;&#50976;&#54644;&#51452;&#49464;&#50836;.</string>
+  <string name="shareOverview">Shush!&#47484; &#52828;&#44396;&#46308;&#50640;&#44172; &#49548;&#44060;&#54644;&#51452;&#49464;&#50836;.</string>
+  <string name="shareButton">&#44277;&#50976;&#54616;&#44592;</string>
+  <string name="shareChooserTitle">&#44277;&#50976;&#54644;&#51452;&#49464;&#50836;.</string>
+  <string name="shareMessage">Shush! &#50545; &#50756;&#51204; &#51339;&#50500;! http://shushapp.com</string>
   <string name="shareSubject">&#49791;!</string>
 </resources>

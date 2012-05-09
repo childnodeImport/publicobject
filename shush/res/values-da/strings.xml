@@ -1,0 +1,33 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush! Lyd Genopretter</string>
+  <string name="welcomeMessage">Aktiver Shush ved at sl&#229; lyden fra. Du kan  bruge den lydknap som du plejer</string>
+  <string name="okay">Super!</string>
+  <string name="ringerRestored">Lyden er genoprettet</string>
+  <string name="ringerShushedUntil">Lyd sl&#229;et fra indtil %1$s</string>
+  <string name="ringerShushedIndefinitely">Lyd sl&#229;et fra</string>
+  <string name="turnRingerOnIn">Lyden bliver sl&#229;et til om</string>
+  <string name="restoreVolumeLevel">Genoprettelses lyd niveau</string>
+  <string name="minutes">Minuter</string>
+  <string name="hour">Time</string>
+  <string name="hours">Timer</string>
+  <string name="shush">Shush!</string>
+  <string name="keepItOff">Sl&#229; ikke lyden til igen</string>
+  <string name="turnItOnNow">Tryk for at sl&#229; lyden til nu</string>
+  <string name="notificationsOn">Notifikationer til</string>
+  <string name="notificationsOff">Notifikationer fra</string>
+  <string name="pink">Pink</string>
+  <string name="blue">Bl&#229;</string>
+  <string name="green">Gr&#248;n</string>
+  <string name="yellow">Gul</string>
+  <string name="orange">Orange</string>
+  <string name="red">R&#248;d</string>
+  <string name="purple">Lilla</string>
+  <string name="settingsTitle">Valgmuligheder</string>
+  <string name="shareTitle">Del K&#230;rligheden</string>
+  <string name="shareOverview">Kan du lide appen? M&#229;ske kan dine venner</string>
+  <string name="shareButton">Del</string>
+  <string name="shareChooserTitle">Del K&#230;rligheden</string>
+  <string name="shareMessage">Jeg har h&#248;rt Shush for Android. http://shusapp.com</string>
+  <string name="shareSubject">Shush!</string>
+</resources>

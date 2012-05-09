@@ -1,0 +1,33 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">&#22040;&#65281;&#38899;&#37327;&#24674;&#22797;</string>
+  <string name="welcomeMessage">&#20851;&#38381;&#38083;&#22768;&#21363;&#21487;&#35302;&#21457;&#8220;&#22040;&#65281;&#8221;&#21151;&#33021;&#12290;&#20687;&#20197;&#24448;&#19968;&#26679;&#25353;&#20303;&#38899;&#37327;&#38477;&#20302;&#38190;&#21363;&#21487;&#12290;</string>
+  <string name="okay">&#22909;&#65281;</string>
+  <string name="ringerRestored">&#38899;&#37327;&#24050;&#24674;&#22797;.</string>
+  <string name="ringerShushedUntil">&#38745;&#38899;&#25345;&#32493;&#26102;&#38388;:</string>
+  <string name="ringerShushedIndefinitely">&#20445;&#25345;&#38745;&#38899;&#29366;&#24577;&#65281;</string>
+  <string name="turnRingerOnIn">&#22312;&#22810;&#20037;&#21518;&#24674;&#22797;&#21709;&#38083;&#27169;&#24335;&#65311;</string>
+  <string name="restoreVolumeLevel">&#24674;&#22797;&#38899;&#37327;&#32423;&#21035;&#65306;</string>
+  <string name="minutes">&#20998;&#38047;</string>
+  <string name="hour">&#23567;&#26102;</string>
+  <string name="hours">&#23567;&#26102;</string>
+  <string name="shush">&#22040;&#65281;</string>
+  <string name="keepItOff">&#20445;&#25345;&#38745;&#38899;.</string>
+  <string name="turnItOnNow">&#28857;&#27492;&#30452;&#25509;&#24674;&#22797;&#38899;&#37327;.</string>
+  <string name="notificationsOn">&#22312;&#36890;&#30693;&#26639;&#26174;&#31034;</string>
+  <string name="notificationsOff">&#19981;&#22312;&#36890;&#30693;&#26639;&#26174;&#31034;</string>
+  <string name="pink">&#31881;&#33394;</string>
+  <string name="blue">&#34013;&#33394;</string>
+  <string name="green">&#32511;&#33394;</string>
+  <string name="yellow">&#40644;&#33394;</string>
+  <string name="orange">&#26708;&#33394;</string>
+  <string name="red">&#32418;&#33394;</string>
+  <string name="purple">&#32043;&#33394;</string>
+  <string name="settingsTitle">&#33258;&#23450;&#20041;</string>
+  <string name="shareTitle">&#20998;&#20139;&#32473;&#22909;&#21451;</string>
+  <string name="shareOverview">&#29233;&#29992;&#25105;&#20204;&#30340;&#24212;&#29992;&#65311;&#20320;&#30340;&#26379;&#21451;&#32943;&#23450;&#20063;&#20250;&#21916;&#27426;&#65281;</string>
+  <string name="shareButton">&#20998;&#20139;</string>
+  <string name="shareChooserTitle">&#20998;&#20139;&#32473;&#22909;&#21451;</string>
+  <string name="shareMessage">&#24555;&#26469;&#35797;&#35797;\"&#22040;&#65281;&#38899;&#37327;&#24674;&#22797;&#22120;\"&#21543;&#65281; http://shushapp.com</string>
+  <string name="shareSubject">&#22040;&#65281;</string>
+</resources>
