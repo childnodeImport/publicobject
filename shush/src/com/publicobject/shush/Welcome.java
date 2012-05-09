@@ -24,6 +24,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,13 +40,18 @@ import android.widget.TextView;
 public final class Welcome extends Activity
         implements DialogInterface.OnClickListener, OnCancelListener {
     public static final int[] COLORS = {
-            Color.rgb(0xff, 0x00, 0xff), // pink
-            Color.rgb(0x88, 0x33, 0xbb), // purple
-            Color.rgb(0x66, 0x99, 0xff), // blue
-            Color.rgb(0x99, 0xcc, 0x33), // green
-            Color.rgb(0xff, 0xcc, 0x00), // yellow
-            Color.rgb(0xff, 0x66, 0x00), // orange
-            Color.rgb(0xcc, 0x00, 0x00), // red
+            Color.rgb(0xff, 0x00, 0xff), //  0 pink
+            Color.rgb(0x88, 0x33, 0xbb), //  1 purple
+            Color.rgb(0x66, 0x99, 0xff), //  2 blue
+            Color.rgb(0x99, 0xcc, 0x33), //  3 green
+            Color.rgb(0xff, 0xcc, 0x00), //  4 yellow
+            Color.rgb(0xff, 0x66, 0x00), //  5 orange
+            Color.rgb(0xcc, 0x00, 0x00), //  6 red
+            Color.rgb(0x33, 0xb5, 0xe5), //  7 ICS blue
+            Color.rgb(0xaa, 0x66, 0xcc), //  8 ICS purple
+            Color.rgb(0x99, 0xcc, 0x00), //  9 ICS green
+            Color.rgb(0xff, 0xbb, 0x33), // 10 ICS orange
+            Color.rgb(0xff, 0x44, 0x44), // 11 ICS red
     };
     public static final int[] COLOR_NAMES = {
             R.string.pink,
@@ -53,6 +59,11 @@ public final class Welcome extends Activity
             R.string.blue,
             R.string.green,
             R.string.yellow,
+            R.string.orange,
+            R.string.red,
+            R.string.blue,
+            R.string.purple,
+            R.string.green,
             R.string.orange,
             R.string.red,
     };
@@ -142,7 +153,19 @@ public final class Welcome extends Activity
         }
 
         @Override void toggle() {
-            colorIndex = (colorIndex + 1) % COLORS.length;
+            colorIndex++;
+
+            if (Build.VERSION.SDK_INT < 14) {
+                // Use colors 0-7 for Honeycomb and earlier
+                if (colorIndex >= 7) {
+                    colorIndex = 0;
+                }
+            } else {
+                // Use colors 7-11 for ICS
+                if (colorIndex < 7 || colorIndex >= 12) {
+                    colorIndex = 7;
+                }
+            }
 
             SharedPreferences preferences = getSharedPreferences(
                     RingerMutedDialog.class.getSimpleName(), Context.MODE_PRIVATE);
