@@ -11,7 +11,7 @@
   <string name="minutes">minutid</string>
   <string name="hour">tund</string>
   <string name="hours">tunnid</string>
-  <string name="shush">Kuss!</string>
+  <string name="shush">Shush!</string>
   <string name="keepItOff">J&#228;tagi vaikseks</string>
   <string name="turnItOnNow">Vali, et heli tagasi sisse l&#252;litada.</string>
   <string name="notificationsOn">Teavitused sees</string>
@@ -20,14 +20,14 @@
   <string name="blue">Sinine</string>
   <string name="green">Roheline</string>
   <string name="yellow">Kollane</string>
-  <string name="orange">Oraan&#382;</string>
+  <string name="orange">Oran&#353;</string>
   <string name="red">Punane</string>
   <string name="purple">Lilla</string>
   <string name="settingsTitle">KOHANDA</string>
   <string name="shareTitle">JAGA ARMASTUST</string>
-  <string name="shareOverview">Kas sulle meeldis see rakendus? Su s&#245;pradele meeldib see ka!</string>
+  <string name="shareOverview">Kas sulle meeldis see rakendus? Su s&#245;pradele meeldib see ilmselt ka!</string>
   <string name="shareButton">Jaga</string>
-  <string name="shareChooserTitle">Jaga armastust</string>
-  <string name="shareMessage">Androidile kuss! http://shushapp.com</string>
-  <string name="shareSubject">Kuss!</string>
+  <string name="shareChooserTitle">Jaga Armastust</string>
+  <string name="shareMessage">Shush! Androidile http://shushapp.com</string>
+  <string name="shareSubject">Shush!</string>
 </resources>

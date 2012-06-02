@@ -11,7 +11,7 @@
     <string name="minutes">minutos</string>
     <string name="hour">hora</string>
     <string name="hours">horas</string>
-    <string name="shush">Shush!</string>
+    <string name="shush">&#161;Silenciar!</string>
     <string name="keepItOff">Mantener apagado</string>
     <string name="turnItOnNow">Seleccionar para activar ahora.</string>
     <string name="notificationsOn">Notificaciones activadas</string>

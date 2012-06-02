@@ -1,0 +1,33 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush! Luitoon Hersteller</string>
+  <string name="welcomeMessage">Om Shush te aktiveer, kan jy jou luitoon af skakel. Jy kan van die afwaartse volume knoppie gebruik maak, nes jy gewoon is.</string>
+  <string name="okay">Lekker!</string>
+  <string name="ringerRestored">Luitoon Herstel.</string>
+  <string name="ringerShushedUntil">Luitoon geshht tot %1$s</string>
+  <string name="ringerShushedIndefinitely">Luitoon permanent geshht!</string>
+  <string name="turnRingerOnIn">Skakel luitoon aan in:</string>
+  <string name="restoreVolumeLevel">Herstel volume vlak:</string>
+  <string name="minutes">minute</string>
+  <string name="hour">uur</string>
+  <string name="hours">ure</string>
+  <string name="shush">shht</string>
+  <string name="keepItOff">Hou dit af.</string>
+  <string name="turnItOnNow">Kies om dadelik aan te skakel.</string>
+  <string name="notificationsOn">Kennisgewings aan</string>
+  <string name="notificationsOff">Kennisgewings af</string>
+  <string name="pink">Pienk</string>
+  <string name="blue">Blou</string>
+  <string name="green">Groen</string>
+  <string name="yellow">Geel</string>
+  <string name="orange">Oranje</string>
+  <string name="red">Rooi</string>
+  <string name="purple">Pers</string>
+  <string name="settingsTitle">PAS AAN</string>
+  <string name="shareTitle">DEEL DIE LIEFDE</string>
+  <string name="shareOverview">Hou van di&#233; app? Jou vriende sal ook!</string>
+  <string name="shareButton">DEEL DIE LIEFDE</string>
+  <string name="shareChooserTitle">Deel die Liefde</string>
+  <string name="shareMessage">Ek lief Shush vir Android. http://shushapp.com</string>
+  <string name="shareSubject">Shush!</string>
+</resources>

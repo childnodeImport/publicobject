@@ -1,0 +1,33 @@
+<?xml version='1.0' ?>
+<resources>
+  <string name="title">Shush! Aktiv&#225;tor vyzv&#225;n&#283;n&#237;</string>
+  <string name="welcomeMessage">Aktivujte Shush! vypnut&#237;m vyzv&#225;n&#283;n&#237;. M&#367;&#382;ete pou&#382;&#237;t tla&#269;&#237;tko pro ovl&#225;d&#225;n&#237; hlasitosti, jak jste zvykl&#237;.</string>
+  <string name="okay">Hotovo!</string>
+  <string name="ringerRestored">Vyzv&#225;n&#283;n&#237; obnoveno.</string>
+  <string name="ringerShushedUntil">Vyzv&#225;n&#283;n&#237; ztlumeno do %1$s</string>
+  <string name="ringerShushedIndefinitely">Vyzv&#225;n&#283;n&#237; ztlumeno trvale.</string>
+  <string name="turnRingerOnIn">Zapnout vyzv&#225;n&#283;n&#237; v:</string>
+  <string name="restoreVolumeLevel">Obnoven&#225; &#250;rove&#328; hlasitosti:</string>
+  <string name="minutes">minut</string>
+  <string name="hour">hodina</string>
+  <string name="hours">hodiny</string>
+  <string name="shush">Ztlumit!</string>
+  <string name="keepItOff">Ztlumit trvale.</string>
+  <string name="turnItOnNow">Vyberte pro obnoven&#237; vyzv&#225;n&#283;n&#237;.</string>
+  <string name="notificationsOn">Notifikace zapnut&#233;</string>
+  <string name="notificationsOff">Notifikace vypnut&#233;</string>
+  <string name="pink">R&#367;&#382;ov&#225;</string>
+  <string name="blue">Modr&#225;</string>
+  <string name="green">Zelen&#225;</string>
+  <string name="yellow">&#381;lut&#225;</string>
+  <string name="orange">Oran&#382;ov&#225;</string>
+  <string name="red">&#268;erven&#225;</string>
+  <string name="purple">Fialov&#225;</string>
+  <string name="settingsTitle">P&#344;IZP&#366;SOBIT</string>
+  <string name="shareTitle">POD&#282;LTE SE</string>
+  <string name="shareOverview">L&#237;b&#237; se V&#225;m tato aplikace? Va&#353;im p&#345;&#225;tel&#367;m se bude l&#237;bit tak&#233;!</string>
+  <string name="shareButton">Sd&#237;let</string>
+  <string name="shareChooserTitle">Pod&#283;lte se</string>
+  <string name="shareMessage">L&#237;b&#237; se mi Shush pro Android. http://shushapp.com</string>
+  <string name="shareSubject">Shush! </string>
+</resources>
