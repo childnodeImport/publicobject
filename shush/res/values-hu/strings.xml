@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="title">Pszt! Csengés Visszaállító</string>
+  <string name="welcomeMessage">"Az aktivált Pszt kikapcsolja a csengőhangot a beállított időtartamra. Használd a készüléked hangerő halkító gombját, vagy egy hang profil váltó widgetet az alkalmazáshoz.</string>
+  <string name="okay">Ok</string>
+  <string name="ringerRestored">Csengőhang aktiválva.</string>
+  <string name="ringerShushedUntil">Csengőhang lenémítva %1$s-ig</string>
+  <string name="ringerShushedIndefinitely">Korlátlan ideig lenémítva!</string>
+  <string name="turnRingerOnIn">Csengőhang némítás időtartama:</string>
+  <string name="restoreVolumeLevel">Hangerőszint beállítása:</string>
+  <string name="minutes">perc</string>
+  <string name="hour">óra</string>
+  <string name="hours">óra</string>
+  <string name="shush">Pszt!</string>
+  <string name="keepItOff">Időzítés nélkül.</string>
+  <string name="turnItOnNow">Válaszd ki az azonnali bekapcsoláshoz.</string>
+  <string name="notificationsOn">Értesítés aktív</string>
+  <string name="notificationsOff">Értesítés inaktív</string>
+  <string name="pink">Rózsaszín</string>
+  <string name="blue">Kék</string>
+  <string name="green">Zöld</string>
+  <string name="yellow">Sárga</string>
+  <string name="orange">Narancs</string>
+  <string name="red">Piros</string>
+  <string name="purple">Lila</string>
+  <string name="settingsTitle">Testreszabás</string>
+  <string name="shareTitle">Megosztás</string>
+  <string name="shareOverview">Tetszik ez az app? A barátaidnak szintén!</string>
+  <string name="shareButton">Megoszt</string>
+  <string name="shareChooserTitle">Megosztás</string>
+  <string name="shareMessage">Kedvelem a Pszt! az Androidon. http://shushapp.com</string>
+  <string name="shareSubject">Pszt!</string>
+</resources>

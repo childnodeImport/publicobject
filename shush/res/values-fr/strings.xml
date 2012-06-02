@@ -5,7 +5,7 @@
   <string name="okay">Cool !</string>
   <string name="ringerRestored">Sonnerie r&#233;tablie.</string>
   <string name="ringerShushedUntil">Sonnerie coup&#233;e jusqu\'&#224; %1$s</string>
-  <string name="ringerShushedIndefinitely">Sonnerie coup&#233;eind&#233;finiment!</string>
+  <string name="ringerShushedIndefinitely">Sonnerie coup&#233;e ind&#233;finiment !</string>
   <string name="turnRingerOnIn">Activer la sonnerie dans :</string>
   <string name="restoreVolumeLevel">Volume de sonnerie &#224; restaurer :</string>
   <string name="minutes">minutes</string>
@@ -14,8 +14,8 @@
   <string name="shush">Chut !</string>
   <string name="keepItOff">Garder le silence.</string>
   <string name="turnItOnNow">S&#233;lectionnez pour l\'activer maintenant.</string>
-  <string name="notificationsOn">Notifications activ&#233;es </string>
-  <string name="notificationsOff">Notifications d&#233;sactiv&#233;es </string>
+  <string name="notificationsOn">Notifications ON</string>
+  <string name="notificationsOff">Notifications OFF</string>
   <string name="pink">Rose</string>
   <string name="blue">Bleu</string>
   <string name="green">Vert</string>
@@ -27,7 +27,7 @@
   <string name="shareTitle">PARTAGEZ L\'AMOUR</string>
   <string name="shareOverview">Vous aimez cette appli ?  Vos amis l\'aimeront aussi!</string>
   <string name="shareButton">Partagez</string>
-  <string name="shareChooserTitle">Partager l\'amou</string>
+  <string name="shareChooserTitle">Partager l\'appli</string>
   <string name="shareMessage">J\'adore Shush! pour Android.  http://shushapp.com</string>
   <string name="shareSubject">Chut !</string>
 </resources>
