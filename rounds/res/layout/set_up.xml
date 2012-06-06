@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+  <LinearLayout
+      android:weightSum="100"
+      android:gravity="center"
+      android:orientation="vertical"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:background="#202020">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="bottom"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+      <Space
+          android:layout_width="10dp"
+          android:layout_height="0dp"/>
+      <AutoCompleteTextView
+          style="@android:style/TextAppearance.Holo.Large"
+          android:id="@+id/name"
+          android:imeOptions="actionNext"
+          android:capitalize="words"
+          android:text=""
+          android:singleLine="true"
+          android:maxLength="12"
+          android:layout_weight="1"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"/>
+      <Space
+          android:id="@+id/colorPlaceholder"
+          android:layout_width="60dp"
+          android:layout_height="60dp"/>
+      <Space
+          android:layout_width="10dp"
+          android:layout_height="0dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:weightSum="100"
+        android:gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+      <Button
+          android:id="@+id/next"
+          android:text="Next"
+          android:layout_weight="30"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="20"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:id="@+id/namesRow0"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/namesRow1"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </LinearLayout>
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="20"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:weightSum="100"
+        android:gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+      <Button
+          android:id="@+id/play"
+          android:text="Play"
+          android:layout_weight="30"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
+    </LinearLayout>
+  </LinearLayout>
+</FrameLayout>

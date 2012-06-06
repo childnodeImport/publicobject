@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+  <Space
+      android:layout_weight="33"
+      android:layout_width="0dp"
+      android:layout_height="0dp"/>
+  <LinearLayout
+      android:layout_weight="33"
+      android:orientation="vertical"
+      android:gravity="center"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent">
+    <Space
+        android:layout_weight="40"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+    <ImageView
+        android:src="@drawable/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Space
+        android:layout_weight="20"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+    <Button
+        android:id="@+id/newGame"
+        android:text="New Game"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/resumeLastGame"
+        android:text="Resume Last Game"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/loadGame"
+        android:text="Load Game"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+    <Space
+        android:layout_weight="40"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+  </LinearLayout>
+  <Space
+      android:layout_weight="33"
+      android:layout_width="0dp"
+      android:layout_height="0dp"/>
+</LinearLayout>
