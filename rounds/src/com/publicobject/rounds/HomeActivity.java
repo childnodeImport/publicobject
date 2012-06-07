@@ -63,6 +63,7 @@ public class HomeActivity extends Activity {
         gameList = (ListView) findViewById(R.id.gameList);
         gameList.setItemsCanFocus(true);
 
+        getActionBar().setTitle("Recent Games");
     }
 
     @Override public void onResume() {
@@ -151,7 +152,7 @@ public class HomeActivity extends Activity {
             players.setText(ssb);
 
             StringBuilder rounds = new StringBuilder();
-            if (game.roundCount() == 0) {
+            if (game.roundCount() == 1) {
                 rounds.append("1 round. ");
             } else {
                 rounds.append(Integer.toString(game.roundCount()));
