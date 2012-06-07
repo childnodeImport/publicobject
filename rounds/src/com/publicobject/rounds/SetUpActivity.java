@@ -152,6 +152,7 @@ public final class SetUpActivity extends Activity {
         intent.putExtra(GameActivity.EXTRA_PLAYER_NAMES, playerNames);
         intent.putExtra(GameActivity.EXTRA_PLAYER_COLORS, playerColors);
         startActivity(intent);
+        finish();
     }
 
     private void setEditingPlayer(Player player) {

@@ -18,6 +18,7 @@ package com.publicobject.rounds;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -52,11 +53,19 @@ public final class GameActivity extends Activity {
     private Button nextRound;
     private Button previousRound;
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    @Override public void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
 
         database = GameDatabase.getInstance(getApplicationContext());
-        game = createGame();
+
+        Intent intent = getIntent();
+        if (savedState != null) {
+            game = Json.jsonToGame(savedState.getString(EXTRA_GAME));
+        } else if (intent.hasExtra(EXTRA_GAME)) {
+            game = Json.jsonToGame(intent.getStringExtra(EXTRA_GAME));
+        } else {
+            game = createNewGame();
+        }
         game.setRound(game.roundCount() - 1);
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -111,6 +120,11 @@ public final class GameActivity extends Activity {
         });
 
         roundChanged();
+    }
+
+    @Override protected void onSaveInstanceState(Bundle savedState) {
+        super.onSaveInstanceState(savedState);
+        savedState.putString(EXTRA_GAME, Json.gameToJson(game));
     }
 
     private void roundChanged() {
@@ -182,14 +196,6 @@ public final class GameActivity extends Activity {
     private boolean shouldAutosave() {
         // TODO(jessewilson): only save when dirty
         return true;
-    }
-
-    private Game createGame() {
-        if (getIntent().hasExtra(EXTRA_PLAYER_NAMES)) {
-            return createNewGame();
-        } else {
-            return Json.jsonToGame(getIntent().getStringExtra(EXTRA_GAME));
-        }
     }
 
     private Game createNewGame() {

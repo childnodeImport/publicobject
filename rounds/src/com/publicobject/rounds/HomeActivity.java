@@ -39,7 +39,7 @@ public class HomeActivity extends Activity {
     private GameDatabase database;
     private ListView gameList;
 
-    private final View.OnClickListener replayListener = new View.OnClickListener() {
+    private final View.OnClickListener rematchListener = new View.OnClickListener() {
         @Override public void onClick(View button) {
             int position = gameList.getPositionForView((View) button.getParent());
             Game game = (Game) gameList.getAdapter().getItem(position);
@@ -127,7 +127,7 @@ public class HomeActivity extends Activity {
                     : recycle);
             TextView players = (TextView) layout.findViewById(R.id.players);
             TextView summary = (TextView) layout.findViewById(R.id.summary);
-            Button replay = (Button) layout.findViewById(R.id.replay);
+            Button rematch = (Button) layout.findViewById(R.id.rematch);
             Game game = getItem(position);
             int maxTotal = game.maxTotal();
 
@@ -163,7 +163,7 @@ public class HomeActivity extends Activity {
                     game.getDateStarted(), true));
             summary.setText(rounds);
 
-            replay.setOnClickListener(replayListener);
+            rematch.setOnClickListener(rematchListener);
             layout.setOnClickListener(resumeListener);
             layout.setFocusable(true);
             layout.setBackgroundResource(android.R.drawable.list_selector_background);

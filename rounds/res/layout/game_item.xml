@@ -28,8 +28,8 @@
       android:layout_height="wrap_content"/>
   </LinearLayout>
   <Button
-      android:id="@+id/replay"
-      android:text="Replay"
+      android:id="@+id/rematch"
+      android:text="Rematch"
       android:layout_marginLeft="4dp"
       android:layout_marginRight="8dp"
       android:layout_marginTop="4dp"
