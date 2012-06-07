@@ -32,7 +32,7 @@ public final class Game implements Cloneable {
         SAMPLE.addPlayer("Jono", 0xff00ff);
     }
 
-    private String id;
+    private long lastSaved = 0;
     private long dateStarted;
     private int round = 0;
     private List<Player> players = new ArrayList<Player>();
@@ -41,11 +41,26 @@ public final class Game implements Cloneable {
         setRound(0);
     }
 
-    public String getId() {
-        return id;
+    /**
+     * Returns a new game with the same players but no scoring.
+     */
+    public Game replay() {
+        Game result = clone();
+        result.round = 0;
+        result.setDateStarted(System.currentTimeMillis());
+        for (Player player : result.players) {
+            player.total = 0;
+            player.history.clear();
+            player.history.add(0);
+        }
+        return result;
     }
-    public void setId(String id) {
-        this.id = id;
+
+    public long getLastSaved() {
+        return lastSaved;
+    }
+    public void setLastSaved(long lastSaved) {
+        this.lastSaved = lastSaved;
     }
     public long getDateStarted() {
         return dateStarted;
@@ -93,7 +108,7 @@ public final class Game implements Cloneable {
     public void setPlayerScore(int player, int round, int value) {
         Player playerScore = players.get(player);
         int last = playerScore.history.set(round, value);
-        playerScore.score = playerScore.score - last + value;
+        playerScore.total = playerScore.total - last + value;
     }
 
     public int round() {
@@ -112,6 +127,17 @@ public final class Game implements Cloneable {
         return players.get(player).name;
     }
 
+    /**
+     * Returns the highest total among all players.
+     */
+    public int maxTotal() {
+        int result = Integer.MIN_VALUE;
+        for (int p = 0; p < players.size(); p++) {
+            result = Math.max(result, players.get(p).total);
+        }
+        return result;
+    }
+
     public int roundCount() {
         return players.get(0).history.size();
     }
@@ -121,7 +147,7 @@ public final class Game implements Cloneable {
     }
 
     public int playerTotal(int player) {
-        return players.get(player).score;
+        return players.get(player).total;
     }
 
     public int roundScore(int player) {
@@ -144,7 +170,7 @@ public final class Game implements Cloneable {
     private static class Player implements Cloneable {
         private final String name;
         private final int color;
-        private int score;
+        private int total;
         private final List<Integer> history = new ArrayList<Integer>();
 
         private Player(String name, int color) {
@@ -157,7 +183,7 @@ public final class Game implements Cloneable {
 
         @Override public Player clone() {
             Player result = new Player(name, color);
-            result.score = score;
+            result.total = total;
             result.history.addAll(history);
             return result;
         }

@@ -106,7 +106,7 @@ public final class GameDatabase {
      * Games are identified by their start date in hex. This way the most recent
      * game is always sorted to the end in an alphabetical sort.
      */
-    private String createGameId(Game game) {
+    private String getGameId(Game game) {
         if (game.getDateStarted() == 0) {
             throw new IllegalArgumentException();
         }
@@ -187,13 +187,9 @@ public final class GameDatabase {
      * if it already exists.
      */
     public synchronized void save(Game game) {
-        String id = game.getId();
-        boolean isNewGame = false;
-        if (id == null) {
-            id = createGameId(game);
-            game.setId(id);
-            isNewGame = true;
-        }
+        String id = getGameId(game);
+        boolean isNewGame = (game.getLastSaved() == 0);
+        game.setLastSaved(System.currentTimeMillis());
 
         // save the game to the filesystem
         File scratch = getFile(id + ".scratch");
@@ -271,7 +267,7 @@ public final class GameDatabase {
      */
     public void deleteGames(Set<Game> games) {
         for (Game game : games) {
-            delete(getFile(game.getId() + ".game"));
+            delete(getFile(getGameId(game) + ".game"));
         }
     }
 
