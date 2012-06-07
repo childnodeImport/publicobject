@@ -3,7 +3,7 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-              android:background="#202020">
+              android:background="#000000">
   <LinearLayout
       android:orientation="horizontal"
       android:gravity="center"
@@ -61,8 +61,7 @@
       android:orientation="horizontal"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="20dp"
-      android:layout_marginBottom="20dp">
+      android:layout_marginTop="20dp">
     <HorizontalScrollView
         android:id="@+id/runningScoresScroller"
         android:layout_weight="1"
