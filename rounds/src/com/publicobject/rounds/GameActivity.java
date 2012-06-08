@@ -16,18 +16,19 @@
 
 package com.publicobject.rounds;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import java.util.concurrent.TimeUnit;
@@ -50,8 +51,9 @@ public final class GameActivity extends Activity {
     private ScoreHistoryTable scoreHistoryTable;
     private TextView labelTextView;
     private TextView valueTextView;
-    private Button nextRound;
-    private Button previousRound;
+    private ImageButton nextRound;
+    private TextView roundTextView;
+    private ImageButton previousRound;
 
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
@@ -76,8 +78,6 @@ public final class GameActivity extends Activity {
 
         labelTextView = (TextView) layout.findViewById(R.id.label);
         valueTextView = (TextView) layout.findViewById(R.id.value);
-        nextRound = (Button) layout.findViewById(R.id.nextRound);
-        previousRound = (Button) layout.findViewById(R.id.previousRound);
 
         scoreHistoryTable = new ScoreHistoryTable(getApplicationContext(),
                 (TableLayout) layout.findViewById(R.id.runningScores),
@@ -91,33 +91,47 @@ public final class GameActivity extends Activity {
             @Override public void selecting(int player, int value) {
                 labelTextView.setText(game.playerName(player));
                 labelTextView.setTextColor(game.playerColor(player));
+                labelTextView.setVisibility(View.VISIBLE);
                 String prefix = value > 0 ? "+" : "";
                 valueTextView.setText(prefix + Integer.toString(value));
+                valueTextView.setVisibility(View.VISIBLE);
             }
+
             @Override public void selected(int player, int value) {
                 int round = game.round();
                 game.setPlayerScore(player, round, value);
                 scoreHistoryTable.scoreChanged(player, round);
                 roundChanged();
             }
+
             @Override public void cancelled() {
                 roundChanged();
             }
         });
 
+        View roundPicker = getLayoutInflater().inflate(R.layout.round_picker, null);
+        nextRound = (ImageButton) roundPicker.findViewById(R.id.nextRound);
+        roundTextView = (TextView) roundPicker.findViewById(R.id.roundNumber);
+        previousRound = (ImageButton) roundPicker.findViewById(R.id.previousRound);
         nextRound.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 game.setRound(game.round() + 1);
                 roundChanged();
             }
         });
-
         previousRound.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
                 game.setRound(game.round() - 1);
                 roundChanged();
             }
         });
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
+                ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
+        actionBar.setCustomView(roundPicker);
 
         roundChanged();
     }
@@ -129,12 +143,12 @@ public final class GameActivity extends Activity {
 
     private void roundChanged() {
         scoreHistoryTable.roundCountChanged();
-        labelTextView.setText("Round");
-        labelTextView.setTextColor(Color.WHITE);
+        roundTextView.setText("Round " + Integer.toString(game.round() + 1));
+        labelTextView.setVisibility(View.INVISIBLE);
         previousRound.setEnabled(game.round() > 0);
         nextRound.setEnabled(game.round() < game.roundCount() - 1
                 || game.hasNonZeroScore(game.round()));
-        valueTextView.setText(Integer.toString(game.round() + 1));
+        valueTextView.setVisibility(View.INVISIBLE);
         jogWheel.invalidate();
     }
 
@@ -168,6 +182,18 @@ public final class GameActivity extends Activity {
         startPeriodicSave();
         roundChanged();
         paused = false;
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     private void startPeriodicSave() {

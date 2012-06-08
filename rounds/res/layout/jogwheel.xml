@@ -4,58 +4,29 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:background="#000000">
-  <LinearLayout
-      android:orientation="horizontal"
-      android:gravity="center"
+  <TextView
+      android:id="@+id/label"
+      android:text="Jesse"
+      android:gravity="center_horizontal"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_marginTop="20dp"
-      android:layout_marginBottom="20dp">
-    <Button
-        android:id="@+id/previousRound"
-        android:text="&lt;"
-        android:layout_weight="4"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"/>
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_weight="12"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content">
-      <TextView
-          android:id="@+id/label"
-          android:text="Round"
-          android:gravity="center_horizontal"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"
-          style="@android:style/TextAppearance.Holo.Medium"/>
-      <TextView
-          android:id="@+id/value"
-          android:text="10"
-          android:gravity="center_horizontal"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="3dp"
-          style="@android:style/TextAppearance.Holo.Large"
-          android:textSize="32dp"
-          android:textStyle="bold"/>
-    </LinearLayout>
-    <Button
-        android:id="@+id/nextRound"
-        android:text="&gt;"
-        android:layout_weight="4"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"/>
-  </LinearLayout>
+      style="@android:style/TextAppearance.Holo.Medium"/>
+  <TextView
+      android:id="@+id/value"
+      android:text="75"
+      android:gravity="center_horizontal"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="3dp"
+      style="@android:style/TextAppearance.Holo.Large"
+      android:textSize="32dp"
+      android:textStyle="bold"/>
 
   <com.publicobject.rounds.JogWheel
       android:id="@+id/jogWheel"
       android:layout_width="fill_parent"
       android:layout_height="0dp"
-      android:layout_weight="1"
-      />
+      android:layout_weight="1"/>
 
   <LinearLayout
       android:orientation="horizontal"

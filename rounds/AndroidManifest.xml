@@ -24,8 +24,9 @@
         android:windowSoftInputMode="adjustResize|stateVisible"/>
     <activity
         android:name=".GameActivity"
-        android:theme="@android:style/Theme.Holo.NoActionBar"
+        android:theme="@android:style/Theme.Holo"
         android:screenOrientation="portrait"
+        android:windowActionBarOverlay="true"
         android:configChanges="orientation|keyboardHidden|keyboard"/>
   </application>
   <uses-permission
