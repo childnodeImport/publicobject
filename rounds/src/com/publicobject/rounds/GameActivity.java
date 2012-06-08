@@ -20,13 +20,18 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.text.SpannableStringBuilder;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
@@ -51,6 +56,8 @@ public final class GameActivity extends Activity {
     private ScoreHistoryTable scoreHistoryTable;
     private TextView labelTextView;
     private TextView valueTextView;
+
+    private ActionBar actionBar;
     private ImageButton nextRound;
     private TextView roundTextView;
     private ImageButton previousRound;
@@ -73,6 +80,8 @@ public final class GameActivity extends Activity {
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, getPackageName());
 
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+
         View layout = getLayoutInflater().inflate(R.layout.jogwheel, null);
         setContentView(layout);
 
@@ -89,21 +98,39 @@ public final class GameActivity extends Activity {
         jogWheel.setModel(game);
         jogWheel.setListener(new JogWheel.Listener() {
             @Override public void selecting(int player, int value) {
+                int selectingFrom = game.playerScore(player, game.round());
+
                 labelTextView.setText(game.playerName(player));
                 labelTextView.setTextColor(game.playerColor(player));
                 labelTextView.setVisibility(View.VISIBLE);
-                String prefix = value > 0 ? "+" : "";
-                valueTextView.setText(prefix + Integer.toString(value));
-                valueTextView.setVisibility(View.VISIBLE);
-            }
 
+                SpannableStringBuilder ssb = new SpannableStringBuilder();
+                if (selectingFrom != 0 && selectingFrom != value) {
+                    ssb.append(Integer.toString(selectingFrom));
+                    if (value > selectingFrom) {
+                        ssb.append(" + ").append(Integer.toString(value - selectingFrom));
+                    } else {
+                        ssb.append(" - ").append(Integer.toString(selectingFrom - value));
+                    }
+                    ssb.append(" = ");
+                }
+                String valueString = (value > 0 ? "+" : "") + Integer.toString(value);
+                ssb.append(valueString);
+                ssb.setSpan(new AbsoluteSizeSpan(32, true),
+                        ssb.length() - valueString.length(), ssb.length(), 0);
+                ssb.setSpan(new StyleSpan(Typeface.BOLD),
+                        ssb.length() - valueString.length(), ssb.length(), 0);
+
+                valueTextView.setText(ssb);
+                valueTextView.setVisibility(View.VISIBLE);
+                actionBar.hide();
+            }
             @Override public void selected(int player, int value) {
                 int round = game.round();
                 game.setPlayerScore(player, round, value);
                 scoreHistoryTable.scoreChanged(player, round);
                 roundChanged();
             }
-
             @Override public void cancelled() {
                 roundChanged();
             }
@@ -127,7 +154,7 @@ public final class GameActivity extends Activity {
             }
         });
 
-        ActionBar actionBar = getActionBar();
+        actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -149,6 +176,7 @@ public final class GameActivity extends Activity {
         nextRound.setEnabled(game.round() < game.roundCount() - 1
                 || game.hasNonZeroScore(game.round()));
         valueTextView.setVisibility(View.INVISIBLE);
+        actionBar.show();
         jogWheel.invalidate();
     }
 

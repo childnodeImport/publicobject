@@ -7,20 +7,20 @@
   <TextView
       android:id="@+id/label"
       android:text="Jesse"
-      android:gravity="center_horizontal"
+      android:gravity="right"
+      android:layout_marginRight="16dp"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
       style="@android:style/TextAppearance.Holo.Medium"/>
   <TextView
       android:id="@+id/value"
       android:text="75"
-      android:gravity="center_horizontal"
+      android:gravity="right"
+      android:layout_marginRight="16dp"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="3dp"
-      style="@android:style/TextAppearance.Holo.Large"
-      android:textSize="32dp"
-      android:textStyle="bold"/>
+      style="@android:style/TextAppearance.Holo.Large"/>
 
   <com.publicobject.rounds.JogWheel
       android:id="@+id/jogWheel"
