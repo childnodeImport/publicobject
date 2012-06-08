@@ -76,6 +76,7 @@ public final class HomeActivity extends Activity {
         case R.id.newGame:
             Intent newGameIntent = new Intent(this, SetUpActivity.class);
             startActivity(newGameIntent);
+            overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -86,6 +87,7 @@ public final class HomeActivity extends Activity {
         Intent intent = new Intent(getApplicationContext(), GameActivity.class);
         intent.putExtra(GameActivity.EXTRA_GAME, Json.gameToJson(game));
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
     }
 
     private class GameListAdapter extends BaseAdapter {

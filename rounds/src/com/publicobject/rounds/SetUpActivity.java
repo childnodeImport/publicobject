@@ -59,7 +59,7 @@ public final class SetUpActivity extends Activity {
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("Players");
+        actionBar.setTitle("Add Players");
 
         name = (AutoCompleteTextView) layout.findViewById(R.id.name);
         Set<String> playerNames = GameDatabase.getInstance(getApplicationContext())
@@ -158,6 +158,7 @@ public final class SetUpActivity extends Activity {
         intent.putExtra(GameActivity.EXTRA_PLAYER_NAMES, playerNames);
         intent.putExtra(GameActivity.EXTRA_PLAYER_COLORS, playerColors);
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
         finish();
     }
 
@@ -220,6 +221,7 @@ public final class SetUpActivity extends Activity {
             Intent intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
             return true;
         default:
             return super.onOptionsItemSelected(item);

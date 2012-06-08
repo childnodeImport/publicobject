@@ -20,6 +20,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -57,6 +58,7 @@ public final class GameActivity extends Activity {
     private TextView labelTextView;
     private TextView valueTextView;
 
+    private ActionBarBackground actionBarBackground;
     private ActionBar actionBar;
     private ImageButton nextRound;
     private TextView roundTextView;
@@ -129,6 +131,7 @@ public final class GameActivity extends Activity {
                 int round = game.round();
                 game.setPlayerScore(player, round, value);
                 scoreHistoryTable.scoreChanged(player, round);
+                updateActionBarBackground();
                 roundChanged();
             }
             @Override public void cancelled() {
@@ -159,6 +162,9 @@ public final class GameActivity extends Activity {
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
         actionBar.setCustomView(roundPicker);
+        actionBarBackground = new ActionBarBackground(getResources());
+        actionBar.setBackgroundDrawable(actionBarBackground);
+        updateActionBarBackground();
 
         roundChanged();
     }
@@ -178,6 +184,21 @@ public final class GameActivity extends Activity {
         valueTextView.setVisibility(View.INVISIBLE);
         actionBar.show();
         jogWheel.invalidate();
+    }
+
+    private void updateActionBarBackground() {
+        int color = Color.WHITE;
+        int maxTotal = Integer.MIN_VALUE;
+        for (int p = 0; p < game.playerCount(); p++) {
+            int playerTotal = game.playerTotal(p);
+            if (playerTotal > maxTotal) {
+                color = game.playerColor(p);
+                maxTotal = playerTotal;
+            } else if (playerTotal == maxTotal) {
+                color = Color.WHITE;
+            }
+        }
+        actionBarBackground.setColor(color);
     }
 
     @Override protected void onDestroy() {
@@ -218,6 +239,7 @@ public final class GameActivity extends Activity {
             Intent intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
             return true;
         default:
             return super.onOptionsItemSelected(item);

@@ -6,7 +6,7 @@
     android:layout_height="fill_parent">
   <TextView
       style="@android:style/TextAppearance.Holo.Medium"
-      android:text="Rounds is a digital score pad for card games, board games, charades and mini golf."
+      android:text="Use Rounds to keep score when you play cards, mini golf and other games."
       android:id="@+id/players"
       android:layout_marginTop="8dp"
       android:layout_marginLeft="8dp"
@@ -16,7 +16,7 @@
       android:layout_height="wrap_content"/>
   <TextView
       style="@android:style/TextAppearance.Holo.Medium"
-      android:text="Create a game, pick players, and play. Spin the ring to score each player. Then advance the round. Totals are added up automatically."
+      android:text="Create a game, pick players, and play. Spin the ring to score each player. Then advance to the next round. Totals are added up automatically."
       android:id="@+id/players"
       android:layout_marginTop="0dp"
       android:layout_marginLeft="8dp"
