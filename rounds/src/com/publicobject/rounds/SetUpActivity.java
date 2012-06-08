@@ -16,12 +16,14 @@
 
 package com.publicobject.rounds;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -54,6 +56,10 @@ public final class SetUpActivity extends Activity {
 
         FrameLayout layout = (FrameLayout) getLayoutInflater().inflate(R.layout.set_up, null);
         setContentView(layout);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle("Players");
 
         name = (AutoCompleteTextView) layout.findViewById(R.id.name);
         Set<String> playerNames = GameDatabase.getInstance(getApplicationContext())
@@ -205,6 +211,18 @@ public final class SetUpActivity extends Activity {
                 textView.setOnTouchListener(nameTouchListener);
                 players.add(new Player(textView, c == 0, Colors.DEFAULT_COLORS[r * COLS + c]));
             }
+        }
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 

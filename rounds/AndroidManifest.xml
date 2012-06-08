@@ -20,7 +20,7 @@
         android:name=".SetUpActivity"
         android:label="Set Up"
         android:screenOrientation="portrait"
-        android:theme="@android:style/Theme.Holo.NoActionBar"
+        android:theme="@android:style/Theme.Holo"
         android:windowSoftInputMode="adjustResize|stateVisible"/>
     <activity
         android:name=".GameActivity"

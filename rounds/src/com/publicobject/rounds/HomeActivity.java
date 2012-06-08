@@ -16,6 +16,7 @@
 
 package com.publicobject.rounds;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -35,25 +36,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import java.util.List;
 
-public class HomeActivity extends Activity {
+public final class HomeActivity extends Activity {
     private GameDatabase database;
     private ListView gameList;
-
-    private final View.OnClickListener rematchListener = new View.OnClickListener() {
-        @Override public void onClick(View button) {
-            int position = gameList.getPositionForView((View) button.getParent());
-            Game game = (Game) gameList.getAdapter().getItem(position);
-            launchGame(game.replay());
-        }
-    };
-
-    private final View.OnClickListener resumeListener = new View.OnClickListener() {
-        @Override public void onClick(View view) {
-            int position = gameList.getPositionForView(view);
-            Game game = (Game) gameList.getAdapter().getItem(position);
-            launchGame(game);
-        }
-    };
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +48,8 @@ public class HomeActivity extends Activity {
         gameList = (ListView) findViewById(R.id.gameList);
         gameList.setItemsCanFocus(true);
 
-        getActionBar().setTitle("Recent Games");
+        ActionBar actionBar = getActionBar();
+        actionBar.setTitle("Rounds");
     }
 
     @Override public void onResume() {
@@ -105,30 +91,79 @@ public class HomeActivity extends Activity {
     private class GameListAdapter extends BaseAdapter {
         private final List<Game> games;
 
+        private final View.OnClickListener resumeListener = new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                int position = gameList.getPositionForView(view);
+                Game game = (Game) gameList.getAdapter().getItem(position);
+                if (game != null) {
+                    launchGame(game);
+                }
+            }
+        };
+
+        private final View.OnClickListener rematchListener = new View.OnClickListener() {
+            @Override public void onClick(View button) {
+                int position = gameList.getPositionForView((View) button.getParent());
+                Game game = (Game) gameList.getAdapter().getItem(position);
+                launchGame(game.replay());
+            }
+        };
+
         private GameListAdapter(List<Game> games) {
             this.games = games;
         }
 
         @Override public int getCount() {
-            return games.size();
+            return games.size() + 1;
         }
 
-        @Override public Game getItem(int i) {
-            return games.get(i);
+        @Override public Object getItem(int i) {
+            if (i < 1) {
+                return null;
+            }
+            return games.get(i - 1);
         }
 
         @Override public long getItemId(int i) {
-            return games.get(i).getDateStarted();
+            if (i < 1) {
+                return i;
+            }
+            return games.get(i - 1).getDateStarted();
         }
 
         @Override public View getView(int position, View recycle, ViewGroup parent) {
+            if (position == 0) {
+                return getOverview(recycle, parent);
+            }
+            return getGame(position, recycle, parent);
+        }
+
+        @Override public int getViewTypeCount() {
+            return 2; // header, games
+        }
+
+        @Override public int getItemViewType(int position) {
+            if (position == 0) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+
+        private View getOverview(View recycle, ViewGroup parent) {
+            return (recycle == null)
+                    ? getLayoutInflater().inflate(R.layout.overview_item, parent, false)
+                    : recycle;
+        }
+
+        private View getGame(int position, View recycle, ViewGroup parent) {
             LinearLayout layout = (LinearLayout) ((recycle == null)
                     ? getLayoutInflater().inflate(R.layout.game_item, parent, false)
                     : recycle);
             TextView players = (TextView) layout.findViewById(R.id.players);
             TextView summary = (TextView) layout.findViewById(R.id.summary);
             Button rematch = (Button) layout.findViewById(R.id.rematch);
-            Game game = getItem(position);
+            Game game = (Game) getItem(position);
             int maxTotal = game.maxTotal();
 
             SpannableStringBuilder ssb = new SpannableStringBuilder();
