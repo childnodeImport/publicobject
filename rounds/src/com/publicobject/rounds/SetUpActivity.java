@@ -56,7 +56,6 @@ public final class SetUpActivity extends Activity {
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("Add Players");
 
         Set<String> playerNames = GameDatabase.getInstance(getApplicationContext())
                 .suggestedPlayerNames();
@@ -120,11 +119,18 @@ public final class SetUpActivity extends Activity {
         names = (TextView) layout.findViewById(R.id.names);
         names.setMovementMethod(LinkMovementMethod.getInstance());
 
-        game = new Game();
-        game.setDateStarted(System.currentTimeMillis());
-        game.addPlayer("", pickAColor());
+        Intent intent = getIntent();
+        if (intent.hasExtra(GameActivity.EXTRA_GAME)) {
+            game = Json.jsonToGame(intent.getStringExtra(GameActivity.EXTRA_GAME));
+            actionBar.setTitle("Edit Players");
+        } else {
+            game = new Game();
+            game.setDateStarted(System.currentTimeMillis());
+            game.addPlayer("", pickAColor());
+            actionBar.setTitle("Add Players");
+        }
 
-        editingPlayer = 0;
+        editingPlayer = game.playerCount() - 1;
         editingPlayerChanged();
         updateNameList();
     }

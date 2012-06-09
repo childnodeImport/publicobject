@@ -30,6 +30,7 @@ import android.os.PowerManager;
 import android.text.SpannableStringBuilder;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -164,6 +165,11 @@ public final class GameActivity extends Activity {
         roundChanged();
     }
 
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.game, menu);
+        return true;
+    }
+
     @Override protected void onSaveInstanceState(Bundle savedState) {
         super.onSaveInstanceState(savedState);
         savedState.putString(EXTRA_GAME, Json.gameToJson(game));
@@ -230,12 +236,21 @@ public final class GameActivity extends Activity {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+        case R.id.editPlayers:
+            Intent intent = new Intent(this, SetUpActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra(EXTRA_GAME, Json.gameToJson(game));
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
+            return true;
+
         case android.R.id.home:
-            Intent intent = new Intent(this, HomeActivity.class);
+            intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
             return true;
+
         default:
             return super.onOptionsItemSelected(item);
         }
