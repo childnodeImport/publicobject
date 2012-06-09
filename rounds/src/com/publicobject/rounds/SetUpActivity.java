@@ -39,14 +39,18 @@ import android.widget.TextView;
 import java.util.Set;
 
 public final class SetUpActivity extends Activity {
+    private GameDatabase database;
+
     private AutoCompleteTextView name;
     private TextView names;
     private Button next;
 
     private Game game;
-    private int editingPlayer;
     private ColorPicker colorPicker;
     private MenuItem play;
+
+    private int editingPlayer;
+    private boolean newGame;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,34 +61,16 @@ public final class SetUpActivity extends Activity {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        Set<String> playerNames = GameDatabase.getInstance(getApplicationContext())
-                .suggestedPlayerNames();
+        database = GameDatabase.getInstance(getApplicationContext());
+        Set<String> playerNames = database.suggestedPlayerNames();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,
                 playerNames.toArray(new String[playerNames.size()]));
         name = (AutoCompleteTextView) layout.findViewById(R.id.name);
         name.setThreshold(1);
         name.setAdapter(adapter);
-        name.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence text, int a, int b, int c) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence text, int a, int b, int c) {
-                String currentName = name.getText().toString().trim();
-                game.setPlayerName(editingPlayer, currentName);
-                updateButtons();
-                updateNameList();
-            }
-
-            @Override
-            public void afterTextChanged(Editable textView) {
-            }
-        });
         name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int action, KeyEvent event) {
+            @Override public boolean onEditorAction(TextView textView, int action, KeyEvent event) {
                 next();
                 return true;
             }
@@ -110,8 +96,7 @@ public final class SetUpActivity extends Activity {
 
         next = (Button) layout.findViewById(R.id.next);
         next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
                 next();
             }
         });
@@ -120,19 +105,43 @@ public final class SetUpActivity extends Activity {
         names.setMovementMethod(LinkMovementMethod.getInstance());
 
         Intent intent = getIntent();
-        if (intent.hasExtra(GameActivity.EXTRA_GAME)) {
-            game = Json.jsonToGame(intent.getStringExtra(GameActivity.EXTRA_GAME));
+        if (intent.hasExtra(GameActivity.GAME_ID)) {
+            newGame = false;
+            game = database.get(intent.getStringExtra(GameActivity.GAME_ID));
             actionBar.setTitle("Edit Players");
         } else {
+            newGame = true;
             game = new Game();
             game.setDateStarted(System.currentTimeMillis());
             game.addPlayer("", pickAColor());
             actionBar.setTitle("Add Players");
         }
 
-        editingPlayer = game.playerCount() - 1;
+        if (savedInstanceState != null) {
+            editingPlayer = savedInstanceState.getInt("editingPlayer");
+        } else {
+            editingPlayer = game.playerCount() - 1;
+        }
         editingPlayerChanged();
         updateNameList();
+
+        name.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence text, int a, int b, int c) {
+            }
+            @Override public void onTextChanged(CharSequence text, int a, int b, int c) {
+                String currentName = name.getText().toString().trim();
+                game.setPlayerName(editingPlayer, currentName);
+                updateButtons();
+                updateNameList();
+            }
+            @Override public void afterTextChanged(Editable textView) {
+            }
+        });
+    }
+
+    @Override protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("editingPlayer", editingPlayer);
     }
 
     private void next() {
@@ -179,9 +188,14 @@ public final class SetUpActivity extends Activity {
             game.removePlayer(editingPlayer);
         }
         Intent intent = new Intent(this, GameActivity.class);
-        intent.putExtra(GameActivity.EXTRA_GAME, Json.gameToJson(game));
+        intent.putExtra(GameActivity.GAME_ID, game.getId());
         startActivity(intent);
-        overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+        if (newGame) {
+            overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+        } else {
+            overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
+        }
+
         finish();
     }
 
@@ -239,6 +253,11 @@ public final class SetUpActivity extends Activity {
         names.setText(ssb);
     }
 
+    @Override protected void onPause() {
+        super.onPause();
+        database.save(game);
+    }
+
     private int nonEmptyPlayerCount() {
         // the only player that can have an empty name is the currently edited player
         int count = game.playerCount();
@@ -251,21 +270,26 @@ public final class SetUpActivity extends Activity {
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.set_up, menu);
         play = menu.findItem(R.id.play);
+        play.setVisible(newGame);
         updateButtons();
         return true;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.play:
-            play();
-            return true;
 
         case android.R.id.home:
-            Intent intent = new Intent(this, HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
+            if (newGame) {
+                Intent intent = new Intent(this, HomeActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
+                finish();
+                return true;
+            }
+            // fall through
+        case R.id.play:
+            play();
             return true;
 
         default:

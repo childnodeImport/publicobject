@@ -68,6 +68,18 @@ public final class Game implements Cloneable {
     public void setDateStarted(long dateStarted) {
         this.dateStarted = dateStarted;
     }
+
+    /**
+     * Games are identified by their start date in hex. This way the most recent
+     * game is always sorted to the end in an alphabetical sort.
+     */
+    public String getId() {
+        if (dateStarted == 0) {
+            throw new IllegalArgumentException();
+        }
+        return String.format("%016x", dateStarted);
+    }
+
     public void addPlayer(String name, int color) {
         players.add(new Player(name, color));
         makeRoundsConsistent();

@@ -5,7 +5,7 @@
     android:layout_height="fill_parent">
   <LinearLayout
       android:weightSum="100"
-      android:gravity="top"
+      android:gravity="top|center_horizontal"
       android:orientation="vertical"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"

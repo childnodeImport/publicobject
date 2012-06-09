@@ -35,6 +35,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Game data access. Most operations are blocking. May be used by multiple
@@ -79,6 +85,8 @@ public final class GameDatabase {
     };
 
     private static GameDatabase singleton;
+    private final ExecutorService saveExecutor = new ThreadPoolExecutor(0, 1,
+            10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     private final File gameDir;
     private Map<String, Player> players;
@@ -100,17 +108,6 @@ public final class GameDatabase {
 
     private File getFile(String name) {
         return new File(gameDir, name);
-    }
-
-    /**
-     * Games are identified by their start date in hex. This way the most recent
-     * game is always sorted to the end in an alphabetical sort.
-     */
-    private String getGameId(Game game) {
-        if (game.getDateStarted() == 0) {
-            throw new IllegalArgumentException();
-        }
-        return String.format("%016x", game.getDateStarted());
     }
 
     /**
@@ -183,11 +180,40 @@ public final class GameDatabase {
     }
 
     /**
-     * Writes game to persistent storage, updating a saved instance of the game
-     * if it already exists.
+     * Saves a snapshot of {@code game} at some point in the near future.
+     * The saved game overwrites any previous saveLater() call.
      */
-    public synchronized void save(Game game) {
-        String id = getGameId(game);
+    public Future<?> saveLater(Game game) {
+        final Game copyToSave = game.clone();
+        return saveExecutor.submit(new Runnable() {
+            @Override public void run() {
+                doSave(copyToSave);
+            }
+        });
+    }
+
+    /**
+     * Saves {@code game} and returns. This will wait until all currently
+     * enqueued {@link #saveLater} calls have completed so the save is not
+     * clobbered.
+     */
+    public void save(Game game) {
+        try {
+            saveLater(game).get();
+        } catch (InterruptedException e) {
+            throw new AssertionError();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Writes game to persistent storage, updating a saved instance of the game
+     * if it already exists. This method is private since most callers should
+     * use {@code #saveLater}, which defends against race conditions.
+     */
+    private synchronized void doSave(Game game) {
+        String id = game.getId();
         boolean isNewGame = (game.getLastSaved() == 0);
         game.setLastSaved(System.currentTimeMillis());
 
@@ -239,11 +265,33 @@ public final class GameDatabase {
         try {
             List<Game> result = new ArrayList<Game>();
             for (File file : gameFilesByMostRecent()) {
-                Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
-                Game game = Json.gson.fromJson(reader, Game.class);
-                result.add(game);
+                result.add(fileToGame(file));
             }
             return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Game fileToGame(File file) throws IOException {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+            return Json.gson.fromJson(reader, Game.class);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    public Game get(String id) {
+        try {
+            File saved = getFile(id + ".game");
+            return fileToGame(saved);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -267,24 +315,7 @@ public final class GameDatabase {
      */
     public void deleteGames(Set<Game> games) {
         for (Game game : games) {
-            delete(getFile(getGameId(game) + ".game"));
-        }
-    }
-
-    /**
-     * Returns the most recently played game, or null if no games have been
-     * saved.
-     */
-    public Game mostRecentGame() {
-        try {
-            List<File> files = gameFilesByMostRecent();
-            if (files.isEmpty()) {
-                return null;
-            }
-            Reader reader = new InputStreamReader(new FileInputStream(files.get(0)), "UTF-8");
-            return Json.gson.fromJson(reader, Game.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            delete(getFile(game.getId() + ".game"));
         }
     }
 

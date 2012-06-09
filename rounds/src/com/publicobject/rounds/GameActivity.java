@@ -22,10 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.text.SpannableStringBuilder;
 import android.text.style.AbsoluteSizeSpan;
@@ -41,17 +38,13 @@ import android.widget.TextView;
 import java.util.concurrent.TimeUnit;
 
 public final class GameActivity extends Activity {
-    public static final String EXTRA_GAME = "game";
-
-    private static final long PERIODIC_SAVE_PERIOD = TimeUnit.SECONDS.toMillis(30);
+    public static final String GAME_ID = "game";
 
     private Game game;
     private PowerManager.WakeLock wakeLock;
-
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private boolean paused = true;
     private GameDatabase database;
 
+    private View layout;
     private JogWheel jogWheel;
     private ScoreHistoryTable scoreHistoryTable;
     private TextView labelTextView;
@@ -63,16 +56,24 @@ public final class GameActivity extends Activity {
     private TextView roundTextView;
     private ImageButton previousRound;
 
+    private volatile boolean savePending = false;
+    private final Runnable saveRunnable = new Runnable() {
+        @Override public void run() {
+            savePending = false;
+            database.saveLater(game);
+        }
+    };
+
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
 
         database = GameDatabase.getInstance(getApplicationContext());
 
         Intent intent = getIntent();
-        String gameJson = savedState != null
-                ? savedState.getString(EXTRA_GAME)
-                : intent.getStringExtra(EXTRA_GAME);
-        game = Json.jsonToGame(gameJson);
+        String gameId = savedState != null
+                ? savedState.getString(GAME_ID)
+                : intent.getStringExtra(GAME_ID);
+        game = database.get(gameId);
         game.setRound(game.roundCount() - 1);
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -80,7 +81,7 @@ public final class GameActivity extends Activity {
 
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
-        View layout = getLayoutInflater().inflate(R.layout.jogwheel, null);
+        layout = getLayoutInflater().inflate(R.layout.jogwheel, null);
         setContentView(layout);
 
         labelTextView = (TextView) layout.findViewById(R.id.label);
@@ -129,6 +130,7 @@ public final class GameActivity extends Activity {
                 scoreHistoryTable.scoreChanged(player, round);
                 updateActionBarBackground();
                 roundChanged();
+                saveLater();
             }
             @Override public void cancelled() {
                 roundChanged();
@@ -172,7 +174,20 @@ public final class GameActivity extends Activity {
 
     @Override protected void onSaveInstanceState(Bundle savedState) {
         super.onSaveInstanceState(savedState);
-        savedState.putString(EXTRA_GAME, Json.gameToJson(game));
+        savedState.putString(GAME_ID, game.getId());
+    }
+
+    /**
+     * Saves the game at some point in the future. Multiple calls to this method
+     * will be coalesced into a single filesystem write.
+     */
+    private void saveLater() {
+        if (savePending) {
+            return;
+        }
+
+        layout.getHandler().postDelayed(saveRunnable, TimeUnit.SECONDS.toMillis(30));
+        savePending = true;
     }
 
     private void roundChanged() {
@@ -214,11 +229,8 @@ public final class GameActivity extends Activity {
             wakeLock.release();
         }
 
-        paused = true;
-
-        if (shouldAutosave()) {
-            saveGame(false, null);
-        }
+        layout.getHandler().removeCallbacks(saveRunnable);
+        database.save(game);
     }
 
     @Override protected void onResume() {
@@ -229,9 +241,7 @@ public final class GameActivity extends Activity {
             wakeLock.acquire();
         }
 
-        startPeriodicSave();
         roundChanged();
-        paused = false;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -239,9 +249,9 @@ public final class GameActivity extends Activity {
         case R.id.editPlayers:
             Intent intent = new Intent(this, SetUpActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra(EXTRA_GAME, Json.gameToJson(game));
+            intent.putExtra(GAME_ID, game.getId());
             startActivity(intent);
-            overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
+            overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
             return true;
 
         case android.R.id.home:
@@ -253,61 +263,6 @@ public final class GameActivity extends Activity {
 
         default:
             return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void startPeriodicSave() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (shouldAutosave()) {
-                    saveGame(true, new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!paused) {
-                                startPeriodicSave();
-                            }
-                        }
-                    });
-                } else {
-                    if (!paused) {
-                        startPeriodicSave();
-                    }
-                }
-            }
-        }, PERIODIC_SAVE_PERIOD);
-
-    }
-
-    private boolean shouldAutosave() {
-        // TODO(jessewilson): only save when dirty
-        return true;
-    }
-
-    private synchronized void saveGame(boolean inBackground, final Runnable onFinished) {
-        if (inBackground) {
-            // do in the background to avoid jankiness
-            new AsyncTask<Void, Void, Void>() {
-                @Override protected Void doInBackground(Void... params) {
-                    GameDatabase database = GameActivity.this.database;
-                    if (database != null) {
-                        database.save(game);
-                    }
-                    return null;
-                }
-                @Override protected void onPostExecute(Void result) {
-                    super.onPostExecute(result);
-                    if (onFinished != null) {
-                        onFinished.run();
-                    }
-                }
-            }.execute((Void) null);
-        } else {
-            // do in foreground to ensure the game gets saved before the activity finishes
-            database.save(game);
-            if (onFinished != null) {
-                onFinished.run();
-            }
         }
     }
 }

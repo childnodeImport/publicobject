@@ -85,7 +85,7 @@ public final class HomeActivity extends Activity {
 
     private void launchGame(Game game) {
         Intent intent = new Intent(getApplicationContext(), GameActivity.class);
-        intent.putExtra(GameActivity.EXTRA_GAME, Json.gameToJson(game));
+        intent.putExtra(GameActivity.GAME_ID, game.getId());
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
     }
