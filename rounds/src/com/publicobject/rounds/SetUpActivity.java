@@ -67,19 +67,25 @@ public final class SetUpActivity extends Activity {
         name.setThreshold(1);
         name.setAdapter(adapter);
         name.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence text, int a, int b, int c) {
+            @Override
+            public void beforeTextChanged(CharSequence text, int a, int b, int c) {
             }
-            @Override public void onTextChanged(CharSequence text, int a, int b, int c) {
+
+            @Override
+            public void onTextChanged(CharSequence text, int a, int b, int c) {
                 String currentName = name.getText().toString().trim();
                 game.setPlayerName(editingPlayer, currentName);
                 updateButtons();
                 updateNameList();
             }
-            @Override public void afterTextChanged(Editable textView) {
+
+            @Override
+            public void afterTextChanged(Editable textView) {
             }
         });
         name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override public boolean onEditorAction(TextView textView, int action, KeyEvent event) {
+            @Override
+            public boolean onEditorAction(TextView textView, int action, KeyEvent event) {
                 next();
                 return true;
             }
@@ -105,7 +111,8 @@ public final class SetUpActivity extends Activity {
 
         next = (Button) layout.findViewById(R.id.next);
         next.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
                 next();
             }
         });
@@ -115,7 +122,7 @@ public final class SetUpActivity extends Activity {
 
         game = new Game();
         game.setDateStarted(System.currentTimeMillis());
-        game.addPlayer("", Colors.DEFAULT_COLORS[0]);
+        game.addPlayer("", pickAColor());
 
         editingPlayer = 0;
         editingPlayerChanged();
@@ -140,9 +147,22 @@ public final class SetUpActivity extends Activity {
             editingPlayer = 0;
         }
         if (editingPlayer == game.playerCount()) {
-            game.addPlayer("", Colors.DEFAULT_COLORS[0]);
+            game.addPlayer("", pickAColor());
         }
         editingPlayerChanged();
+    }
+
+    private int pickAColor() {
+        eachColor:
+        for (int color : Colors.DEFAULT_COLORS) {
+            for (int p = 0; p < game.playerCount(); p++) {
+                if (color == game.playerColor(p)) {
+                    continue eachColor;
+                }
+            }
+            return color;
+        }
+        throw new AssertionError();
     }
 
     private void play() {
