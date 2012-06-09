@@ -38,8 +38,6 @@ import android.widget.TextView;
 import java.util.concurrent.TimeUnit;
 
 public final class GameActivity extends Activity {
-    public static final String GAME_ID = "game";
-
     private Game game;
     private PowerManager.WakeLock wakeLock;
     private GameDatabase database;
@@ -71,8 +69,8 @@ public final class GameActivity extends Activity {
 
         Intent intent = getIntent();
         String gameId = savedState != null
-                ? savedState.getString(GAME_ID)
-                : intent.getStringExtra(GAME_ID);
+                ? savedState.getString(IntentExtras.GAME_ID)
+                : intent.getStringExtra(IntentExtras.GAME_ID);
         game = database.get(gameId);
         game.setRound(game.roundCount() - 1);
 
@@ -174,7 +172,7 @@ public final class GameActivity extends Activity {
 
     @Override protected void onSaveInstanceState(Bundle savedState) {
         super.onSaveInstanceState(savedState);
-        savedState.putString(GAME_ID, game.getId());
+        savedState.putString(IntentExtras.GAME_ID, game.getId());
     }
 
     /**
@@ -249,7 +247,8 @@ public final class GameActivity extends Activity {
         case R.id.editPlayers:
             Intent intent = new Intent(this, SetUpActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra(GAME_ID, game.getId());
+            intent.putExtra(IntentExtras.GAME_ID, game.getId());
+            intent.putExtra(IntentExtras.IS_NEW_GAME, false);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
             return true;

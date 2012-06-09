@@ -75,6 +75,7 @@ public final class HomeActivity extends Activity {
         switch (item.getItemId()) {
         case R.id.newGame:
             Intent newGameIntent = new Intent(this, SetUpActivity.class);
+            newGameIntent.putExtra(IntentExtras.IS_NEW_GAME, true);
             startActivity(newGameIntent);
             overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
             return true;
@@ -85,7 +86,7 @@ public final class HomeActivity extends Activity {
 
     private void launchGame(Game game) {
         Intent intent = new Intent(getApplicationContext(), GameActivity.class);
-        intent.putExtra(GameActivity.GAME_ID, game.getId());
+        intent.putExtra(IntentExtras.GAME_ID, game.getId());
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
     }

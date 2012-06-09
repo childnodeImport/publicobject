@@ -39,6 +39,7 @@ import android.widget.TextView;
 import java.util.Set;
 
 public final class SetUpActivity extends Activity {
+    private static final String EDITING_PLAYER = "editingPlayer";
     private GameDatabase database;
 
     private AutoCompleteTextView name;
@@ -50,7 +51,7 @@ public final class SetUpActivity extends Activity {
     private MenuItem play;
 
     private int editingPlayer;
-    private boolean newGame;
+    private boolean isNewGame;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,23 +106,24 @@ public final class SetUpActivity extends Activity {
         names.setMovementMethod(LinkMovementMethod.getInstance());
 
         Intent intent = getIntent();
-        if (intent.hasExtra(GameActivity.GAME_ID)) {
-            newGame = false;
-            game = database.get(intent.getStringExtra(GameActivity.GAME_ID));
-            actionBar.setTitle("Edit Players");
-        } else {
-            newGame = true;
+        isNewGame = intent.getBooleanExtra(IntentExtras.IS_NEW_GAME, true);
+        String gameId = savedInstanceState != null
+                ? savedInstanceState.getString(IntentExtras.GAME_ID)
+                : intent.getStringExtra(IntentExtras.GAME_ID);
+        if (gameId == null) {
+            if (!isNewGame) {
+                throw new AssertionError();
+            }
             game = new Game();
-            game.setDateStarted(System.currentTimeMillis());
             game.addPlayer("", pickAColor());
-            actionBar.setTitle("Add Players");
-        }
-
-        if (savedInstanceState != null) {
-            editingPlayer = savedInstanceState.getInt("editingPlayer");
+            game.setDateStarted(System.currentTimeMillis());
         } else {
-            editingPlayer = game.playerCount() - 1;
+            game = database.get(gameId);
         }
+        actionBar.setTitle(isNewGame ? "Add Players" : "Edit Players");
+        editingPlayer = savedInstanceState != null
+                ? savedInstanceState.getInt(EDITING_PLAYER)
+                : game.playerCount() - 1;
         editingPlayerChanged();
         updateNameList();
 
@@ -141,7 +143,8 @@ public final class SetUpActivity extends Activity {
 
     @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("editingPlayer", editingPlayer);
+        outState.putInt(EDITING_PLAYER, editingPlayer);
+        outState.putString(IntentExtras.GAME_ID, game.getId());
     }
 
     private void next() {
@@ -188,9 +191,9 @@ public final class SetUpActivity extends Activity {
             game.removePlayer(editingPlayer);
         }
         Intent intent = new Intent(this, GameActivity.class);
-        intent.putExtra(GameActivity.GAME_ID, game.getId());
+        intent.putExtra(IntentExtras.GAME_ID, game.getId());
         startActivity(intent);
-        if (newGame) {
+        if (isNewGame) {
             overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
         } else {
             overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
@@ -270,7 +273,7 @@ public final class SetUpActivity extends Activity {
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.set_up, menu);
         play = menu.findItem(R.id.play);
-        play.setVisible(newGame);
+        play.setVisible(isNewGame);
         updateButtons();
         return true;
     }
@@ -279,7 +282,7 @@ public final class SetUpActivity extends Activity {
         switch (item.getItemId()) {
 
         case android.R.id.home:
-            if (newGame) {
+            if (isNewGame) {
                 Intent intent = new Intent(this, HomeActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
