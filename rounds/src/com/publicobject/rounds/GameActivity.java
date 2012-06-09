@@ -40,8 +40,6 @@ import android.widget.TextView;
 import java.util.concurrent.TimeUnit;
 
 public final class GameActivity extends Activity {
-    public static final String EXTRA_PLAYER_NAMES = "playerNames";
-    public static final String EXTRA_PLAYER_COLORS = "playerColors";
     public static final String EXTRA_GAME = "game";
 
     private static final long PERIODIC_SAVE_PERIOD = TimeUnit.SECONDS.toMillis(30);
@@ -70,13 +68,10 @@ public final class GameActivity extends Activity {
         database = GameDatabase.getInstance(getApplicationContext());
 
         Intent intent = getIntent();
-        if (savedState != null) {
-            game = Json.jsonToGame(savedState.getString(EXTRA_GAME));
-        } else if (intent.hasExtra(EXTRA_GAME)) {
-            game = Json.jsonToGame(intent.getStringExtra(EXTRA_GAME));
-        } else {
-            game = createNewGame();
-        }
+        String gameJson = savedState != null
+                ? savedState.getString(EXTRA_GAME)
+                : intent.getStringExtra(EXTRA_GAME);
+        game = Json.jsonToGame(gameJson);
         game.setRound(game.roundCount() - 1);
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -274,19 +269,7 @@ public final class GameActivity extends Activity {
         return true;
     }
 
-    private Game createNewGame() {
-        String[] playerNames = getIntent().getStringArrayExtra(EXTRA_PLAYER_NAMES);
-        int[] playerColors = getIntent().getIntArrayExtra(EXTRA_PLAYER_COLORS);
-        Game game = new Game();
-        game.setDateStarted(System.currentTimeMillis());
-        for (int i = 0; i < playerNames.length; i++) {
-            game.addPlayer(playerNames[i], playerColors[i]);
-        }
-        return game;
-    }
-
-    private synchronized void saveGame(boolean inBackground,
-                                       final Runnable onFinished) {
+    private synchronized void saveGame(boolean inBackground, final Runnable onFinished) {
         if (inBackground) {
             // do in the background to avoid jankiness
             new AsyncTask<Void, Void, Void>() {

@@ -73,6 +73,10 @@ public final class Game implements Cloneable {
         makeRoundsConsistent();
     }
 
+    public void removePlayer(int editingPlayer) {
+        players.remove(editingPlayer);
+    }
+
     private void makeRoundsConsistent() {
         int longestHistory = 0;
         for (Player player : players) {
@@ -123,8 +127,16 @@ public final class Game implements Cloneable {
         return players.get(player).color;
     }
 
+    public void setPlayerColor(int player, int color) {
+        players.get(player).color = color;
+    }
+
     public String playerName(int player) {
         return players.get(player).name;
+    }
+
+    public void setPlayerName(int player, String name) {
+        players.get(player).name = name;
     }
 
     /**
@@ -168,8 +180,8 @@ public final class Game implements Cloneable {
     }
 
     private static class Player implements Cloneable {
-        private final String name;
-        private final int color;
+        private String name;
+        private int color;
         private int total;
         private final List<Integer> history = new ArrayList<Integer>();
 
