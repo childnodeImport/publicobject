@@ -38,7 +38,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public final class GameActivity extends Activity {
@@ -262,8 +261,8 @@ public final class GameActivity extends Activity {
             for (int p = 0; p < game.playerCount(); p++) {
                 playersToEliminate.add(p);
             }
-            Collections.shuffle(playersToEliminate, new Random(0));
-            jogWheel.eliminatePlayers(playersToEliminate);
+            Collections.shuffle(playersToEliminate);
+            jogWheel.selectPlayer(playersToEliminate);
             return true;
 
         case android.R.id.home:

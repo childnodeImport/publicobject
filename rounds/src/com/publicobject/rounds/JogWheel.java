@@ -39,7 +39,9 @@ public final class JogWheel extends View {
     private static final long MILLIS_PER_MINUTE = TimeUnit.MINUTES.toMillis(1);
     private static final long FRAMERATE = 1000 / 60; // 60 fps
     private static final long UPDATE_RPM_PERIOD = 1000 / 60; // 60 fps
-    private final long ELIMINATE_DURATION = 6000;
+    private static final long ELIMINATE_DURATION = 1000;
+    private static final long NAME_DURATION = 1000;
+    private static final int ELIMINATE_ROTATION = 720;
     private static final int INSETS = 6;
 
     /** Degrees between ticks at speedMultiplier==1.0 */
@@ -56,7 +58,7 @@ public final class JogWheel extends View {
 
     private final Path path = new Path();
     private final RpmComputer rpmComputer = new RpmComputer();
-    private final PlayerEliminator playerEliminator = new PlayerEliminator();
+    private final PlayerSelector playerSelector = new PlayerSelector();
 
     private Game model;
     private Listener listener;
@@ -162,7 +164,7 @@ public final class JogWheel extends View {
         }
 
         long timestamp = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-        if (playerEliminator.draw(canvas, timestamp)) {
+        if (playerSelector.draw(canvas, timestamp)) {
             return;
         }
 
@@ -329,6 +331,9 @@ public final class JogWheel extends View {
         if (touchPlayer == -1 && event.getAction() != MotionEvent.ACTION_DOWN) {
             return false;
         }
+        if (playerSelector.isActive()) {
+            return false; // ignore all events while a player is being selected
+        }
 
         float x = event.getX();
         float y = event.getY();
@@ -413,20 +418,33 @@ public final class JogWheel extends View {
         }
     }
 
-    public void eliminatePlayers(List<Integer> players) {
-        this.playerEliminator.players = players;
-        this.playerEliminator.startTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-        getHandler().post(playerEliminator);
+    /**
+     * @param players list of game players in order of elimination. The last
+     *     player in the list will be selected.
+     */
+    public void selectPlayer(List<Integer> players) {
+        this.playerSelector.players = players;
+        this.playerSelector.startTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+        getHandler().post(playerSelector);
     }
 
-    private class PlayerEliminator implements Runnable {
+    private final class PlayerSelector implements Runnable {
         private List<Integer> players;
         private long startTime;
 
+        boolean isActive() {
+            return players != null;
+        }
+
         boolean draw(Canvas canvas, long timestamp) {
             long elapsed = timestamp - startTime;
-            if (players == null || elapsed >= ELIMINATE_DURATION) {
+            if (!isActive() || elapsed >= (ELIMINATE_DURATION + NAME_DURATION)) {
+                players = null;
                 return false;
+            }
+            if (elapsed > ELIMINATE_DURATION) {
+                drawPick(canvas);
+                return true;
             }
 
             // time to eliminate each player
@@ -449,6 +467,8 @@ public final class JogWheel extends View {
             }
             angle += computeDeltaAngle(eliminatedCount, baseSweep,
                     eliminatedPlayerSweep, remainingPlayerSweep);
+            angle += ((float) elapsed / ELIMINATE_DURATION) * ELIMINATE_ROTATION;
+
             drawPlayerArcs(canvas, eliminatedCount, eliminatedPlayerSweep,
                     remainingPlayerSweep, angle);
             return true;
@@ -488,9 +508,17 @@ public final class JogWheel extends View {
             }
         }
 
+        private void drawPick(Canvas canvas) {
+            int p = players.get(players.size() - 1);
+            Paint paint = playerPaints[p];
+            drawArc(canvas, 0, 180, paint);
+            drawArc(canvas, 180, 180, paint);
+            float baseline = centerY + paint.getTextSize() * 0.3f;
+            canvas.drawText(model.playerName(p), circle0.centerX(), baseline, paint);
+        }
+
         @Override public void run() {
-            long nowMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-            if (nowMillis - startTime < ELIMINATE_DURATION) {
+            if (players != null) {
                 invalidate();
                 Handler handler = getHandler();
                 if (handler != null) {
