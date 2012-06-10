@@ -2,8 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
   <item
       android:id="@+id/randomPlayer"
-      android:title="Bottle Spin"
-      android:showAsAction="never"/>
+      android:icon="@drawable/bottle"
+      android:title="Spin the Bottle"
+      android:showAsAction="ifRoom"/>
   <item
       android:id="@+id/editPlayers"
       android:title="Edit Players"
