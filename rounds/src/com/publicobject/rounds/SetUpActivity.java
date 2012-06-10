@@ -270,7 +270,9 @@ public final class SetUpActivity extends Activity {
 
     @Override protected void onPause() {
         super.onPause();
-        database.save(game);
+        if (nonEmptyPlayerCount() > 0) {
+            database.save(game);
+        }
     }
 
     private int nonEmptyPlayerCount() {
