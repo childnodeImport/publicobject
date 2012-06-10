@@ -25,8 +25,6 @@ import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -66,24 +64,6 @@ public final class HomeActivity extends Activity {
         database = null;
     }
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
-    }
-
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.newGame:
-            Intent newGameIntent = new Intent(this, SetUpActivity.class);
-            newGameIntent.putExtra(IntentExtras.IS_NEW_GAME, true);
-            startActivity(newGameIntent);
-            overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
     private void launchGame(Game game) {
         Intent intent = new Intent(getApplicationContext(), GameActivity.class);
         intent.putExtra(IntentExtras.GAME_ID, game.getId());
@@ -93,6 +73,15 @@ public final class HomeActivity extends Activity {
 
     private class GameListAdapter extends BaseAdapter {
         private final List<Game> games;
+
+        private final View.OnClickListener newGameListener = new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                Intent newGameIntent = new Intent(HomeActivity.this, SetUpActivity.class);
+                newGameIntent.putExtra(IntentExtras.IS_NEW_GAME, true);
+                startActivity(newGameIntent);
+                overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+            }
+        };
 
         private final View.OnClickListener resumeListener = new View.OnClickListener() {
             @Override public void onClick(View view) {
@@ -154,9 +143,13 @@ public final class HomeActivity extends Activity {
         }
 
         private View getOverview(View recycle, ViewGroup parent) {
-            return (recycle == null)
-                    ? getLayoutInflater().inflate(R.layout.overview_item, parent, false)
-                    : recycle;
+            if (recycle != null) {
+                return recycle;
+            }
+            View overview = getLayoutInflater().inflate(R.layout.overview_item, parent, false);
+            Button newGame = (Button) overview.findViewById(R.id.newGame);
+            newGame.setOnClickListener(newGameListener);
+            return overview;
         }
 
         private View getGame(int position, View recycle, ViewGroup parent) {

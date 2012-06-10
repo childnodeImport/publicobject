@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
+    android:gravity="right"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
   <TextView
@@ -20,9 +21,18 @@
       android:id="@+id/players"
       android:layout_marginTop="0dp"
       android:layout_marginLeft="8dp"
-      android:layout_marginBottom="16dp"
+      android:layout_marginBottom="8dp"
       android:layout_marginRight="8dp"
       android:layout_width="fill_parent"
+      android:layout_height="wrap_content"/>
+  <Button
+      android:id="@+id/newGame"
+      android:text="New Game"
+      android:layout_marginLeft="8dp"
+      android:layout_marginRight="8dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginBottom="16dp"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>
   <TextView
       style="?android:attr/listSeparatorTextViewStyle"

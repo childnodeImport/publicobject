@@ -28,7 +28,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -45,10 +44,10 @@ public final class SetUpActivity extends Activity {
     private AutoCompleteTextView name;
     private TextView names;
     private Button next;
+    private Button play;
 
     private Game game;
     private ColorPicker colorPicker;
-    private MenuItem play;
 
     private int editingPlayer;
     private boolean isNewGame;
@@ -102,6 +101,13 @@ public final class SetUpActivity extends Activity {
             }
         });
 
+        play = (Button) layout.findViewById(R.id.play);
+        play.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                play();
+            }
+        });
+
         names = (TextView) layout.findViewById(R.id.names);
         names.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -120,7 +126,13 @@ public final class SetUpActivity extends Activity {
         } else {
             game = database.get(gameId);
         }
-        actionBar.setTitle(isNewGame ? "Add Players" : "Edit Players");
+        if (isNewGame) {
+            actionBar.setTitle("Add Players");
+            name.setText("Play");
+        } else {
+            actionBar.setTitle("Edit Players");
+            name.setText("Done");
+        }
         editingPlayer = savedInstanceState != null
                 ? savedInstanceState.getInt(EDITING_PLAYER)
                 : game.playerCount() - 1;
@@ -270,31 +282,22 @@ public final class SetUpActivity extends Activity {
         return count;
     }
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.set_up, menu);
-        play = menu.findItem(R.id.play);
-        play.setVisible(isNewGame);
-        updateButtons();
-        return true;
-    }
-
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
         case android.R.id.home:
             if (isNewGame) {
+                // back to home
                 Intent intent = new Intent(this, HomeActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
                 finish();
                 return true;
+            } else {
+                // back to the game
+                play();
+                return true;
             }
-            // fall through
-        case R.id.play:
-            play();
-            return true;
-
         default:
             return super.onOptionsItemSelected(item);
         }

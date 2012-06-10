@@ -38,8 +38,9 @@
     <LinearLayout
         android:orientation="horizontal"
         android:weightSum="100"
-        android:gravity="center"
+        android:gravity="right"
         android:layout_marginTop="4dp"
+        android:layout_marginRight="8dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
       <Button
@@ -59,5 +60,26 @@
         android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
+    <Space
+        android:layout_weight="100"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:weightSum="100"
+        android:gravity="right"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+      <Button
+          android:id="@+id/play"
+          android:text="Play"
+          android:layout_weight="30"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
+    </LinearLayout>
   </LinearLayout>
 </FrameLayout>
