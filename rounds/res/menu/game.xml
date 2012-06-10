@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
   <item
+      android:id="@+id/randomPlayer"
+      android:title="Bottle Spin"
+      android:showAsAction="never"/>
+  <item
       android:id="@+id/editPlayers"
       android:title="Edit Players"
       android:showAsAction="never"/>

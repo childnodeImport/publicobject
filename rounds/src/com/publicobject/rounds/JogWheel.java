@@ -23,19 +23,24 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A slider around a circle to select an integer value.
  */
 public final class JogWheel extends View {
-    private static final int INSETS = 6;
-    private static final long MILLIS_PER_MINUTE = 1000 * 60;
+    private static final long MILLIS_PER_MINUTE = TimeUnit.MINUTES.toMillis(1);
+    private static final long FRAMERATE = 1000 / 60; // 60 fps
     private static final long UPDATE_RPM_PERIOD = 1000 / 60; // 60 fps
+    private final long ELIMINATE_DURATION = 6000;
+    private static final int INSETS = 6;
 
     /** Degrees between ticks at speedMultiplier==1.0 */
     private static final int TICK_DISTANCE = 15;
@@ -51,6 +56,7 @@ public final class JogWheel extends View {
 
     private final Path path = new Path();
     private final RpmComputer rpmComputer = new RpmComputer();
+    private final PlayerEliminator playerEliminator = new PlayerEliminator();
 
     private Game model;
     private Listener listener;
@@ -153,6 +159,11 @@ public final class JogWheel extends View {
 
         if (getWidth() != width || getHeight() != height) {
             dimensionsChanged();
+        }
+
+        long timestamp = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+        if (playerEliminator.draw(canvas, timestamp)) {
+            return;
         }
 
         if (touchPlayer == -1) {
@@ -399,6 +410,93 @@ public final class JogWheel extends View {
             return deltaDegrees + 360;
         } else {
             return deltaDegrees;
+        }
+    }
+
+    public void eliminatePlayers(List<Integer> players) {
+        this.playerEliminator.players = players;
+        this.playerEliminator.startTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+        getHandler().post(playerEliminator);
+    }
+
+    private class PlayerEliminator implements Runnable {
+        private List<Integer> players;
+        private long startTime;
+
+        boolean draw(Canvas canvas, long timestamp) {
+            long elapsed = timestamp - startTime;
+            if (players == null || elapsed >= ELIMINATE_DURATION) {
+                return false;
+            }
+
+            // time to eliminate each player
+            long perPlayerDuration = ELIMINATE_DURATION / (players.size() - 1);
+            int eliminatedCount = (int) (elapsed / perPlayerDuration);
+
+            // time spent performing the current elimination
+            long eliminationElapsed = elapsed - (perPlayerDuration * eliminatedCount);
+            float eliminationFraction = ((float) eliminationElapsed) / perPlayerDuration;
+
+            int playersRemaining = players.size() - eliminatedCount;
+            float baseSweep = 360 / playersRemaining;
+            float eliminatedPlayerSweep = baseSweep * (1 - eliminationFraction);
+            float remainingPlayerSweep = (360 - eliminatedPlayerSweep) / (playersRemaining - 1);
+
+            float angle = baseAngle;
+            for (int i = 0; i < eliminatedCount; i++) {
+                angle += computeDeltaAngle(i, 360f / (players.size() - i), 0,
+                        360f / (players.size() - i - 1));
+            }
+            angle += computeDeltaAngle(eliminatedCount, baseSweep,
+                    eliminatedPlayerSweep, remainingPlayerSweep);
+            drawPlayerArcs(canvas, eliminatedCount, eliminatedPlayerSweep,
+                    remainingPlayerSweep, angle);
+            return true;
+        }
+
+        /**
+         * Returns the amount of rotation to player 0 to apply after reducing
+         * the sweep of a player to {@code eliminatedPlayerSweep}.
+         */
+        private float computeDeltaAngle(int totalEliminated, float baseSweep,
+                float eliminatedPlayerSweep, float remainingPlayerSweep) {
+            float delta = -(baseSweep - eliminatedPlayerSweep) / 2;
+            int eliminated = players.get(totalEliminated);
+            int size = players.size();
+            for (int i = (eliminated + 1) % size; i != 0; i = (i + 1) % size) {
+                if (players.indexOf(i) > totalEliminated) {
+                    delta += remainingPlayerSweep - baseSweep;
+                }
+            }
+            return delta;
+        }
+
+        private void drawPlayerArcs(Canvas canvas, int eliminatedCount, float eliminatedPlayerSweep,
+                float remainingPlayerSweep, float baseAngle) {
+            for (int p = 0; p < players.size(); p++) {
+                int player = players.indexOf(p);
+                float sweep;
+                if (player < eliminatedCount) {
+                    continue;
+                } else if (player == eliminatedCount) {
+                    sweep = eliminatedPlayerSweep;
+                } else {
+                    sweep = remainingPlayerSweep;
+                }
+                drawArc(canvas, baseAngle, sweep, playerPaints[p]);
+                baseAngle += sweep;
+            }
+        }
+
+        @Override public void run() {
+            long nowMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+            if (nowMillis - startTime < ELIMINATE_DURATION) {
+                invalidate();
+                Handler handler = getHandler();
+                if (handler != null) {
+                    handler.postDelayed(this, FRAMERATE);
+                }
+            }
         }
     }
 

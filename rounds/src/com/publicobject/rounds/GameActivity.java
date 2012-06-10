@@ -35,6 +35,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public final class GameActivity extends Activity {
@@ -251,6 +255,15 @@ public final class GameActivity extends Activity {
             intent.putExtra(IntentExtras.IS_NEW_GAME, false);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+            return true;
+
+        case R.id.randomPlayer:
+            List<Integer> playersToEliminate = new ArrayList<Integer>();
+            for (int p = 0; p < game.playerCount(); p++) {
+                playersToEliminate.add(p);
+            }
+            Collections.shuffle(playersToEliminate, new Random(0));
+            jogWheel.eliminatePlayers(playersToEliminate);
             return true;
 
         case android.R.id.home:

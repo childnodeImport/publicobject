@@ -98,9 +98,7 @@ public final class HomeActivity extends Activity {
             @Override public void onClick(View view) {
                 int position = gameList.getPositionForView(view);
                 Game game = (Game) gameList.getAdapter().getItem(position);
-                if (game != null) {
-                    launchGame(game);
-                }
+                launchGame(game);
             }
         };
 
@@ -108,7 +106,9 @@ public final class HomeActivity extends Activity {
             @Override public void onClick(View button) {
                 int position = gameList.getPositionForView((View) button.getParent());
                 Game game = (Game) gameList.getAdapter().getItem(position);
-                launchGame(game.replay());
+                Game replay = game.replay();
+                database.save(replay);
+                launchGame(replay);
             }
         };
 
