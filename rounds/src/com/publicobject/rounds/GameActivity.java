@@ -170,6 +170,7 @@ public final class GameActivity extends Activity {
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.game, menu);
+        menu.findItem(R.id.randomPlayer).setEnabled(game.playerCount() > 1);
         return true;
     }
 
@@ -257,6 +258,9 @@ public final class GameActivity extends Activity {
             return true;
 
         case R.id.randomPlayer:
+            if (game.playerCount() < 2) {
+                throw new IllegalStateException();
+            }
             List<Integer> playersToEliminate = new ArrayList<Integer>();
             for (int p = 0; p < game.playerCount(); p++) {
                 playersToEliminate.add(p);
