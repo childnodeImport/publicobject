@@ -25,14 +25,22 @@ import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class HomeActivity extends Activity {
     private GameDatabase database;
@@ -48,6 +56,8 @@ public final class HomeActivity extends Activity {
 
         ActionBar actionBar = getActionBar();
         actionBar.setTitle("Rounds");
+
+        gameList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
     }
 
     @Override public void onResume() {
@@ -72,8 +82,6 @@ public final class HomeActivity extends Activity {
     }
 
     private class GameListAdapter extends BaseAdapter {
-        private final List<Game> games;
-
         private final View.OnClickListener newGameListener = new View.OnClickListener() {
             @Override public void onClick(View view) {
                 Intent newGameIntent = new Intent(HomeActivity.this, SetUpActivity.class);
@@ -100,6 +108,75 @@ public final class HomeActivity extends Activity {
                 launchGame(replay);
             }
         };
+
+        private final ActionMode.Callback batchModeCallback = new ActionMode.Callback() {
+            @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                case R.id.delete:
+                    Set<Game> toDelete = new LinkedHashSet<Game>();
+                    for (int i = 0; i < getCount(); i++) {
+                        Game game = (Game) getItem(i);
+                        if (game != null && gameList.isItemChecked(i)) {
+                            toDelete.add(game);
+                        }
+                    }
+                    database.deleteGames(toDelete);
+                    games.clear();
+                    games.addAll(database.allGames());
+                    notifyDataSetChanged();
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+                }
+            }
+            @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                getMenuInflater().inflate(R.menu.home_context, menu);
+                return true;
+            }
+            @Override public void onDestroyActionMode(ActionMode mode) {
+                gameList.clearChoices();
+                notifyDataSetChanged();
+                batchMode = null;
+            }
+            @Override public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+        };
+
+        private View.OnLongClickListener contextListener = new View.OnLongClickListener() {
+            @Override public boolean onLongClick(View view) {
+                if (batchMode == null) {
+                    // check the context-selected item
+                    int position = gameList.getPositionForView(view);
+                    gameList.setItemChecked(position, true);
+
+                    // switch to delete mode
+                    batchMode = HomeActivity.this.startActionMode(batchModeCallback);
+                    notifyDataSetChanged();
+                    updateContextMenuTitle();
+                }
+                return true;
+            }
+        };
+
+        private final View.OnClickListener checkListener = new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                CheckBox checked = (CheckBox) view.findViewById(R.id.checked);
+                checked.setChecked(!checked.isChecked());
+            }
+        };
+
+        private final OnCheckedChangeListener checkBoxToListModel = new OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+                int position = gameList.getPositionForView((View) button.getParent());
+                gameList.setItemChecked(position, isChecked);
+                updateContextMenuTitle();
+            }
+        };
+
+        private ActionMode batchMode;
+        private final List<Game> games;
 
         private GameListAdapter(List<Game> games) {
             this.games = games;
@@ -156,6 +233,7 @@ public final class HomeActivity extends Activity {
             LinearLayout layout = (LinearLayout) ((recycle == null)
                     ? getLayoutInflater().inflate(R.layout.game_item, parent, false)
                     : recycle);
+            CheckBox checked = (CheckBox) layout.findViewById(R.id.checked);
             TextView players = (TextView) layout.findViewById(R.id.players);
             TextView summary = (TextView) layout.findViewById(R.id.summary);
             Button rematch = (Button) layout.findViewById(R.id.rematch);
@@ -194,11 +272,49 @@ public final class HomeActivity extends Activity {
                     game.getDateStarted(), true));
             summary.setText(rounds);
 
-            rematch.setOnClickListener(rematchListener);
-            layout.setOnClickListener(resumeListener);
+            // Remove listeners before changing any observed state. Necessary for recycling.
+            checked.setOnCheckedChangeListener(null);
+            layout.setOnLongClickListener(null);
+            layout.setOnClickListener(null);
+            rematch.setOnClickListener(null);
+
+            checked.setChecked(gameList.isItemChecked(position));
+
+            // Add the listeners we care about in this state.
+            if (batchMode == null) {
+                checked.setVisibility(View.GONE);
+                rematch.setVisibility(View.VISIBLE);
+                layout.setOnClickListener(resumeListener);
+                layout.setOnLongClickListener(contextListener);
+                rematch.setOnClickListener(rematchListener);
+            } else {
+                checked.setVisibility(View.VISIBLE);
+                rematch.setVisibility(View.GONE);
+                checked.setOnCheckedChangeListener(checkBoxToListModel);
+                layout.setOnClickListener(checkListener);
+            }
+
             layout.setFocusable(true);
             layout.setBackgroundResource(android.R.drawable.list_selector_background);
             return layout;
+        }
+
+        private void updateContextMenuTitle() {
+            if (batchMode == null) {
+                throw new IllegalStateException();
+            }
+            int count = gameList.getCheckedItemCount();
+            switch (count) {
+            case 0:
+                batchMode.setTitle("0 Games");
+                break;
+            case 1:
+                batchMode.setTitle("1 Game");
+                break;
+            default:
+                batchMode.setTitle(count + " Games");
+                break;
+            }
         }
     }
 }
