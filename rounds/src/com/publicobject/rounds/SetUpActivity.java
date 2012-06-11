@@ -128,10 +128,10 @@ public final class SetUpActivity extends Activity {
         }
         if (isNewGame) {
             actionBar.setTitle("Add Players");
-            name.setText("Play");
+            play.setText("Play");
         } else {
             actionBar.setTitle("Edit Players");
-            name.setText("Done");
+            play.setText("Done");
         }
         editingPlayer = savedInstanceState != null
                 ? savedInstanceState.getInt(EDITING_PLAYER)
