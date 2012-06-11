@@ -233,16 +233,20 @@ public final class SetUpActivity extends Activity {
     private ClickableSpan newClickableSpan(final int player) {
         return new ClickableSpan() {
             @Override public void onClick(View widget) {
-                if (player >= game.playerCount() || player == editingPlayer) {
+                int clickedPlayer = player;
+                if (clickedPlayer >= game.playerCount() || clickedPlayer == editingPlayer) {
                     return;
                 }
 
                 // if the current player doesn't have a name, remove that player
                 if (game.playerName(editingPlayer).isEmpty()) {
                     game.removePlayer(editingPlayer);
+                    if (player > editingPlayer) {
+                        clickedPlayer--;
+                    }
                 }
 
-                editingPlayer = player;
+                editingPlayer = clickedPlayer;
                 editingPlayerChanged();
             }
             @Override public void updateDrawState(TextPaint ds) {
