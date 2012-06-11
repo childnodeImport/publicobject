@@ -2,8 +2,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.publicobject.rounds"
-    android:versionCode="15"
-    android:versionName="1.5">
+    android:versionCode="16"
+    android:versionName="1.6">
   <application
       android:label="@string/app_name"
       android:icon="@drawable/rounds">

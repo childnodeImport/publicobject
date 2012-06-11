@@ -201,6 +201,9 @@ public final class SetUpActivity extends Activity {
         }
         if (game.playerName(editingPlayer).isEmpty()) {
             game.removePlayer(editingPlayer);
+            if (editingPlayer == game.playerCount()) {
+                editingPlayer = 0;
+            }
         }
         Intent intent = new Intent(this, GameActivity.class);
         intent.putExtra(IntentExtras.GAME_ID, game.getId());
