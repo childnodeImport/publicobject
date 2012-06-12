@@ -81,12 +81,14 @@ public final class SetUpActivity extends SherlockActivity {
             @Override public void selecting() {
                 name.setVisibility(View.INVISIBLE);
                 next.setVisibility(View.INVISIBLE);
+                play.setVisibility(View.INVISIBLE);
                 names.setVisibility(View.INVISIBLE);
             }
             @Override public void selected(int color) {
                 game.setPlayerColor(editingPlayer, color);
                 name.setVisibility(View.VISIBLE);
                 next.setVisibility(View.VISIBLE);
+                play.setVisibility(View.VISIBLE);
                 names.setVisibility(View.VISIBLE);
                 updateNameList();
             }

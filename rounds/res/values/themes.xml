@@ -4,7 +4,9 @@
   <style name="TextAppearance.Rounds.Medium" parent="@android:style/TextAppearance.Medium"/>
   <style name="TextAppearance.Rounds.Large" parent="@android:style/TextAppearance.Large"/>
   <style name="Theme.SherlockWithActionBarOverlay" parent="@style/Theme.Sherlock">
+    <!-- for Android 4+ -->
+    <item name="android:windowActionBarOverlay">true</item>
+    <!-- for ActionBarSherlock -->
     <item name="windowActionBarOverlay">true</item>
-    <item name="windowActionModeOverlay">true</item>
   </style>
 </resources>
