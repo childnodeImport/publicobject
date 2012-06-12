@@ -16,8 +16,6 @@
 
 package com.publicobject.rounds;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -27,20 +25,21 @@ import android.os.PowerManager;
 import android.text.SpannableStringBuilder;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public final class GameActivity extends Activity {
+public final class GameActivity extends SherlockActivity {
     private Game game;
     private PowerManager.WakeLock wakeLock;
     private GameDatabase database;
@@ -79,8 +78,6 @@ public final class GameActivity extends Activity {
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, getPackageName());
-
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
         layout = getLayoutInflater().inflate(R.layout.jogwheel, null);
         setContentView(layout);
@@ -156,7 +153,7 @@ public final class GameActivity extends Activity {
             }
         });
 
-        actionBar = getActionBar();
+        actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
                 ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -169,7 +166,7 @@ public final class GameActivity extends Activity {
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.game, menu);
+        getSupportMenuInflater().inflate(R.menu.game, menu);
         menu.findItem(R.id.randomPlayer).setEnabled(game.playerCount() > 1);
         return true;
     }

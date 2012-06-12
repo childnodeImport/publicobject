@@ -1,0 +1,6 @@
+<?xml version='1.0'?>
+<resources>
+  <style name="TextAppearance.Rounds.Small" parent="@android:style/TextAppearance.Holo.Small"/>
+  <style name="TextAppearance.Rounds.Medium" parent="@android:style/TextAppearance.Holo.Medium"/>
+  <style name="TextAppearance.Rounds.Large" parent="@android:style/TextAppearance.Holo.Large"/>
+</resources>

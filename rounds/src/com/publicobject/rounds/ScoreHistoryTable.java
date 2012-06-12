@@ -157,8 +157,7 @@ public final class ScoreHistoryTable {
 
     private TextView newTextView(int player) {
         TextView result = new TextView(context);
-        result.setTextAppearance(context,
-                android.R.style.TextAppearance_Holo_Medium);
+        result.setTextAppearance(context, R.style.TextAppearance_Rounds_Small);
         result.setGravity(Gravity.RIGHT);
         result.setPadding(20, 0, 20, 0); // TODO: vary based on device DPI?
         if (player != -1) {

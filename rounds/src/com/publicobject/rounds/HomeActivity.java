@@ -16,8 +16,6 @@
 
 package com.publicobject.rounds;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -25,9 +23,6 @@ import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -38,11 +33,16 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class HomeActivity extends Activity {
+public final class HomeActivity extends SherlockActivity {
     private GameDatabase database;
     private ListView gameList;
 
@@ -54,7 +54,7 @@ public final class HomeActivity extends Activity {
         gameList = (ListView) findViewById(R.id.gameList);
         gameList.setItemsCanFocus(true);
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("Rounds");
 
         gameList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -131,7 +131,7 @@ public final class HomeActivity extends Activity {
                 }
             }
             @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                getMenuInflater().inflate(R.menu.home_context, menu);
+                getSupportMenuInflater().inflate(R.menu.home_context, menu);
                 return true;
             }
             @Override public void onDestroyActionMode(ActionMode mode) {
@@ -303,7 +303,8 @@ public final class HomeActivity extends Activity {
             if (batchMode == null) {
                 throw new IllegalStateException();
             }
-            int count = gameList.getCheckedItemCount();
+
+            int count = gameList.getCheckedItemIds().length; // no getCheckedItemCount 'til API 11
             switch (count) {
             case 0:
                 batchMode.setTitle("0 Games");

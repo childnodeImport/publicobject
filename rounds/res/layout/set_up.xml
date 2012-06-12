@@ -19,7 +19,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
       <AutoCompleteTextView
-          style="@android:style/TextAppearance.Holo.Large"
+          style="@style/TextAppearance.Rounds.Large"
           android:id="@+id/name"
           android:imeOptions="actionNext"
           android:capitalize="words"
@@ -27,9 +27,11 @@
           android:singleLine="true"
           android:maxLength="12"
           android:layout_weight="1"
+          android:layout_marginRight="4dp"
           android:layout_width="0dp"
           android:layout_height="wrap_content"/>
-      <Space
+      <!-- no android.widget.Space until API 14 -->
+      <View
           android:id="@+id/colorPlaceholder"
           android:layout_width="48dp"
           android:layout_height="48dp"/>
@@ -52,7 +54,7 @@
     </LinearLayout>
 
     <TextView
-        style="@android:style/TextAppearance.Holo.Medium"
+        style="@style/TextAppearance.Rounds.Medium"
         android:id="@+id/names"
         android:text="Jesse  Jodie  Mike  Graham  Jono  Olav  Carina  Jesse  Jodie  Mike  Graham  Jono  Olav  Carina"
         android:lineSpacingMultiplier="2"
@@ -61,7 +63,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <Space
+    <!-- no android.widget.Space until API 14 -->
+    <View
         android:layout_weight="100"
         android:layout_width="0dp"
         android:layout_height="0dp"/>

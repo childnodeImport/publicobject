@@ -48,10 +48,7 @@ public final class ActionBarBackground extends Drawable {
 
     public void setColor(int color) {
         line.setColor(color);
-        Callback callback = getCallback();
-        if (callback != null) {
-            callback.invalidateDrawable(this);
-        }
+        invalidateSelf();
     }
 
     @Override public void setAlpha(int alpha) {

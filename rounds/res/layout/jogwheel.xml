@@ -12,7 +12,7 @@
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="4dp"
-      style="@android:style/TextAppearance.Holo.Medium"/>
+      style="@style/TextAppearance.Rounds.Medium"/>
   <TextView
       android:id="@+id/value"
       android:text="75"
@@ -20,7 +20,7 @@
       android:layout_marginRight="16dp"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Holo.Large"/>
+      style="@style/TextAppearance.Rounds.Large"/>
 
   <com.publicobject.rounds.JogWheel
       android:id="@+id/jogWheel"

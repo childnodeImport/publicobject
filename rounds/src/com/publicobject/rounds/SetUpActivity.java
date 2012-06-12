@@ -16,8 +16,6 @@
 
 package com.publicobject.rounds;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -28,16 +26,18 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
 import java.util.Set;
 
-public final class SetUpActivity extends Activity {
+public final class SetUpActivity extends SherlockActivity {
     private static final String EDITING_PLAYER = "editingPlayer";
     private GameDatabase database;
 
@@ -58,7 +58,7 @@ public final class SetUpActivity extends Activity {
         FrameLayout layout = (FrameLayout) getLayoutInflater().inflate(R.layout.set_up, null);
         setContentView(layout);
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         database = GameDatabase.getInstance(getApplicationContext());

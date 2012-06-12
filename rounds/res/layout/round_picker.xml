@@ -6,7 +6,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
   <ImageButton
-      style="@android:style/Widget.ActionButton"
+      style="@style/Widget.Sherlock.ActionButton"
       android:id="@+id/previousRound"
       android:src="@drawable/prev"
       android:paddingRight="0dp"
@@ -14,14 +14,14 @@
       android:layout_height="wrap_content"
       android:contentDescription="Previous"/>
   <TextView
-      style="@android:style/TextAppearance.Holo.Widget.ActionBar.Title"
+      style="@style/TextAppearance.Sherlock.Widget.ActionBar.Title"
       android:id="@+id/roundNumber"
       android:text="Round 1"
       android:gravity="center_horizontal"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>
   <ImageButton
-      style="@android:style/Widget.ActionButton"
+      style="@style/Widget.Sherlock.ActionButton"
       android:id="@+id/nextRound"
       android:src="@drawable/next"
       android:paddingLeft="0dp"
