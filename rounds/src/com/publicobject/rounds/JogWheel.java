@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * A slider around a circle to select an integer value.
  */
 public final class JogWheel extends View {
-    private static final long MILLIS_PER_MINUTE = TimeUnit.MINUTES.toMillis(1);
+    private static final long MILLIS_PER_MINUTE = 60 * 1000;
     private static final long FRAMERATE = 1000 / 60; // 60 fps
     private static final long UPDATE_RPM_PERIOD = 1000 / 60; // 60 fps
     private static final long ELIMINATE_DURATION = 1000;

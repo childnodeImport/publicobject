@@ -41,6 +41,7 @@ public final class SetUpActivity extends SherlockActivity {
     private static final String EDITING_PLAYER = "editingPlayer";
     private GameDatabase database;
 
+    private ArrayAdapter<String> nameAdapter;
     private AutoCompleteTextView name;
     private TextView names;
     private Button next;
@@ -63,15 +64,17 @@ public final class SetUpActivity extends SherlockActivity {
 
         database = GameDatabase.getInstance(getApplicationContext());
         Set<String> playerNames = database.suggestedPlayerNames();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        nameAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,
                 playerNames.toArray(new String[playerNames.size()]));
         name = (AutoCompleteTextView) layout.findViewById(R.id.name);
         name.setThreshold(1);
-        name.setAdapter(adapter);
+        name.setAdapter(nameAdapter);
         name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override public boolean onEditorAction(TextView textView, int action, KeyEvent event) {
-                next();
+                if (event == null || event.getAction() == KeyEvent.ACTION_UP) {
+                    next();
+                }
                 return true;
             }
         });
@@ -157,8 +160,10 @@ public final class SetUpActivity extends SherlockActivity {
 
     @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(EDITING_PLAYER, editingPlayer);
-        outState.putString(IntentExtras.GAME_ID, game.getId());
+        if (nonEmptyPlayerCount() > 0) {
+            outState.putInt(EDITING_PLAYER, editingPlayer);
+            outState.putString(IntentExtras.GAME_ID, game.getId());
+        }
     }
 
     private void next() {
@@ -167,7 +172,7 @@ public final class SetUpActivity extends SherlockActivity {
         }
 
         // if the current player doesn't have a name, remove it
-        if (game.playerName(editingPlayer).isEmpty()) {
+        if (game.playerName(editingPlayer).length() == 0) {
             game.removePlayer(editingPlayer);
             if (editingPlayer == game.playerCount()) {
                 editingPlayer = 0; // next on the last empty player cycles to the first player
@@ -201,7 +206,7 @@ public final class SetUpActivity extends SherlockActivity {
         if (nonEmptyPlayerCount() == 0) {
             throw new IllegalStateException();
         }
-        if (game.playerName(editingPlayer).isEmpty()) {
+        if (game.playerName(editingPlayer).length() == 0) {
             game.removePlayer(editingPlayer);
             if (editingPlayer == game.playerCount()) {
                 editingPlayer = 0;
@@ -221,7 +226,10 @@ public final class SetUpActivity extends SherlockActivity {
 
     private void editingPlayerChanged() {
         String nameString = game.playerName(editingPlayer);
+        // Temporarily remove AutoCompleteTextView's adapter to suppress an unwanted popup.
+        name.setAdapter((ArrayAdapter<String>) null);
         name.setText(nameString);
+        name.setAdapter(nameAdapter);
         name.setSelection(nameString.length());
         colorPicker.setColor(game.playerColor(editingPlayer));
         updateButtons();
@@ -244,7 +252,7 @@ public final class SetUpActivity extends SherlockActivity {
                 }
 
                 // if the current player doesn't have a name, remove that player
-                if (game.playerName(editingPlayer).isEmpty()) {
+                if (game.playerName(editingPlayer).length() == 0) {
                     game.removePlayer(editingPlayer);
                     if (player > editingPlayer) {
                         clickedPlayer--;
@@ -263,7 +271,7 @@ public final class SetUpActivity extends SherlockActivity {
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         for (int p = 0; p < game.playerCount(); p++) {
             String name = game.playerName(p);
-            if (name.isEmpty()) {
+            if (name.length() == 0) {
                 continue;
             }
             if (ssb.length() > 0) {
@@ -287,7 +295,7 @@ public final class SetUpActivity extends SherlockActivity {
     private int nonEmptyPlayerCount() {
         // the only player that can have an empty name is the currently edited player
         int count = game.playerCount();
-        if (game.playerName(editingPlayer).isEmpty()) {
+        if (game.playerName(editingPlayer).length() == 0) {
             count--;
         }
         return count;
