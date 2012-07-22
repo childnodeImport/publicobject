@@ -238,27 +238,8 @@ public final class HomeActivity extends SherlockActivity {
             TextView summary = (TextView) layout.findViewById(R.id.summary);
             Button rematch = (Button) layout.findViewById(R.id.rematch);
             Game game = (Game) getItem(position);
-            int maxTotal = game.maxTotal();
 
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            for (int p = 0, size = game.playerCount(); p < size; p++) {
-                if (p > 0) {
-                    ssb.append("  ");
-                }
-                String name = game.playerName(p);
-                String total = Integer.toString(game.playerTotal(p));
-                ssb.append(name);
-                ssb.append("\u00a0");
-
-                ssb.append(total);
-                ssb.setSpan(new ForegroundColorSpan(game.playerColor(p)),
-                        ssb.length() - total.length(), ssb.length(), 0);
-                if (maxTotal == game.playerTotal(p)) {
-                    ssb.setSpan(new StyleSpan(Typeface.BOLD),
-                            ssb.length() - total.length(), ssb.length(), 0);
-                }
-            }
-            players.setText(ssb);
+            players.setText(Names.styleScores(game));
 
             StringBuilder rounds = new StringBuilder();
             if (game.roundCount() == 1) {

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:background="#000000"
+        >
+  <TextView
+          android:id="@+id/label"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginRight="16dp"
+          android:layout_marginTop="4dp"
+          android:text="Jesse"
+          android:gravity="right"
+          style="@style/TextAppearance.Rounds.Medium"
+          />
+  <TextView
+          android:id="@+id/value"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginRight="16dp"
+          android:text="75"
+          android:gravity="right"
+          style="@style/TextAppearance.Rounds.Large"
+          />
+  <com.publicobject.rounds.JogWheel
+          android:id="@+id/jogWheel"
+          android:layout_width="fill_parent"
+          android:layout_height="0dp"
+          android:layout_weight="1"
+          />
+  <include
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="20dp"
+          layout="@layout/scores_table"
+          />
+</LinearLayout>

@@ -18,13 +18,16 @@ package com.publicobject.rounds;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.text.SpannableStringBuilder;
-import android.text.style.AbsoluteSizeSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -43,12 +46,14 @@ public final class GameActivity extends SherlockActivity {
     private Game game;
     private PowerManager.WakeLock wakeLock;
     private GameDatabase database;
+    private Handler handler = new Handler();
 
     private View layout;
     private JogWheel jogWheel;
     private ScoreHistoryTable scoreHistoryTable;
     private TextView labelTextView;
     private TextView valueTextView;
+    private TextView playersTextView;
 
     private ActionBarBackground actionBarBackground;
     private ActionBar actionBar;
@@ -64,8 +69,19 @@ public final class GameActivity extends SherlockActivity {
         }
     };
 
+    /** True for landscape layout. */
+    private boolean tablet;
+
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        tablet = metrics.widthPixels / metrics.density >= 600;
+        int orientation = tablet
+                ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        setRequestedOrientation(orientation);
 
         database = GameDatabase.getInstance(getApplicationContext());
 
@@ -79,11 +95,12 @@ public final class GameActivity extends SherlockActivity {
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, getPackageName());
 
-        layout = getLayoutInflater().inflate(R.layout.jogwheel, null);
+        layout = getLayoutInflater().inflate(R.layout.game, null);
         setContentView(layout);
 
         labelTextView = (TextView) layout.findViewById(R.id.label);
         valueTextView = (TextView) layout.findViewById(R.id.value);
+        playersTextView = (TextView) layout.findViewById(R.id.players);
 
         scoreHistoryTable = new ScoreHistoryTable(getApplicationContext(),
                 (TableLayout) layout.findViewById(R.id.runningScores),
@@ -110,17 +127,20 @@ public final class GameActivity extends SherlockActivity {
                         ssb.append(" - ").append(Integer.toString(selectingFrom - value));
                     }
                     ssb.append(" = ");
+                    ssb.setSpan(new RelativeSizeSpan(0.75f), 0, ssb.length(), 0);
                 }
                 String valueString = (value > 0 ? "+" : "") + Integer.toString(value);
                 ssb.append(valueString);
-                ssb.setSpan(new AbsoluteSizeSpan(32, true),
-                        ssb.length() - valueString.length(), ssb.length(), 0);
                 ssb.setSpan(new StyleSpan(Typeface.BOLD),
                         ssb.length() - valueString.length(), ssb.length(), 0);
 
                 valueTextView.setText(ssb);
                 valueTextView.setVisibility(View.VISIBLE);
-                actionBar.hide();
+                if (!tablet) {
+                    actionBar.hide();
+                } else {
+                    playersTextView.setVisibility(View.INVISIBLE);
+                }
             }
             @Override public void selected(int player, int value) {
                 int round = game.round();
@@ -135,7 +155,22 @@ public final class GameActivity extends SherlockActivity {
             }
         });
 
-        View roundPicker = getLayoutInflater().inflate(R.layout.round_picker, null);
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBarBackground = new ActionBarBackground(getResources());
+        actionBar.setBackgroundDrawable(actionBarBackground);
+        updateActionBarBackground();
+
+        View roundPicker;
+        if (tablet) {
+            roundPicker = layout.findViewById(R.id.roundPicker);
+        } else {
+            roundPicker = getLayoutInflater().inflate(R.layout.round_picker, null);
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
+                    ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
+            actionBar.setCustomView(roundPicker);
+        }
+
         nextRound = (ImageButton) roundPicker.findViewById(R.id.nextRound);
         roundTextView = (TextView) roundPicker.findViewById(R.id.roundNumber);
         previousRound = (ImageButton) roundPicker.findViewById(R.id.previousRound);
@@ -152,15 +187,6 @@ public final class GameActivity extends SherlockActivity {
                 roundChanged();
             }
         });
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
-                ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
-        actionBar.setCustomView(roundPicker);
-        actionBarBackground = new ActionBarBackground(getResources());
-        actionBar.setBackgroundDrawable(actionBarBackground);
-        updateActionBarBackground();
 
         roundChanged();
     }
@@ -185,7 +211,7 @@ public final class GameActivity extends SherlockActivity {
             return;
         }
 
-        layout.getHandler().postDelayed(saveRunnable, TimeUnit.SECONDS.toMillis(30));
+        handler.postDelayed(saveRunnable, TimeUnit.SECONDS.toMillis(30));
         savePending = true;
     }
 
@@ -197,7 +223,12 @@ public final class GameActivity extends SherlockActivity {
         nextRound.setEnabled(game.round() < game.roundCount() - 1
                 || game.hasNonZeroScore(game.round()));
         valueTextView.setVisibility(View.INVISIBLE);
-        actionBar.show();
+        if (tablet) {
+            playersTextView.setText(Names.styleScores(game));
+            playersTextView.setVisibility(View.VISIBLE);
+        } else {
+            actionBar.show();
+        }
         jogWheel.invalidate();
     }
 
@@ -228,7 +259,7 @@ public final class GameActivity extends SherlockActivity {
             wakeLock.release();
         }
 
-        layout.getHandler().removeCallbacks(saveRunnable);
+        handler.removeCallbacks(saveRunnable);
         database.save(game);
     }
 

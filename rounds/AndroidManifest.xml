@@ -26,7 +26,7 @@
         android:name=".GameActivity"
         android:theme="@style/Theme.SherlockWithActionBarOverlay"
         android:screenOrientation="portrait"
-        android:configChanges="orientation|keyboardHidden|keyboard"/>
+        android:configChanges="keyboardHidden|keyboard"/>
   </application>
   <uses-permission
       android:name="android.permission.WAKE_LOCK"/>
