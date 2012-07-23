@@ -17,12 +17,9 @@
 package com.publicobject.rounds;
 
 import android.content.Intent;
-import android.graphics.Typeface;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -46,11 +43,32 @@ public final class HomeActivity extends SherlockActivity {
     private GameDatabase database;
     private ListView gameList;
 
+    private final View.OnClickListener newGameListener = new View.OnClickListener() {
+        @Override public void onClick(View view) {
+            Intent newGameIntent = new Intent(HomeActivity.this, SetUpActivity.class);
+            newGameIntent.putExtra(IntentExtras.IS_NEW_GAME, true);
+            startActivity(newGameIntent);
+            overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+        }
+    };
+
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setRequestedOrientation(Device.isTablet(this)
+                ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         database = GameDatabase.getInstance(getApplicationContext());
 
-        setContentView(R.layout.home);
+        View layout = getLayoutInflater().inflate(R.layout.home, null);
+        setContentView(layout);
+
+        Button newGame = (Button) layout.findViewById(R.id.newGame);
+        if (newGame != null) {
+            newGame.setOnClickListener(newGameListener);
+        }
+
         gameList = (ListView) findViewById(R.id.gameList);
         gameList.setItemsCanFocus(true);
 
@@ -82,15 +100,6 @@ public final class HomeActivity extends SherlockActivity {
     }
 
     private class GameListAdapter extends BaseAdapter {
-        private final View.OnClickListener newGameListener = new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Intent newGameIntent = new Intent(HomeActivity.this, SetUpActivity.class);
-                newGameIntent.putExtra(IntentExtras.IS_NEW_GAME, true);
-                startActivity(newGameIntent);
-                overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
-            }
-        };
-
         private final View.OnClickListener resumeListener = new View.OnClickListener() {
             @Override public void onClick(View view) {
                 int position = gameList.getPositionForView(view);
@@ -225,7 +234,9 @@ public final class HomeActivity extends SherlockActivity {
             }
             View overview = getLayoutInflater().inflate(R.layout.overview_item, parent, false);
             Button newGame = (Button) overview.findViewById(R.id.newGame);
-            newGame.setOnClickListener(newGameListener);
+            if (newGame != null) {
+                newGame.setOnClickListener(newGameListener);
+            }
             return overview;
         }
 

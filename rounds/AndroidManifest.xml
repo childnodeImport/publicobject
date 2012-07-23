@@ -19,13 +19,11 @@
     <activity
         android:name=".SetUpActivity"
         android:label="Set Up"
-        android:screenOrientation="portrait"
         android:theme="@style/Theme.Sherlock"
         android:windowSoftInputMode="adjustResize|stateVisible"/>
     <activity
         android:name=".GameActivity"
         android:theme="@style/Theme.SherlockWithActionBarOverlay"
-        android:screenOrientation="portrait"
         android:configChanges="keyboardHidden|keyboard"/>
   </application>
   <uses-permission

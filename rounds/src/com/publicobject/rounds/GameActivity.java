@@ -27,7 +27,7 @@ import android.os.PowerManager;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
-import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -75,13 +75,10 @@ public final class GameActivity extends SherlockActivity {
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
 
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        tablet = metrics.widthPixels / metrics.density >= 600;
-        int orientation = tablet
+        tablet = Device.isTablet(this);
+        setRequestedOrientation(tablet
                 ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        setRequestedOrientation(orientation);
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         database = GameDatabase.getInstance(getApplicationContext());
 
@@ -224,6 +221,8 @@ public final class GameActivity extends SherlockActivity {
                 || game.hasNonZeroScore(game.round()));
         valueTextView.setVisibility(View.INVISIBLE);
         if (tablet) {
+            int textSize = (game.playerCount() > 4) ? 40 : 48;
+            playersTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
             playersTextView.setText(Names.styleScores(game));
             playersTextView.setVisibility(View.VISIBLE);
         } else {

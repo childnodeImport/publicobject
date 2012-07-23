@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top|center_horizontal"
+            android:orientation="vertical"
+            android:background="#000"
+            >
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                >
+            <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="35"
+                    />
+            <AutoCompleteTextView
+                    android:id="@+id/name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="4dp"
+                    android:layout_weight="30"
+                    android:imeOptions="actionNext"
+                    android:capitalize="words"
+                    android:text=""
+                    android:singleLine="true"
+                    android:maxLength="12"
+                    />
+            <View
+                    android:id="@+id/colorPlaceholder"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    />
+            <Button
+                    android:id="@+id/next"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:text="Next"
+                    />
+            <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="35"
+                    />
+        </LinearLayout>
+
+        <TextView
+                android:id="@+id/names"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                style="@style/TextAppearance.Rounds.Medium"
+                android:text="Jesse  Jodie  Mike  Graham  Jono  Olav  Carina  Jesse  Jodie  Mike  Graham  Jono  Olav  Carina"
+                android:lineSpacingMultiplier="2"
+                />
+
+        <Button
+                android:id="@+id/play"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="Play"
+                />
+
+    </LinearLayout>
+</FrameLayout>

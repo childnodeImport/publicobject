@@ -17,6 +17,7 @@
 package com.publicobject.rounds;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
@@ -55,6 +56,10 @@ public final class SetUpActivity extends SherlockActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setRequestedOrientation(Device.isTablet(this)
+                ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         FrameLayout layout = (FrameLayout) getLayoutInflater().inflate(R.layout.set_up, null);
         setContentView(layout);
