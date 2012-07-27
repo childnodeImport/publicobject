@@ -299,13 +299,16 @@ public final class GameDatabase {
 
     private List<File> gameFilesByMostRecent() {
         List<File> result = new ArrayList<File>();
-        for (File file : gameDir.listFiles()) {
-            if (file.getName().endsWith(".game")) {
-                result.add(file);
+        File[] files = gameDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().endsWith(".game")) {
+                    result.add(file);
+                }
             }
+            Collections.sort(result, ORDER_BY_NAME);
+            Collections.reverse(result);
         }
-        Collections.sort(result, ORDER_BY_NAME);
-        Collections.reverse(result);
         return result;
     }
 

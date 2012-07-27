@@ -25,6 +25,11 @@
         android:name=".GameActivity"
         android:theme="@style/Theme.SherlockWithActionBarOverlay"
         android:configChanges="keyboardHidden|keyboard"/>
+    <activity
+        android:name=".ShareActivity"
+        android:label="Share"
+        android:theme="@style/Theme.Sherlock"
+        android:windowSoftInputMode="adjustResize|stateVisible"/>
   </application>
   <uses-permission
       android:name="android.permission.WAKE_LOCK"/>

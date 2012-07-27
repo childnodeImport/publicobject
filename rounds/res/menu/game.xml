@@ -10,4 +10,9 @@
       android:icon="@drawable/group"
       android:title="Edit Players"
       android:showAsAction="ifRoom"/>
+  <item
+      android:id="@+id/share"
+      android:icon="@drawable/group"
+      android:title="Share"
+      android:showAsAction="ifRoom"/>
 </menu>

@@ -296,6 +296,14 @@ public final class GameActivity extends SherlockActivity {
             jogWheel.selectPlayer(playersToEliminate);
             return true;
 
+        case R.id.share:
+            intent = new Intent(this, ShareActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra(IntentExtras.GAME_ID, game.getId());
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+            return true;
+
         case android.R.id.home:
             intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

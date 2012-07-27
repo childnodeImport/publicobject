@@ -36,6 +36,8 @@ public final class Game implements Cloneable {
     private long dateStarted;
     private int round = 0;
     private List<Player> players = new ArrayList<Player>();
+    private String name;
+    private WinCondition winCondition = WinCondition.NONE;
 
     public Game() {
         setRound(0);
@@ -67,6 +69,18 @@ public final class Game implements Cloneable {
     }
     public void setDateStarted(long dateStarted) {
         this.dateStarted = dateStarted;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public WinCondition getWinCondition() {
+        return winCondition;
+    }
+    public void setWinCondition(WinCondition winCondition) {
+        this.winCondition = winCondition;
     }
 
     /**
@@ -158,6 +172,17 @@ public final class Game implements Cloneable {
         int result = Integer.MIN_VALUE;
         for (int p = 0; p < players.size(); p++) {
             result = Math.max(result, players.get(p).total);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the lowest total among all players.
+     */
+    public int minTotal() {
+        int result = Integer.MAX_VALUE;
+        for (int p = 0; p < players.size(); p++) {
+            result = Math.min(result, players.get(p).total);
         }
         return result;
     }
