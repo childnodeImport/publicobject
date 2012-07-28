@@ -1,0 +1,137 @@
+<html
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+<jsp:directive.page contentType="text/html; charset=UTF-8"/>
+<jsp:output omit-xml-declaration="true"/>
+<jsp:useBean id="game" class="com.publicobject.roundsweb.Game" scope="request"/>
+<head>
+  <title><c:out value="${game.name}"/></title>
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular" title="roboto"/>
+  <style type="text/css">
+    body {
+        background-color: #333;
+        font-family: Roboto, Helvetica, sans-serif;
+        font-size: 16px;
+        padding: 0px;
+        margin: 0px;
+    }
+    .scores {
+        background-color: #222;
+        color: #fff;
+        padding: 48px 0px 96px 0px;
+        margin: 0px;
+    }
+    .game {
+        font-size: 48px;
+        font-weight: 300;
+        margin: 0px 64px;
+    }
+    .date {
+        margin: 16px 64px;
+    }
+    .players {
+        background-color: #000;
+        white-space: pre-wrap;
+        font-weight: 300;
+        font-size: 48px;
+        padding: 8px 64px;
+        margin: 24px 0px;
+    }
+    .players b {
+        font-weight: 400;
+    }
+    .player {
+        white-space: pre;
+    }
+    .history {
+        margin: 16px 48px;
+        color: #fff;
+    }
+    .history td {
+        padding: 2px 8px;
+        width: 24px;
+        text-align: right;
+        font-size: 16px;
+    }
+    .history .total {
+        font-weight: 400;
+    }
+    .history .player {
+        text-align: left;
+        padding-left: 20px;
+        font-weight: 400;
+    }
+    .app {
+        text-align: center;
+        padding: 16px 64px;
+    }
+    .app a, .app a table {
+        color: #fff;
+        text-decoration: none;
+    }
+    .app a:hover, .app a:hover table {
+        background-color: #111;
+    }
+    .app table {
+        margin: auto;
+    }
+    .app td {
+        vertical-align: center;
+        padding: 2px 8px;
+        white-space: pre-wrap;
+    }
+    .serif {
+        font-family: serif;
+        font-weight: 100;
+    }
+    <c:forEach var="p" begin="0" end="${fn:length(game.players) - 1}">
+    <c:out value=".c${p}"/> {
+        color: <c:out value="${game.players[p].color}"/>;
+    }
+    </c:forEach>
+  </style>
+  </head>
+  <body>
+
+  <div class="scores">
+  <div class="game"><c:out value="${game.name}"/></div>
+  <div class="date"><c:out value="${game.dateStarted}"/></div>
+
+  <div class="players">
+    <c:forEach var="p" begin="0" end="${fn:length(game.players) - 1}">
+      <c:out value="${game.players[p].name}"/>&#160;<b class="c${p}"><c:out value="${game.players[p].total}"/></b>
+      <c:out value="  "/>
+    </c:forEach>
+  </div>
+
+  <table class="history">
+
+  <tr class="header">
+  <c:forEach var="s" begin="0" end="${fn:length(game.players[0].history) - 1}">
+    <td><c:out value="${s}"/></td>
+  </c:forEach>
+  <td>&#931;</td>
+  <td/>
+  </tr>
+
+  <c:forEach var="p" begin="0" end="${fn:length(game.players) - 1}">
+     <tr class="c${p}">
+     <c:forEach var="s" begin="0" end="${fn:length(game.players[p].history) - 1}">
+        <td><c:out value="${game.players[p].history[s]}"/></td>
+     </c:forEach>
+     <td class="total"><c:out value="${game.players[p].total}"/></td>
+     <td class="player"><c:out value="${game.players[p].name}"/></td>
+     </tr>
+  </c:forEach>
+  </table>
+  </div>
+
+  <div class="app">
+  <a href="https://play.google.com/store/apps/details?id=com.publicobject.rounds">
+  <table><tr><td>ROUNDS</td><td><img src="/static/icon114.png" height="30" width="30"/></td><td>SCORE PAD  <i class="serif">for</i>  ANDROID</td></tr></table>
+  </a>
+  </div>
+
+</body>
+</html>
