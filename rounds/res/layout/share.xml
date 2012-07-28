@@ -15,12 +15,13 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:hint="Game Name"
-            android:inputType="textCapWords"/>
+            android:inputType="textCapWords"
+            />
 
     <RadioGroup
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:orientation="horizontal"
@@ -45,22 +46,22 @@
             android:id="@+id/messagePreview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_weight="100"
+            android:layout_marginTop="8dp"
             android:layout_marginLeft="24dp"
             android:layout_marginRight="24dp"
+            android:layout_marginBottom="8dp"
             android:text="&quot;Mike, Graham, Jodie and Carina played Mini Golf.&quot;"
             android:textStyle="italic"
             style="@style/TextAppearance.Rounds.Medium"
             />
-
     <Button
             android:id="@+id/share"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Share"/>
-
+            android:text="Share"
+            />
 </LinearLayout>

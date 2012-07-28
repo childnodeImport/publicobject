@@ -129,7 +129,7 @@ public final class ShareActivity extends SherlockActivity {
         messagePreview.setText(gameSummarizer.summarize(game, "roundsapp.com/..."));
 
         String gameName = game.getName();
-        if (gameName == null || gameName.isEmpty()) {
+        if (gameName == null || gameName.length() == 0) {
             messagePreview.setVisibility(View.INVISIBLE);
             share.setEnabled(false);
         } else {

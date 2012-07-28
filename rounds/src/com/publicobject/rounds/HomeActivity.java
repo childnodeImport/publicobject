@@ -253,7 +253,7 @@ public final class HomeActivity extends SherlockActivity {
             players.setText(Names.styleScores(game));
 
             StringBuilder summaryText = new StringBuilder();
-            if (game.getName() != null && !game.getName().isEmpty()) {
+            if (game.getName() != null && game.getName().length() > 0) {
                 summaryText.append(game.getName());
                 summaryText.append(". ");
             }

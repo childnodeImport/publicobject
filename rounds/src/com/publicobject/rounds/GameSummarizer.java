@@ -93,7 +93,7 @@ final class GameSummarizer {
         }
 
         String gameName = game.getName();
-        if (gameName == null || gameName.isEmpty()) {
+        if (gameName == null || gameName.length() == 0) {
             gameName = "a game";
         }
         ssb.append(gameName).append(". ");
