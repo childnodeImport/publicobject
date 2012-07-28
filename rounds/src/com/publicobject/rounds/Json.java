@@ -23,12 +23,4 @@ import com.google.gson.Gson;
  */
 public final class Json {
     static final Gson gson = new Gson();
-
-    public static Game jsonToGame(String json) {
-        return gson.fromJson(json, Game.class);
-    }
-
-    public static String gameToJson(Game game) {
-        return gson.toJson(game);
-    }
 }

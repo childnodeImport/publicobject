@@ -26,7 +26,7 @@ public final class Names {
      * Returns styled text containing alternating player names and scores.
      */
     public static SpannableStringBuilder styleScores(Game game) {
-        int maxTotal = game.maxTotal();
+        int winningTotal = game.winningTotal();
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         for (int p = 0, size = game.playerCount(); p < size; p++) {
             if (p > 0) {
@@ -40,7 +40,7 @@ public final class Names {
             ssb.append(total);
             ssb.setSpan(new ForegroundColorSpan(game.playerColor(p)),
                     ssb.length() - total.length(), ssb.length(), 0);
-            if (maxTotal == game.playerTotal(p)) {
+            if (winningTotal == game.playerTotal(p)) {
                 ssb.setSpan(new StyleSpan(Typeface.BOLD),
                         ssb.length() - total.length(), ssb.length(), 0);
             }

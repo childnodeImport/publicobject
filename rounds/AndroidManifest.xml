@@ -31,8 +31,8 @@
         android:theme="@style/Theme.Sherlock"
         android:windowSoftInputMode="adjustResize|stateVisible"/>
   </application>
-  <uses-permission
-      android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
   <uses-sdk
       android:minSdkVersion="8"
       android:targetSdkVersion="15"/>

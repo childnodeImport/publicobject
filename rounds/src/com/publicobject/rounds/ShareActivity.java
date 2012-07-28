@@ -17,9 +17,11 @@
 package com.publicobject.rounds;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -30,41 +32,55 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.stream.JsonWriter;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public final class ShareActivity extends SherlockActivity {
+    private static final String POST_URL = "http://www.roundsapp.com/post";
+    // private static final String POST_URL = "http://192.168.1.221:8080/post";
+
     private Game game;
-    private GameDatabase database;
-    private String username = "limpbizkit";
+    private GameSaver gameSaver;
+    private GameSummarizer gameSummarizer;
+
     private TextView messagePreview;
     private Button share;
+    private EditText gameName;
+    private RadioButton highScoreWins;
+    private RadioButton lowScoreWins;
 
     @Override protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
 
-        database = GameDatabase.getInstance(getApplicationContext());
-
+        GameDatabase database = GameDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
         String gameId = savedState != null
                 ? savedState.getString(IntentExtras.GAME_ID)
                 : intent.getStringExtra(IntentExtras.GAME_ID);
         game = database.get(gameId);
+        gameSaver = new GameSaver(database, game);
 
         View layout = getLayoutInflater().inflate(R.layout.share, null);
-
-        final EditText gameName = (EditText) layout.findViewById(R.id.gameName);
-        final RadioButton highScoreWins = (RadioButton) layout.findViewById(R.id.highScoreWins);
-        final RadioButton lowScoreWins = (RadioButton) layout.findViewById(R.id.lowScoreWins);
+        gameName = (EditText) layout.findViewById(R.id.gameName);
+        highScoreWins = (RadioButton) layout.findViewById(R.id.highScoreWins);
+        lowScoreWins = (RadioButton) layout.findViewById(R.id.lowScoreWins);
         messagePreview = (TextView) layout.findViewById(R.id.messagePreview);
+        messagePreview.setMovementMethod(LinkMovementMethod.getInstance());
         share = (Button) layout.findViewById(R.id.share);
 
         if (game.getName() == null) {
             game.setName("");
         }
         gameName.setText(game.getName());
+        gameName.setSelection(game.getName().length());
         highScoreWins.setChecked(game.getWinCondition() == WinCondition.HIGH_SCORE);
         lowScoreWins.setChecked(game.getWinCondition() == WinCondition.LOW_SCORE);
+        gameSummarizer = new GameSummarizer(this);
         updateMessagePreview();
 
         gameName.addTextChangedListener(new TextWatcher() {
@@ -73,6 +89,7 @@ public final class ShareActivity extends SherlockActivity {
             @Override public void onTextChanged(CharSequence text, int a, int b, int c) {
                 game.setName(gameName.getText().toString().trim());
                 updateMessagePreview();
+                gameSaver.saveLater();
             }
             @Override public void afterTextChanged(Editable textView) {
             }
@@ -85,10 +102,17 @@ public final class ShareActivity extends SherlockActivity {
                         : WinCondition.LOW_SCORE;
                 game.setWinCondition(winCondition);
                 updateMessagePreview();
+                gameSaver.saveLater();
             }
         };
         highScoreWins.setOnCheckedChangeListener(checkedChangeListener);
         lowScoreWins.setOnCheckedChangeListener(checkedChangeListener);
+
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                new ShareGameTask(game).execute();
+            }
+        });
 
         setContentView(layout);
 
@@ -96,8 +120,13 @@ public final class ShareActivity extends SherlockActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-    private void updateMessagePreview() {
-        messagePreview.setText(getSummaryMessage());
+    @Override protected void onPause() {
+        super.onPause();
+        gameSaver.onPause();
+    }
+
+    void updateMessagePreview() {
+        messagePreview.setText(gameSummarizer.summarize(game, "roundsapp.com/..."));
 
         String gameName = game.getName();
         if (gameName == null || gameName.isEmpty()) {
@@ -106,64 +135,6 @@ public final class ShareActivity extends SherlockActivity {
         } else {
             messagePreview.setVisibility(View.VISIBLE);
             share.setEnabled(true);
-        }
-    }
-
-    private String getSummaryMessage() {
-        List<String> winners = new ArrayList<String>();
-        List<String> losers = new ArrayList<String>();
-
-        if (game.getWinCondition() == WinCondition.NONE) {
-            for (int p = 0; p < game.playerCount(); p++) {
-                winners.add(game.playerName(p));
-            }
-        } else {
-            int winningTotal = game.getWinCondition() == WinCondition.HIGH_SCORE
-                    ? game.maxTotal()
-                    : game.minTotal();
-            for (int p = 0; p < game.playerCount(); p++) {
-                if (winningTotal == game.playerTotal(p)) {
-                    winners.add(game.playerName(p));
-                } else {
-                    losers.add(game.playerName(p));
-                }
-            }
-        }
-
-        StringBuilder message = new StringBuilder();
-        appendNames(message, winners);
-
-        if (game.getWinCondition() == WinCondition.NONE) {
-            message.append(" played ");
-        } else if (!losers.isEmpty()) {
-            message.append(" defeated ");
-            appendNames(message, losers);
-            message.append(" at ");
-        } else {
-            message.append(" tied at ");
-        }
-
-        String gameName = game.getName();
-        if (gameName == null || gameName.isEmpty()) {
-            gameName = "a game";
-        }
-        message.append(gameName).append(".\n");
-        message.append("roundsapp.com/");
-        message.append(username);
-        message.append("/42");
-        return message.toString();
-    }
-
-    private void appendNames(StringBuilder message, List<String> players) {
-        for (int i = 0; i < players.size(); i++) {
-            String player = players.get(i);
-            if (i == 0) {
-                message.append(player);
-            } else if (i < players.size() - 1) {
-                message.append(", ").append(player);
-            } else {
-                message.append(" and ").append(player);
-            }
         }
     }
 
@@ -184,6 +155,67 @@ public final class ShareActivity extends SherlockActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private class ShareGameTask extends AsyncTask<Void, Void, String> {
+        private final Game game;
+
+        public ShareGameTask(Game game) {
+            this.game = game.clone();
+        }
+
+        @Override protected void onPreExecute() {
+            gameName.setEnabled(false);
+            highScoreWins.setEnabled(false);
+            lowScoreWins.setEnabled(false);
+            share.setEnabled(false);
+            messagePreview.setEnabled(false);
+        }
+
+        @Override protected String doInBackground(Void... unused) {
+            String gameUrl = "roundsapp.com";
+            try {
+                URL postUrl = new URL(POST_URL);
+                HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
+                connection.setDoOutput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("POST");
+                JsonWriter writer = new JsonWriter(new OutputStreamWriter(
+                        connection.getOutputStream(), "UTF-8"));
+                Json.gson.toJson(game, Game.class, writer);
+                writer.close();
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    throw new IOException("Unexpected HTTP response: "
+                            + connection.getResponseCode() + " " + connection.getResponseMessage());
+                }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        connection.getInputStream(), "UTF-8"));
+                gameUrl = reader.readLine();
+                if (gameUrl.startsWith("http://www.")) {
+                    gameUrl = gameUrl.substring("http://www.".length());
+                }
+                reader.close();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
+            }
+            return gameUrl;
+        }
+
+        @Override protected void onPostExecute(String url) {
+            gameName.setEnabled(true);
+            highScoreWins.setEnabled(true);
+            lowScoreWins.setEnabled(true);
+            share.setEnabled(true);
+            messagePreview.setEnabled(true);
+
+            String messageWithUrl = gameSummarizer.summarize(game, url).toString();
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            intent.putExtra(Intent.EXTRA_SUBJECT, game.getName());
+            intent.putExtra(Intent.EXTRA_TEXT, messageWithUrl);
+            startActivity(Intent.createChooser(intent, "Share"));
         }
     }
 }

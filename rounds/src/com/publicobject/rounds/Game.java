@@ -216,6 +216,12 @@ public final class Game implements Cloneable {
         }
     }
 
+    public int winningTotal() {
+        return getWinCondition() == WinCondition.LOW_SCORE
+                ? minTotal()
+                : maxTotal(); // also used for WinCondition.NONE
+    }
+
     private static class Player implements Cloneable {
         private String name;
         private int color;

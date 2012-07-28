@@ -252,17 +252,22 @@ public final class HomeActivity extends SherlockActivity {
 
             players.setText(Names.styleScores(game));
 
-            StringBuilder rounds = new StringBuilder();
-            if (game.roundCount() == 1) {
-                rounds.append("1 round. ");
-            } else {
-                rounds.append(Integer.toString(game.roundCount()));
-                rounds.append(" rounds. ");
+            StringBuilder summaryText = new StringBuilder();
+            if (game.getName() != null && !game.getName().isEmpty()) {
+                summaryText.append(game.getName());
+                summaryText.append(". ");
             }
-            rounds.append("Started ");
-            rounds.append(DateUtils.getRelativeTimeSpanString(getApplicationContext(),
+            if (game.roundCount() == 1) {
+                summaryText.append("1 round. ");
+            } else {
+                summaryText.append(Integer.toString(game.roundCount()));
+                summaryText.append(" rounds. ");
+            }
+            summaryText.append("Started ");
+            summaryText.append(DateUtils.getRelativeTimeSpanString(getApplicationContext(),
                     game.getDateStarted(), true));
-            summary.setText(rounds);
+            summaryText.append(".");
+            summary.setText(summaryText);
 
             // Remove listeners before changing any observed state. Necessary for recycling.
             checked.setOnCheckedChangeListener(null);

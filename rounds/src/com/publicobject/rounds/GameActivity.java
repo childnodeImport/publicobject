@@ -22,7 +22,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.PowerManager;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
@@ -40,13 +39,11 @@ import com.actionbarsherlock.view.MenuItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public final class GameActivity extends SherlockActivity {
     private Game game;
     private PowerManager.WakeLock wakeLock;
-    private GameDatabase database;
-    private Handler handler = new Handler();
+    private GameSaver gameSaver;
 
     private View layout;
     private JogWheel jogWheel;
@@ -61,14 +58,6 @@ public final class GameActivity extends SherlockActivity {
     private TextView roundTextView;
     private ImageButton previousRound;
 
-    private volatile boolean savePending = false;
-    private final Runnable saveRunnable = new Runnable() {
-        @Override public void run() {
-            savePending = false;
-            database.saveLater(game);
-        }
-    };
-
     /** True for landscape layout. */
     private boolean tablet;
 
@@ -80,7 +69,7 @@ public final class GameActivity extends SherlockActivity {
                 ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        database = GameDatabase.getInstance(getApplicationContext());
+        GameDatabase database = GameDatabase.getInstance(getApplicationContext());
 
         Intent intent = getIntent();
         String gameId = savedState != null
@@ -88,6 +77,8 @@ public final class GameActivity extends SherlockActivity {
                 : intent.getStringExtra(IntentExtras.GAME_ID);
         game = database.get(gameId);
         game.setRound(game.roundCount() - 1);
+
+        gameSaver = new GameSaver(database, game);
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, getPackageName());
@@ -145,7 +136,7 @@ public final class GameActivity extends SherlockActivity {
                 scoreHistoryTable.scoreChanged(player, round);
                 updateActionBarBackground();
                 roundChanged();
-                saveLater();
+                gameSaver.saveLater();
             }
             @Override public void cancelled() {
                 roundChanged();
@@ -199,19 +190,6 @@ public final class GameActivity extends SherlockActivity {
         savedState.putString(IntentExtras.GAME_ID, game.getId());
     }
 
-    /**
-     * Saves the game at some point in the future. Multiple calls to this method
-     * will be coalesced into a single filesystem write.
-     */
-    private void saveLater() {
-        if (savePending) {
-            return;
-        }
-
-        handler.postDelayed(saveRunnable, TimeUnit.SECONDS.toMillis(30));
-        savePending = true;
-    }
-
     private void roundChanged() {
         scoreHistoryTable.roundCountChanged();
         roundTextView.setText("Round " + Integer.toString(game.round() + 1));
@@ -232,23 +210,19 @@ public final class GameActivity extends SherlockActivity {
     }
 
     private void updateActionBarBackground() {
-        int color = Color.WHITE;
-        int maxTotal = Integer.MIN_VALUE;
+        int color = Color.BLACK; // BLACK indicates the winning color hasn't yet been found.
+        int winningTotal = game.winningTotal();
         for (int p = 0; p < game.playerCount(); p++) {
-            int playerTotal = game.playerTotal(p);
-            if (playerTotal > maxTotal) {
+            if (game.playerTotal(p) != winningTotal) {
+                continue;
+            }
+            if (color == Color.BLACK) {
                 color = game.playerColor(p);
-                maxTotal = playerTotal;
-            } else if (playerTotal == maxTotal) {
-                color = Color.WHITE;
+            } else {
+                color = Color.WHITE; // WHITE indicates a tie.
             }
         }
         actionBarBackground.setColor(color);
-    }
-
-    @Override protected void onDestroy() {
-        super.onDestroy();
-        database = null;
     }
 
     @Override protected void onPause() {
@@ -258,8 +232,7 @@ public final class GameActivity extends SherlockActivity {
             wakeLock.release();
         }
 
-        handler.removeCallbacks(saveRunnable);
-        database.save(game);
+        gameSaver.onPause();
     }
 
     @Override protected void onResume() {
