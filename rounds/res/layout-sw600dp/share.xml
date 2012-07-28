@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="right"
+        android:baselineAligned="false">
+
+    <RadioGroup
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="50"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:orientation="vertical"
+            >
+        <EditText
+                android:id="@+id/gameName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Game Name"
+                android:inputType="textCapWords"
+                />
+        <RadioButton
+                android:id="@+id/highScoreWins"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="High Score Wins"
+                />
+        <RadioButton
+                android:id="@+id/lowScoreWins"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Low Score Wins"
+                />
+    </RadioGroup>
+
+    <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="50"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:orientation="vertical"
+            android:gravity="right"
+            >
+
+        <TextView
+                android:id="@+id/messagePreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="100"
+                android:text="&quot;Mike, Graham, Jodie and Carina played Mini Golf.&quot;"
+                android:textStyle="italic"
+                style="@style/TextAppearance.Rounds.Medium"
+                />
+        <Button
+                android:id="@+id/share"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Share"/>
+
+    </LinearLayout>
+</LinearLayout>

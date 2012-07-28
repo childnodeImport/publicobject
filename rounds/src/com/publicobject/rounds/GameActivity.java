@@ -40,7 +40,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static android.app.ActionBar.LayoutParams;
+
 public final class GameActivity extends SherlockActivity {
+    private String gameId;
     private Game game;
     private PowerManager.WakeLock wakeLock;
     private GameSaver gameSaver;
@@ -69,16 +72,10 @@ public final class GameActivity extends SherlockActivity {
                 ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        GameDatabase database = GameDatabase.getInstance(getApplicationContext());
-
         Intent intent = getIntent();
-        String gameId = savedState != null
+        gameId = savedState != null
                 ? savedState.getString(IntentExtras.GAME_ID)
                 : intent.getStringExtra(IntentExtras.GAME_ID);
-        game = database.get(gameId);
-        game.setRound(game.roundCount() - 1);
-
-        gameSaver = new GameSaver(database, game);
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, getPackageName());
@@ -93,11 +90,9 @@ public final class GameActivity extends SherlockActivity {
         scoreHistoryTable = new ScoreHistoryTable(getApplicationContext(),
                 (TableLayout) layout.findViewById(R.id.runningScores),
                 (TableLayout) layout.findViewById(R.id.currentScores),
-                (HorizontalScrollView) layout.findViewById(R.id.runningScoresScroller),
-                game);
+                (HorizontalScrollView) layout.findViewById(R.id.runningScoresScroller));
 
         jogWheel = (JogWheel) layout.findViewById(R.id.jogWheel);
-        jogWheel.setModel(game);
         jogWheel.setListener(new JogWheel.Listener() {
             @Override public void selecting(int player, int value) {
                 int selectingFrom = game.playerScore(player, game.round());
@@ -147,7 +142,6 @@ public final class GameActivity extends SherlockActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBarBackground = new ActionBarBackground(getResources());
         actionBar.setBackgroundDrawable(actionBarBackground);
-        updateActionBarBackground();
 
         View roundPicker;
         if (tablet) {
@@ -156,7 +150,8 @@ public final class GameActivity extends SherlockActivity {
             roundPicker = getLayoutInflater().inflate(R.layout.round_picker, null);
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
                     ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
-            actionBar.setCustomView(roundPicker);
+            actionBar.setCustomView(roundPicker, new ActionBar.LayoutParams(
+                    LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         }
 
         nextRound = (ImageButton) roundPicker.findViewById(R.id.nextRound);
@@ -175,8 +170,6 @@ public final class GameActivity extends SherlockActivity {
                 roundChanged();
             }
         });
-
-        roundChanged();
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -187,7 +180,7 @@ public final class GameActivity extends SherlockActivity {
 
     @Override protected void onSaveInstanceState(Bundle savedState) {
         super.onSaveInstanceState(savedState);
-        savedState.putString(IntentExtras.GAME_ID, game.getId());
+        savedState.putString(IntentExtras.GAME_ID, gameId);
     }
 
     private void roundChanged() {
@@ -243,6 +236,13 @@ public final class GameActivity extends SherlockActivity {
             wakeLock.acquire();
         }
 
+        GameDatabase database = GameDatabase.getInstance(getApplicationContext());
+        game = database.get(gameId);
+        game.setRound(game.roundCount() - 1);
+        gameSaver = new GameSaver(database, game);
+        scoreHistoryTable.setGame(game);
+        jogWheel.setModel(game);
+        updateActionBarBackground();
         roundChanged();
     }
 
@@ -251,7 +251,7 @@ public final class GameActivity extends SherlockActivity {
         case R.id.editPlayers:
             Intent intent = new Intent(this, SetUpActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra(IntentExtras.GAME_ID, game.getId());
+            intent.putExtra(IntentExtras.GAME_ID, gameId);
             intent.putExtra(IntentExtras.IS_NEW_GAME, false);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
@@ -272,7 +272,7 @@ public final class GameActivity extends SherlockActivity {
         case R.id.share:
             intent = new Intent(this, ShareActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra(IntentExtras.GAME_ID, game.getId());
+            intent.putExtra(IntentExtras.GAME_ID, gameId);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
             return true;

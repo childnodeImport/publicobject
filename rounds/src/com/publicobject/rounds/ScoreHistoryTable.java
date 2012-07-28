@@ -34,27 +34,28 @@ public final class ScoreHistoryTable {
     private final TableLayout runningScoresTable;
     private final TableLayout currentScoresTable;
     private final HorizontalScrollView runningScoresScroller;
-    private final Game model;
+    private Game model;
 
     private TableRow runningScoresHeader;
     private TableRow[] runningScoresRows;
     private TextView[] playerTotals;
 
     public ScoreHistoryTable(Context context,
-                             TableLayout runningScoresTable,
-                             TableLayout currentScoresTable,
-                             HorizontalScrollView runningScoresScroller,
-                             Game model) {
-        if (model.playerCount() == 0 || model.roundCount() == 0) {
-            throw new IllegalArgumentException();
-        }
-
+            TableLayout runningScoresTable,
+            TableLayout currentScoresTable,
+            HorizontalScrollView runningScoresScroller) {
         this.context = context;
         this.runningScoresTable = runningScoresTable;
         this.currentScoresTable = currentScoresTable;
         this.runningScoresScroller = runningScoresScroller;
-        this.model = model;
+    }
 
+    public void setGame(Game game) {
+        if (game.playerCount() == 0 || game.roundCount() == 0) {
+            throw new IllegalArgumentException();
+        }
+
+        this.model = game;
         clear();
         roundCountChanged();
     }
