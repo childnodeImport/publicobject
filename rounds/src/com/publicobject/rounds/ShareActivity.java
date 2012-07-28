@@ -17,6 +17,7 @@
 package com.publicobject.rounds;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -56,6 +57,10 @@ public final class ShareActivity extends SherlockActivity {
 
     @Override protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
+
+        setRequestedOrientation(Device.isTablet(this)
+                ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         GameDatabase database = GameDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
