@@ -63,6 +63,7 @@ public final class GameActivity extends SherlockActivity {
 
     /** True for landscape layout. */
     private boolean tablet;
+    private MenuItem randomPlayerMenu;
 
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
@@ -174,7 +175,10 @@ public final class GameActivity extends SherlockActivity {
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         getSupportMenuInflater().inflate(R.menu.game, menu);
-        menu.findItem(R.id.randomPlayer).setEnabled(game.playerCount() > 1);
+        randomPlayerMenu = menu.findItem(R.id.randomPlayer);
+        if (game != null) {
+            randomPlayerMenu.setEnabled(game.playerCount() > 1);
+        }
         return true;
     }
 
@@ -242,6 +246,9 @@ public final class GameActivity extends SherlockActivity {
         gameSaver = new GameSaver(database, game);
         scoreHistoryTable.setGame(game);
         jogWheel.setModel(game);
+        if (randomPlayerMenu != null) {
+            randomPlayerMenu.setEnabled(game.playerCount() > 1);
+        }
         updateActionBarBackground();
         roundChanged();
     }

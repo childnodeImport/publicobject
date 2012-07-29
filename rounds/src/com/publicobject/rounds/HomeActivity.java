@@ -301,7 +301,12 @@ public final class HomeActivity extends SherlockActivity {
                 throw new IllegalStateException();
             }
 
-            int count = gameList.getCheckedItemIds().length; // no getCheckedItemCount 'til API 11
+            int count = 0;
+            for (int i = 0; i < getCount(); i++) {
+                if (gameList.isItemChecked(i)) {
+                    count++;
+                }
+            }
             switch (count) {
             case 0:
                 batchMode.setTitle("0 Games");
