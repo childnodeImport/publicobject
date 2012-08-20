@@ -29,13 +29,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import static android.media.AudioManager.EXTRA_RINGER_MODE;
-import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.view.ContextThemeWrapper;
-import static android.view.Gravity.BOTTOM;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -44,6 +43,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.Date;
+
+import static android.media.AudioManager.EXTRA_RINGER_MODE;
+import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import static android.media.AudioManager.RINGER_MODE_SILENT;
+import static android.media.AudioManager.RINGER_MODE_VIBRATE;
+import static android.media.AudioManager.VIBRATE_SETTING_OFF;
+import static android.media.AudioManager.VIBRATE_SETTING_ON;
+import static android.media.AudioManager.VIBRATE_TYPE_RINGER;
+import static android.view.Gravity.BOTTOM;
+import static com.publicobject.shush.ClockSlider.CLOCK_SLIDER;
+import static com.publicobject.shush.ClockSlider.VIBRATE_PICKER;
+import static com.publicobject.shush.ClockSlider.VOLUME_SLIDER;
 
 /**
  * A dialog to schedule the ringer back on after a specified duration.
@@ -83,6 +94,10 @@ public final class RingerMutedDialog extends Activity {
             int newRingerMode = intent.getIntExtra(EXTRA_RINGER_MODE, -1);
             if (RINGER_MODE_NORMAL == newRingerMode) {
                 cancel(false);
+            } else if (newRingerMode == RINGER_MODE_VIBRATE) {
+                clockSlider.setVibrateNow(true);
+            } else if (newRingerMode == RINGER_MODE_SILENT) {
+                clockSlider.setVibrateNow(false);
             }
         }
     };
@@ -125,6 +140,8 @@ public final class RingerMutedDialog extends Activity {
         clockSlider.setMinutes(preferences.getInt("minutes", DEFAULT_MINUTES));
         clockSlider.setVolume(preferences.getFloat("volume", DEFAULT_VOLUME));
         clockSlider.setColor(preferences.getInt("color", Welcome.COLORS[0]));
+        clockSlider.setVibrateNow(getDeviceVibrateNow());
+        clockSlider.setVibrateLater(getDeviceVibrateLater());
         notifications = preferences.getBoolean("notifications", true);
 
         registerReceiver(dismissFromVolumeUp, RINGER_MODE_CHANGED);
@@ -148,8 +165,59 @@ public final class RingerMutedDialog extends Activity {
         handler.removeCallbacks(dismissFromTimeout);
     }
 
-    public void volumeSliding(boolean sliding) {
-        dialog.setTitle(sliding ? R.string.restoreVolumeLevel : R.string.turnRingerOnIn);
+    public void modeChanged(int displayMode, boolean vibrateNow, boolean vibrateLater) {
+        if (displayMode == CLOCK_SLIDER) {
+            dialog.setTitle(R.string.turnRingerOnIn);
+        } else if (displayMode == VOLUME_SLIDER) {
+            dialog.setTitle(R.string.restoreVolumeLevel);
+        } else if (displayMode == VIBRATE_PICKER) {
+            if (vibrateNow && vibrateLater) {
+                dialog.setTitle(R.string.vibrateOnOn);
+            } else if (!vibrateNow && vibrateLater) {
+                dialog.setTitle(R.string.vibrateOffOn);
+            } else if (vibrateNow && !vibrateLater) {
+                dialog.setTitle(R.string.vibrateOnOff);
+            } else {
+                dialog.setTitle(R.string.vibrateOffOff);
+            }
+        } else {
+            throw new IllegalArgumentException();
+        }
+
+        setDeviceVibrateNow(vibrateNow);
+        setDeviceVibrateLater(vibrateLater);
+    }
+
+    private boolean getDeviceVibrateNow() {
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        return audioManager.getRingerMode() == RINGER_MODE_VIBRATE;
+    }
+
+    private void setDeviceVibrateNow(boolean vibrateNow) {
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        boolean vibrateSetting = audioManager.getRingerMode() == RINGER_MODE_VIBRATE;
+        if (vibrateSetting != vibrateNow) {
+            audioManager.setRingerMode(vibrateNow ? RINGER_MODE_VIBRATE : RINGER_MODE_SILENT);
+        }
+    }
+
+    private void setDeviceVibrateLater(boolean vibrate) {
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        // For 'ringing' apps that use the pre-ICS system-wide vibrate setting.
+        audioManager.setVibrateSetting(VIBRATE_TYPE_RINGER,
+                vibrate ? VIBRATE_SETTING_ON : VIBRATE_SETTING_OFF);
+        // For the phone app in ICS and beyond
+        Settings.System.putInt(getContentResolver(), "vibrate_when_ringing", vibrate ? 1 : 0);
+    }
+
+    private boolean getDeviceVibrateLater() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+            return audioManager.getVibrateSetting(VIBRATE_TYPE_RINGER) == VIBRATE_SETTING_ON;
+        } else {
+            // TODO: does this need to be "vibrate_on_ring" for ICS ?...
+            return Settings.System.getInt(getContentResolver(), "vibrate_when_ringing", 1) == 1;
+        }
     }
 
     private void commit() {
@@ -208,6 +276,8 @@ public final class RingerMutedDialog extends Activity {
         clockSlider.setStart(new Date(start));
         clockSlider.setMinutes(minutes);
         clockSlider.setVolume(volume);
+        clockSlider.setVibrateNow(getDeviceVibrateNow());
+        clockSlider.setVibrateLater(getDeviceVibrateLater());
     }
 
     private void createShushDialog() {

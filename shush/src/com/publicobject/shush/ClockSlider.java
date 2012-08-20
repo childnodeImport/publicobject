@@ -35,6 +35,11 @@ import java.util.GregorianCalendar;
  * A slider around a circle, to select a time between now and 12 hours from now.
  */
 final class ClockSlider extends View {
+    /* Display modes */
+    public static final int CLOCK_SLIDER = 1;
+    public static final int VOLUME_SLIDER = 2;
+    public static final int VIBRATE_PICKER = 3;
+
     private static final int INSETS = 6;
     private static final int MINUTES_PER_HALF_DAY = 720;
 
@@ -53,9 +58,15 @@ final class ClockSlider extends View {
     private RectF smallVolume;
     private RectF smallVolumeTouchRegion;
     private RectF largeVolume;
-    private boolean volumeSliding;
+    private int displayMode = CLOCK_SLIDER;
     /** Volume to restore to; between 0.0 and 1.0 */
     private float volume = 0.8f;
+
+    /** Vibrate mode */
+    private boolean vibrateNow = true;
+    private boolean vibrateLater = true;
+    private RectF smallVibrate;
+    private RectF smallVibrateTouchRegion;
 
     private Paint lightGrey = new Paint();
     private Paint pink = new Paint();
@@ -148,13 +159,22 @@ final class ClockSlider extends View {
                     bottom - smallVolumeHeight,
                     volumeLeft + smallVolumeWidth,
                     bottom);
+            smallVibrate = new RectF(volumeRight - smallVolumeWidth,
+                    bottom - smallVolumeHeight,
+                    volumeRight,
+                    bottom);
 
             // the small volume touch region is slightly bigger than the triangle
             smallVolumeTouchRegion = new RectF(
-                    smallVolume.left - smallVolume.width() * 0.25f,
-                    smallVolume.top - smallVolume.height() * 0.50f,
-                    smallVolume.right + smallVolume.width() * 0.10f,
+                    smallVolume.left   - smallVolume.width() * 0.25f,
+                    smallVolume.top    - smallVolume.height() * 0.50f,
+                    smallVolume.right  + smallVolume.width() * 0.10f,
                     smallVolume.bottom + smallVolume.height() * 0.25f);
+            smallVibrateTouchRegion = new RectF(
+                    smallVibrate.left   - smallVibrate.width() * 0.10f,
+                    smallVibrate.top    - smallVibrate.height() * 0.50f,
+                    smallVibrate.right  + smallVibrate.width() * 0.25f,
+                    smallVibrate.bottom + smallVibrate.height() * 0.25f);
 
             duration.setTextSize(diameter * 0.32f);
             durationUnits.setTextSize(diameter * 0.10f);
@@ -162,12 +182,20 @@ final class ClockSlider extends View {
             percentPaint.setTextSize(diameter * 0.08f);
         }
 
-        if (volumeSliding) {
-            drawVolumeSlider(canvas, largeVolume);
-        } else {
+        if (displayMode == CLOCK_SLIDER) {
             drawClock(canvas);
             drawClockTextAndButtons(canvas);
             drawVolumeSlider(canvas, smallVolume);
+            drawDevice(canvas, smallVibrate.centerX(), smallVibrate.centerY(),
+                    smallVibrate.height(), true, vibrateNow, false, true);
+            drawDevice(canvas, smallVibrate.centerX(), smallVibrate.centerY(),
+                    smallVibrate.height(), false, vibrateLater, false, true);
+        } else if (displayMode == VOLUME_SLIDER) {
+            drawVolumeSlider(canvas, largeVolume);
+        } else if (displayMode == VIBRATE_PICKER) {
+            drawVibratePicker(canvas);
+        } else {
+            throw new AssertionError();
         }
     }
 
@@ -204,19 +232,35 @@ final class ClockSlider extends View {
         return volume;
     }
 
-    public void setVolume(float volume) {
-        setVolume(volumeSliding, volume);
+    public void setVibrateNow(boolean vibrateNow) {
+        setVolumeAndVibrate(displayMode, volume, vibrateNow, vibrateLater);
     }
 
-    private void setVolume(boolean volumeSliding, float volume) {
-        if (volumeSliding == this.volumeSliding && volume == this.volume) {
+    public void setVibrateLater(boolean vibrateLater) {
+        setVolumeAndVibrate(displayMode, volume, vibrateNow, vibrateLater);
+    }
+
+    public void setVolume(float volume) {
+        setVolumeAndVibrate(displayMode, volume, vibrateNow, vibrateLater);
+    }
+
+    private void setVolumeAndVibrate(int displayMode, float volume,
+            boolean vibrateNow, boolean vibrateLater) {
+        if (displayMode == this.displayMode
+                && volume == this.volume
+                && vibrateNow == this.vibrateNow
+                && vibrateLater == this.vibrateLater) {
             return; // avoid unnecessary repaints
         }
-        if (volumeSliding != this.volumeSliding) {
-            this.ringerMutedDialog.volumeSliding(volumeSliding);
+        if (displayMode != this.displayMode
+                || vibrateNow != this.vibrateNow
+                || vibrateLater != this.vibrateLater) {
+            this.ringerMutedDialog.modeChanged(displayMode, vibrateNow, vibrateLater);
         }
-        this.volumeSliding = volumeSliding;
+        this.displayMode = displayMode;
         this.volume = volume;
+        this.vibrateNow = vibrateNow;
+        this.vibrateLater = vibrateLater;
         postInvalidate();
     }
 
@@ -373,18 +417,30 @@ final class ClockSlider extends View {
         int touchX = (int) event.getX();
         int touchY = (int) event.getY();
 
-        // handle volume slider
-        boolean newVolumeSliding = volumeSliding;
-        if (smallVolumeTouchRegion.contains(touchX, touchY)
-                && event.getAction() == MotionEvent.ACTION_DOWN) {
-            newVolumeSliding = true;
+        // Handle volume slider and vibrate picker.
+        int newDisplayMode = displayMode;
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (smallVolumeTouchRegion.contains(touchX, touchY)) {
+                newDisplayMode = VOLUME_SLIDER;
+            } else if (smallVibrateTouchRegion.contains(touchX, touchY)) {
+                newDisplayMode = VIBRATE_PICKER;
+            }
         }
-        if (newVolumeSliding) {
+        if (newDisplayMode == VOLUME_SLIDER) {
             float newVolume = toVolume((touchX - largeVolume.left) / largeVolume.width());
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                newVolumeSliding = false;
+                newDisplayMode = CLOCK_SLIDER;
             }
-            setVolume(newVolumeSliding, newVolume);
+            setVolumeAndVibrate(newDisplayMode, newVolume, vibrateNow, vibrateLater);
+            return true;
+        }
+        if (newDisplayMode == VIBRATE_PICKER) {
+            boolean vibrateNow = touchX < width / 2;
+            boolean vibrateLater = touchY < height / 2;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                newDisplayMode = CLOCK_SLIDER;
+            }
+            setVolumeAndVibrate(newDisplayMode, volume, vibrateNow, vibrateLater);
             return true;
         }
 
@@ -510,5 +566,71 @@ final class ClockSlider extends View {
      */
     private int roundToNearest15(int angleX2) {
         return ((angleX2 + 8) / 15) * 15;
+    }
+
+    private void drawVibratePicker(Canvas canvas) {
+        boolean onOn = vibrateNow & vibrateLater;
+        boolean offOn = !vibrateNow & vibrateLater;
+        boolean onOff = vibrateNow & !vibrateLater;
+        boolean offOff = !vibrateNow & !vibrateLater;
+
+        int selectedLeft = vibrateNow ? 0 : width / 2;
+        int selectedTop = vibrateLater ? 0 : height / 2;
+        canvas.drawRect(selectedLeft, selectedTop,
+                selectedLeft + width / 2, selectedTop + height / 2, buttonCirclePaint);
+
+        float deviceHeight = height * 0.2f;
+        // top left ON ON
+        drawDevice(canvas, width * 0.25f, height * 0.25f, deviceHeight, true, true, onOn, true);
+        drawDevice(canvas, width * 0.25f, height * 0.25f, deviceHeight, false, true, onOn, true);
+        // top right OFF ON
+        drawDevice(canvas, width * 0.75f, height * 0.25f, deviceHeight, true, false, offOn, true);
+        drawDevice(canvas, width * 0.75f, height * 0.25f, deviceHeight, false, true, offOn, true);
+        // bottom left ON OFF
+        drawDevice(canvas, width * 0.25f, height * 0.75f, deviceHeight, true, true, onOff, true);
+        drawDevice(canvas, width * 0.25f, height * 0.75f, deviceHeight, false, false, onOff, true);
+        // bottom right, OFF OFF
+        drawDevice(canvas, width * 0.75f, height * 0.75f, deviceHeight, true, false, offOff, true);
+        drawDevice(canvas, width * 0.75f, height * 0.75f, deviceHeight, false, false, offOff, true);
+    }
+
+    private void drawDevice(Canvas canvas, float centerX, float centerY, float height,
+            boolean now, boolean vibrate, boolean selected, boolean sideBySide) {
+        canvas.save();
+
+        int width = (int) (height * 0.7f);
+        int bezel = (int) (height * 0.08f);
+        int left = (int) (now ? (centerX - width - bezel) : (centerX + bezel));
+        int right = left + width;
+        int top = (int) (centerY - height / 2);
+        int bottom = (int) (centerY + height / 2);
+
+        // If we're vibrating, rotate the device.
+        if (vibrate) {
+            // If we're right beside another device, move away from center as to not overlap.
+            if (sideBySide) {
+                canvas.translate(now ? -height * 0.18f : height * 0.18f, 0f);
+            }
+            canvas.rotate(27f, left + width / 2, centerY);
+        }
+
+        Paint paint = selected ? white : lightGrey;
+        canvas.drawRect(left, top, left + bezel, bottom, paint); // left edge
+        canvas.drawRect(right - bezel, top, right, bottom, paint); // right edge
+        canvas.drawRect(left, top, right, top + bezel, paint); // top edge
+        canvas.drawRect(left, bottom - bezel, right, bottom, paint); // bottom edge
+
+        if (vibrate) {
+            canvas.drawRect(left - 4 * bezel, top + 3 * bezel,
+                    left - 3 * bezel, top + 7 * bezel, paint);
+            canvas.drawRect(left - 2 * bezel, top + 1 * bezel,
+                    left - 1 * bezel, top + 9 * bezel, paint);
+            canvas.drawRect(right + 3 * bezel, bottom - 7 * bezel,
+                    right + 4 * bezel, bottom - 3 * bezel, paint);
+            canvas.drawRect(right + 1 * bezel, bottom - 9 * bezel,
+                    right + 2 * bezel, bottom - 1 * bezel, paint);
+        }
+
+        canvas.restore();
     }
 }

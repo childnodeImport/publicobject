@@ -8,6 +8,10 @@
   <string name="ringerShushedIndefinitely">Ringer shushed indefinitely!</string>
   <string name="turnRingerOnIn">Turn ringer on in:</string>
   <string name="restoreVolumeLevel">Restore volume level:</string>
+  <string name="vibrateOffOn">Vibrate Later Only</string>
+  <string name="vibrateOffOff">Vibrate Never</string>
+  <string name="vibrateOnOn">Vibrate Always</string>
+  <string name="vibrateOnOff">Vibrate Now Only</string>
   <string name="minutes">minutes</string>
   <string name="hour">hour</string>
   <string name="hours">hours</string>

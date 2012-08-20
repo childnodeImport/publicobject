@@ -6,6 +6,7 @@
     <uses-sdk android:minSdkVersion="5"
               android:targetSdkVersion="15"/>
   <uses-feature android:name="android.hardware.telephony"/>
+  <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
   <application android:label="@string/title"  android:icon="@drawable/shush">
         <activity android:name=".Welcome"
                 android:label="Shush!"
